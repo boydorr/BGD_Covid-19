@@ -1,5 +1,8 @@
+# Plot tdistrict-level maps covid-19 confirmed cases, tests and test positivity (rolling average)
+# Yacob Haddou - 12 April 2021
 git.path <- "insert your git folder here/"
 git.path <- "D:/GITHUB/"
+git.path <- "/Users/katiehampson/Github/"
 
 library(sf); library(tidyverse); library(lubridate); library(ggthemes); library(lubridate); library(viridis); library(ggpubr)
 
