@@ -63,7 +63,7 @@ sum(yearly_BGD$case_n)
 ## EpiFilter: provides formally smoothed and exact estimates
 # Method based on Bayesian recursive filtering and smoothing
 # Source functions
-source("EpiFilter/epiFilter.R")
+source(paste0(git.path, "EpiFilter/epiFilter.R"))
 source("EpiFilter/recursPredict.R")
 source("EpiFilter/epiSmoother.R")
 source("EpiFilter/plotEpiFilter.R")
