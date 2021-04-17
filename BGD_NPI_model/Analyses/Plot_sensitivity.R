@@ -41,7 +41,7 @@ par_names <- c(expression(italic(R)[0]),
                expression(italic(d^ICU)),
                expression(italic(f^pt)),
                expression(italic(f^at)),
-               expression(italic(f^hht)))
+               expression(italic(sigma)))
 
 # Deaths
 tornado_plot(out_stats$perc_change$high_deaths,out_stats$perc_change$low_deaths,
