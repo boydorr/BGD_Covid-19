@@ -1,4 +1,4 @@
-triple_barplot_base <- function(dataframe, title, y_axis_title, show_y_axis, col_pal, stack=NULL){
+triple_barplot_base <- function(dataframe, title_text="", y_axis_title, show_y_axis, col_pal, stack=NULL){
 
   if(is.null(stack)){
     pl <- ggplot() +
@@ -42,6 +42,12 @@ triple_barplot_base <- function(dataframe, title, y_axis_title, show_y_axis, col
             axis.title.y = element_blank(),
             axis.line.y = element_blank())
   }
+  
+  # if(title_text!=""){
+  #   pl <- pl +
+  #     ggtitle(title_text) + 
+  #     theme(plot.title = element_text(hjust = 0.5,size=18))
+  # }
 
   return(pl)
 

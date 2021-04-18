@@ -59,7 +59,7 @@ parms_baseline <- c(dur_inc=5.8, dur_p=2, dur_s=7, dur_a=7.7, # duration of incu
                     mild_nonCovid = 0.35, # proportion of people with mild respiratory symptoms not caused by covid-19 over a year
                     nonCovidHH = 0.23, # proportion of non-covid ILI cases that occur in same household as another ILI case
                     lab_cost=10, # Temporary number for cost of lab test
-                    rapid_cost=2, # Temporary number of cost of rapid test
+                    rapid_cost=3, # Temporary number of cost of rapid test
                     mask = F, # Are masks used?
                     mask_start=152-7, mask_end=max(times_model)+1, # When does mask wearing start and end
                     mask_effect_outward=0.5, # By what proportion does mask wearing reduce viral emissions  from infectious individuals

@@ -4,6 +4,8 @@
 
 # Initial conditions
 source("R/initial_conds.R")
+source("R/covid_model.R")
+
 
 # Pre-introduction dataframe to bind to model outputs
 preIntro <- data.frame(time=0:(min(times_model)-1))
@@ -20,3 +22,9 @@ date_labels <- paste(month.abb[month(seq(start_date,end_date+1,by="month"))], (y
 
 date_ticks2 <- as.numeric(seq(start_date+90,end_date+1,by="month") - start_date)
 date_labels2 <- paste(month.abb[month(seq(start_date+90,end_date+1,by="month"))], (year(seq(start_date,end_date,by="month")))-2000,sep="")
+
+# Run model without any interventions and calculate costs
+parms_no_int <- parms_baseline
+parms_no_int["ld"] <- 0
+out_no_int <- amalgamate_cats(rbind(preIntro,as.data.frame(lsoda(y, times_model, covid_model, parms=parms_no_int)))) 
+costs_no_int <- costs(out_no_int,parms_no_int)

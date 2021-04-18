@@ -135,6 +135,9 @@ shinyUI(
           "h5 {
             font-size: 16px;
           }",
+          "h6 {
+            font-size: 14px;
+          }",
           # Remove bottom border on table
           "table.dataTable.no-footer {
             border-bottom: 0 !important;
@@ -211,6 +214,7 @@ shinyUI(
                        #----- Add tab for Interventions ------------------------
                        tabPanel("Comparison",
                                 br(),
+                                h6(HTML("Adjust R<sub>0</sub>, intervention, and testing settings for the comparison scenario on the 'Interventions Dhaka' tab (coloured red on output plots).")),
                                 #----- R0 -------------------------
                                 sliderInput(inputId = "int_R0", label = HTML(paste("R", tags$sub(0), sep = "")),
                                             min = minR0,  max = 6, value = R0, step = 0.01),
@@ -279,7 +283,7 @@ shinyUI(
                                               step = 100),
                                   sliderInput(inputId = "int_lab_fneg", label = "False negatives:",
                                               min = 0, max = 1, value = parms_baseline["lab_fneg"]),
-                                  numericInput(inputId = "lab_cost", label = "Cost per Lab test:",
+                                  numericInput(inputId = "int_lab_cost", label = "Cost per Lab test:",
                                                value = parms_baseline["lab_cost"])
                                 ),
                                 hr(class = "dot"),
@@ -301,7 +305,7 @@ shinyUI(
                                               step = 500),
                                   sliderInput(inputId = "int_rapid_fneg", label = "False negatives:",
                                               min = 0, max = 1, value = parms_baseline["rapid_fneg"]),
-                                  numericInput(inputId = "RDT_cost", label = "Cost per RDT:",
+                                  numericInput(inputId = "int_RDT_cost", label = "Cost per RDT:",
                                                value = parms_baseline["rapid_cost"])
 
                                 )
@@ -309,8 +313,7 @@ shinyUI(
                        #----- Add tab for baseline -----------------------------
                        tabPanel("Baseline",
                                 br(),
-                                h6("Interventions are described and parameter values listed under the Technical Details tab (see Table)"),
-                                h6("Adjust interventions in the baseline scenario below:"),
+                                h6(HTML("Adjust R<sub>0</sub>, intervention, and testing settings for the baseline scenario on the 'Interventions Dhaka' tab (coloured black on output plots). The baseline parameter settings are also used to produce the plots on the 'Technical Details' tab")),
                                 br(),
                                 radioButtons(inputId = "edit_baseline", "Adjust Baseline Parameters?",
                                              choices = list("Yes" = TRUE,"No" = FALSE), inline=TRUE, selected=FALSE),
@@ -387,7 +390,7 @@ shinyUI(
                                                 step = 100),
                                     sliderInput(inputId = "bl_lab_fneg", label = "False negatives:",
                                                 min = 0, max = 1, value = parms_baseline["lab_fneg"]),
-                                    numericInput(inputId = "lab_cost", label = "Cost per Lab test:",
+                                    numericInput(inputId = "bl_lab_cost", label = "Cost per Lab test:",
                                                      value = parms_baseline["lab_cost"])
                                   ),
                                   hr(class = "dot"),
@@ -409,7 +412,7 @@ shinyUI(
                                                 step = 500),
                                     sliderInput(inputId = "bl_rapid_fneg", label = "False negatives:",
                                                 min = 0, max = 1, value = parms_baseline["rapid_fneg"]),
-                                    numericInput(inputId = "RDT_cost", label = "Cost per RDT:",
+                                    numericInput(inputId = "bl_RDT_cost", label = "Cost per RDT:",
                                                      value = parms_baseline["rapid_cost"])
 
                                   )
@@ -418,7 +421,7 @@ shinyUI(
                        #----- Add tab for upazilas -----------------------------
                        tabPanel("2021",
                                 br(),
-                                h6("Adjust R0 and interventions to be applied in the Forecast 2021 tab:"),
+                                h6(HTML("Adjust R<sub>0</sub> and intervention settings for the 'Forecast 2021' tab.")),
                                 br(),
                                 
                                 #----- R0 -------------------------
@@ -504,10 +507,16 @@ shinyUI(
                      #----- Add row for description of content -----------------
                      fluidRow(
                        box(width=10,
-                           h5("Forecasts are shown for mortality, severe cases requiring hospital care and
-                              costs from lost working days in Dhaka District. These metrics are
-                              summarized over 12 months (right). The proportion of circulating cases detected are shown below.
-                              Use the sidebar to explore how metrics are affected by the timing and capacity of different interventions.")
+                           h5(HTML("Forecasts are shown for <strong>mortality</strong>, severe cases requiring <strong>hospital care</strong>,
+                              proportion of <strong>working days lost</strong>, and <strong>case detection</strong> by tests (rapid and/or lab) in Dhaka District. These metrics are shown both as time series and
+                              summarized over 12 months (barplots to the right).")),
+                           h5(HTML("The costs effectiveness of the intervention scenarios is also described in the bottom three barplots. 
+                              <strong>Total costs</strong> include the costs of implementing the selected interventions (which may arise from advertising, community support teams, mask distribution, and tests) and providing hospital beds for COVID-19 patients.
+                              The <strong>cost per death averted</strong> for each of the two scenarios is calculated by comparison with a scenario in which no interventions are implemented. 
+                              <strong>% return on investment (ROI)</strong> in interventions (in terms of saved healthcare costs) is again estimated relative to a scenario with no interventions.")),
+                           h5("All plots show outputs for both a baseline scenario and a comparison scenario to allow the impact of different interventions to be compared. The interventions applied in these two scenarios can be adjusted via the 'Comparison' and 'Baseline' tabs of the sidebar.")
+                              
+                             
                        ),
                        box(width=2,
                            HTML("<center><img src='bd_map.png' style='max-width: 100%; height: auto;'></center>")
@@ -542,7 +551,7 @@ shinyUI(
                            plotOutput("wdl_plot", height="200px")
                        ),
                        box(width=3, title="2020", solidHeader = TRUE,
-                           plotOutput("barplot_econloss", height="200px")
+                           plotOutput("barplot_wdl", height="200px")
                        )
                      ),
                      br(),
@@ -551,9 +560,23 @@ shinyUI(
                        box(width=9, title = "Cases & detection", solidHeader = TRUE,
                            plotOutput("case_detection", height="200px")
                        ),
-                       box(width=3, title="Testing Costs", solidHeader = TRUE,
-                           plotOutput("barplot_testcost", height="200px")
+                       box(width=3, title="2020", solidHeader = TRUE,
+                           plotOutput("barplot_testing", height="200px")
                        )
+                     ),
+                     br(),
+                     #----- Add row for cost plot --------------------
+                     fluidRow(
+                       box(width=3, title = "Total Costs", solidHeader = TRUE,
+                           plotOutput("costs", height="200px")
+                       ),
+                       box(width=3, title="Cost/Death Averted", solidHeader = TRUE,
+                           plotOutput("costs_deaths_averted", height="200px")
+                       ),
+                       box(width=3, title="%ROI", solidHeader = TRUE,
+                           plotOutput("ROI", height="200px")
+                       )
+                       
                      ),
                      br()
             ),
@@ -564,12 +587,13 @@ shinyUI(
                        
                        box(width=12.5,
                            h5("Forecasts for 2021 in populations of different sizes and population age distributions (with defaults representing Dhaka District)."),
-                           h5("The number of days into to forecast following 1st March 2021 (beginning of the third COVID-19 wave) can be selected (minimum 30), along with the number of infectious
+                           h5("The number of days to forecast following 1st March 2021 (beginning of the third COVID-19 wave) can be selected (minimum 30), along with the number of infectious
                               people and the percentage of the population that is already immune at the start of the forecast."),
-                           h5("The proportions of cases that are symptomatic, hospitalised and fatal increase as the 
-                              average age of the population increases."),
                            h5("The interventions applied during the forecast period can be selected in the 2021 tab
-                              of the sidebar.")
+                              of the sidebar."),
+                           h5("The proportions of cases that are symptomatic, hospitalised and fatal increase as the 
+                              average age of the population increases.  The age distribution can be adjusted at the bottom of this tab.")
+                           
                        )
                      ),
                        #----- Add row for additional inputs ----------------------
@@ -668,11 +692,13 @@ shinyUI(
                      #----- Add row for explanation of panels ------------------
                      fluidRow(
                        box(width=12, #title="", solidHeader = TRUE,
-                           h5(HTML("We use an SEIR model with time-varying transmission to explore impacts of the timing and duration of control measures.",
-                                   "The model was tuned to roughly match the trend in confirmed cases assuming 10x underdetection (short-term forecast below)",
-                                   "However, there is considerable uncertainty in parameter estimates and resulting predictions. We therefore focus on order of magnitude impacts.",
-                                   "Parameters are detailed in the table (below)."
-                           ))
+                           h5(HTML("We use an SEIR model to explore impacts of control measures on COVID-19 transmission in Dhaka District.",
+                                   "R<sub>0</sub> and the impact of lockdown on transmission were tuned to match the trend in deaths prior to June 2020 (see early epidemic forecasts below)",
+                                   "Other epidemiological and population parameters were obtained from literature values; parameters and their sources are detailed in the tables below. The majority of the
+                                   parameters describing the various interventions, including timing, compliance, and impact on transmission, can be adjusted in the sidebar tabs."
+                                   
+                           )),
+                           h5(HTML("A detailed description of the model and of how this app has been used in Bangladesh, along with further analyses, can be found in the associated <a class='table_a' >pre-print</a>."))
                        )
                      ),
                      br(),
@@ -771,8 +797,6 @@ shinyUI(
                              h5("There is considerable uncertainty in quantitative predictions therefore we focus on order of magnitude
                                 impacts. We also caveat that while this framework can help us to understand the consequences of different
                                 decisions, outcomes will depend on how interventions are delivered and complied with."),
-                             h5("More caveats...."),
-                             h5("More caveats...."),
                              br()
                          )
                   ),

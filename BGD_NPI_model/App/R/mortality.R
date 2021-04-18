@@ -7,10 +7,10 @@ rel_mortality = function(LE, pop, deaths_ts){
   deaths_per_day = annual_deaths/365
 
   # calculate daily covid deaths from model output
-  daily_covid_deaths = c(0, diff(deaths_ts))
+  daily_covid_deaths = diff(c(0, deaths_ts))
 
   # print excess daily deaths from covid
-  daily_covid_deaths/deaths_per_day
+  (daily_covid_deaths/deaths_per_day)*100
   }
 
 # LE = 72.05 # Life expectancy in Bangladesh
