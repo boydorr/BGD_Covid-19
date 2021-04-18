@@ -698,7 +698,8 @@ shinyUI(
                                    parameters describing the various interventions, including timing, compliance, and impact on transmission, can be adjusted in the sidebar tabs."
                                    
                            )),
-                           h5(HTML("A detailed description of the model and of how this app has been used in Bangladesh, along with further analyses, can be found in the associated <a class='table_a' >pre-print</a>."))
+                           h5(HTML("A detailed description of the model and of how this app has been used in Bangladesh, along with further analyses, can be found in the associated <a class='table_a' >pre-print</a>. 
+                                   R code for the model and app can be found in our <a class='table_a' href=https://github.com/boydorr/BGD_Covid-19/tree/main/BGD_NPI_model/App>Gihub repository</a>."))
                        )
                      ),
                      br(),
@@ -780,18 +781,20 @@ shinyUI(
                              br(),
                              h3(HTML("<center> Description of analyses </center>")),
                              h5("To understand how the epidemic could progress and the potential impacts of different responses we
-  developed a relatively simple SEIR framework. We assume persons infected to the virus progress
-                                through different levels of infection severity. The rates and probabilities of progression are
-                                detailed in the table under the technical details tab, informed by published studies of COVID-19"),
+                                developed a relatively simple deterministic SEIR framework. We assume persons infected with the virus progress
+                                are either asymptomatic for the duration of their infectious period or enter a pre-symptomatic infectious state and then progress
+                                symptomatic infection. A proportion of symptomatic people are hospitalised and/or die. The rates and probabilities 
+                                of movement between states are
+                                detailed in the technical details tab, informed by published studies of COVID-19"),
                              h5("We assume that transmission can be reduced through response measures, but that the degree to which
                                 transmission is reduced depends upon how well interventions can be implemented, adhered to and enforced.
                                 i.e. as a result of investment, technological and sociological capacity, communications, trust etc."),
                              h5("The timing and duration of the epidemic and associated responses will have major impacts on morbidity,
-                                mortality and the economy, with potential to overwhelm health systems and result in catastrophic
+                                mortality and the economy. The epidemic has the potential to overwhelm health systems and result in catastrophic
                                 consequences for families, communities and society as a whole. These knock on effects are beyond the scope of
-                                our model. However, we attempt to lay out short-term impacts on morbidity and mortality, hospital demand
-                                affecting healthcare workers, supplies, and equipment (e.g. ventilators, oxygen, PPE) and immediate economic
-                                costs, from illness or indirectly due to response measures that limit people from working.
+                                our model. However, we attempt to lay out short-term impacts on morbidity and hospital demand relative to capacity.
+                                Immediate economic costs, from intervention implementation, testing, and healthcare provision, and also from
+                                loss of work due to illness or measures that limit people from working, are also explored.
                                 We summarize these impacts over 12 months to better understand the longer-term consequences of decisions that
                                 need to be taken quickly."),
                              h5("There is considerable uncertainty in quantitative predictions therefore we focus on order of magnitude
