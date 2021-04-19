@@ -1,10 +1,10 @@
 
 library(dplyr)
 library(ggplot2)
-require(deSolve)
-require(data.table)
-require(lubridate)
-require(forcats)
+library(deSolve)
+library(data.table)
+library(lubridate)
+library(forcats)
 
 source("R/worker_days_lost.R")
 source("R/mortality.R")

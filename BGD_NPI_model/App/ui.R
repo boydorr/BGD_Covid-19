@@ -698,7 +698,7 @@ shinyUI(
                                    parameters describing the various interventions, including timing, compliance, and impact on transmission, can be adjusted in the sidebar tabs."
                                    
                            )),
-                           h5(HTML("A detailed description of the model and of how this app has been used in Bangladesh, along with further analyses, can be found in the associated <a class='table_a' >pre-print</a>. 
+                           h5(HTML("A detailed description of the model and of how this app has been used in Bangladesh, along with further analyses, can be found in the associated <a class='table_a' href=https://github.com/boydorr/BGD_Covid-19/tree/main/BGD_NPI_model/Preprint>preprint</a>. 
                                    R code for the model and app can be found in our <a class='table_a' href=https://github.com/boydorr/BGD_Covid-19/tree/main/BGD_NPI_model/App>Gihub repository</a>."))
                        )
                      ),
