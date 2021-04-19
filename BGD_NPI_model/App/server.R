@@ -7,15 +7,17 @@ require(lubridate)
 require(forcats)
 
 source("R/worker_days_lost.R")
-source("R/Costs.R")
 source("R/mortality.R")
+source("R/initial_conds.R")
+source("R/covid_model.R")
+source("R/amalgamate_cats.R")
+source("R/costs.R")
 source("R/server_prep.R")
 source("R/triple_barplot_base.R")
 source("R/bangladesh_covid_data.R")
 source("R/epi_params_table.R")
 source("R/pop_params_table.R")
 source("R/intervention_params_table.R")
-source("R/amalgamate_cats.R")
 
 
 shinyServer(function(input, output, session) {

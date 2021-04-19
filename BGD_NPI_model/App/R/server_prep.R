@@ -2,10 +2,6 @@
 ## Code to create non-reactive objects required by the server
 #_________________________________
 
-# Initial conditions
-source("R/initial_conds.R")
-source("R/covid_model.R")
-
 
 # Pre-introduction dataframe to bind to model outputs
 preIntro <- data.frame(time=0:(min(times_model)-1))
