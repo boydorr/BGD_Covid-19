@@ -4,11 +4,6 @@ git.path <- "insert your git folder here/"
 git.path <- "D:/GITHUB/"
 git.path <- "/Users/katiehampson/Github/"
 
-# Import sequence metadata
-sequences <- read_tsv(paste0(git.path, "BGD_Covid-19/B.1.351_resurgence/data/nextstrain_community_CHRF-Genomics_ncovBangladesh@main_metadata.tsv"))
-
-# devtools::install_github("RamiKrispin/coronavirus") # Install coronavirus package - to show JH data
-library(coronavirus) # update_dataset()
 library(dplyr)
 library(tidyr)
 library(tidyverse)
@@ -16,6 +11,10 @@ library(zoo)
 library(ggthemes)
 library(svglite)
 library(Hmisc)
+
+# Import sequence metadata
+sequences <- read_tsv(paste0(git.path, "BGD_Covid-19/B.1.351_resurgence/data/nextstrain_community_CHRF-Genomics_ncovBangladesh@main_metadata.tsv"))
+dim(sequences)
 
 # Summarize clades by year and month
 var_y <- sequences %>%
@@ -31,6 +30,10 @@ var_m <- sequences %>%
   group_by(month, Clade) %>%
   summarise(clade_n = n()) %>% 
   mutate(freq = clade_n/sum(clade_n)) 
+
+# date of first and last detection
+range(subset(sequences, Clade == "20H/501Y.V2")$"Collection Data")
+range(subset(sequences, Clade == "20I/501Y.V1")$"Collection Data")
 
 # lineage/ clade info
 clades <- unique(sequences$Clade)
@@ -69,9 +72,17 @@ var_m_df$voc2_freq <- var_m_df$`20I/501Y.V1`/seq_m$n
 var_m_df$freq <- seq_m$n
 write.csv(var_m_df, paste0(git.path,"BGD_Covid-19/B.1.351_resurgence/output/variants.csv"), row.names = FALSE)
 
-# date of first and last detection
-range(subset(sequences, Clade == "20H/501Y.V2")$"Collection Data")
-range(subset(sequences, Clade == "20I/501Y.V1")$"Collection Data")
+B.1.351 = var_m_df$`20H/501Y.V2`[10:13] # Jan - March (first detected on 24th Jan!)
+sequences = var_m_df$freq[10:13] 
+var_freq = as.data.frame(binconf(x=B.1.351, n=sequences))
+var_freq$month <- as.Date(var_m_df$month[10:13])
+var_freq$voc <- "B.1.351"
+  
+# Plot frequency of variants over time
+ggplot(var_freq, aes(x=month, y=PointEst, group = voc, colour="voc")) + 
+  geom_errorbar(aes(ymin=Lower, ymax=Upper), width=2, colour = "black") +
+  geom_line(colour = "black") +
+  geom_point(colour = "black")
 
 
 

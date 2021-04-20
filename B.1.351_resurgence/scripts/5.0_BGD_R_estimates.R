@@ -4,10 +4,11 @@ git.path <- "insert your git folder here/"
 git.path <- "/Users/katiehampson/Github/"
 
 # devtools::install_github("RamiKrispin/coronavirus") # Install coronavirus package - to show JH data
-library(coronavirus); # update_dataset()
+library(coronavirus); update_dataset()
 library(dplyr)
 library(tidyr)
 library(tidyverse)
+library(lubridate)
 library(EpiEstim)
 library(EpiNow2)
 library("caTools")
@@ -15,6 +16,11 @@ library(zoo)
 library(ggthemes)
 library(svglite)
 library(Hmisc)
+
+theme <- theme_clean() + theme(axis.title=element_text(size=15), axis.text=element_text(size=12), 
+                               legend.text=element_text(size=14), legend.title=element_text(size=15), 
+                               plot.background = element_rect(color = "white"), 
+                               strip.text=element_text(size=15), title=element_text(size=17))
 
 # Coronavirus package (also from JHU)
 data("coronavirus")
@@ -59,7 +65,99 @@ sum(yearly_BGD$case_n)
 45844/65079 # Dhaka 
 6499/65079 # Chittagong
 
+# reinfection data
+reinfections <- readRDS(paste0(git.path, "BGD_COVID-19/B.1.351_resurgence/data/a2i_reinfection_summary.rda"))
+
 ######################################################################
+# Examine Rt overcourse of pandemic
+days = 71:440
+dates = BGD$date[days-5] # 1 April 2020 - 5 April 2021
+Iday = BGD$cases[days]; nday <- length(Iday)
+Iday_07da = BGD$case_07da[(days)-2]; nday_07da <- length(Iday_07da)
+
+window <- 7
+t_start <- seq(2, nday-window) # starting at 2 as conditional on the past observations
+t_end <- t_start + window # adding 7 to get 7-day windows as bounds included in window
+
+######################################################################
+si_distr = dgamma(0:30, shape = 2.3669, scale = 2.7463)/sum(dgamma(0:30, shape = 2.3669, scale = 2.7463))
+Rs.weekly <- estimate_R(Iday, method="non_parametric_si",
+                        config = make_config(list(si_distr = si_distr, t_start = t_start, t_end = t_end)))
+temp <- Rs.weekly$R %>% select( mean = "Mean(R)", median = "Median(R)", sd = "Std(R)",
+                                lower.CI = "Quantile.0.025(R)", upper.CI = "Quantile.0.975(R)")
+temp$date <- dates[t_end]
+temp <- temp %>% filter(mean > 0)
+latest.R <- round(temp$median[nrow(temp)],2)
+
+p1 <- ggplot(data=temp, aes(x=date)) +
+  geom_ribbon(aes(ymin=lower.CI, ymax=upper.CI), color="grey70", fill="grey90") +
+  geom_line(aes(y=median), color="black") + 
+  theme + ylim(0, 3) + labs(x="Time", y=paste0("R (",window," d window)"), 
+                            title=paste0("Bangladesh, latest median R number = ",latest.R))
+p1
+
+######################################################################
+t_start <- seq(2, nday_07da-window) # starting at 2 as conditional on the past observations
+t_end <- t_start + window # adding 7 to get 7-day windows as bounds included in window
+
+Rs.weekly <- estimate_R(Iday_07da, method="non_parametric_si",
+                        config = make_config(list(si_distr = si_distr, t_start = t_start, t_end = t_end)))
+temp <- Rs.weekly$R %>% select( mean = "Mean(R)", median = "Median(R)", sd = "Std(R)",
+                                lower.CI = "Quantile.0.025(R)", upper.CI = "Quantile.0.975(R)")
+temp$date <- dates[t_end]
+temp <- temp %>% filter(mean > 0)
+latest.R <- round(temp$median[nrow(temp)],2)
+
+p1 <- ggplot(data=temp, aes(x=date)) +
+  geom_ribbon(aes(ymin=lower.CI, ymax=upper.CI), color="grey70", fill="grey90") +
+  geom_line(aes(y=median), color="black") + 
+  theme + ylim(0, 3) + labs(x="Time", y=paste0("R (",window," d window)"), 
+                            title=paste0("Bangladesh, latest median R number = ",latest.R))
+p1
+#
+#####################################################################
+# Reinfections
+days = which(reinfections$days > (as.Date("2021-01-23")+10))
+dates <- reinfections$days[days-5]
+Iday = reinfections$reinfections_90[days]; nday <- length(Iday)
+window <- 7
+t_start <- seq(7, nday-window) # starting at 2 as conditional on the past observations
+t_end <- t_start + window 
+
+Rs.weekly <- estimate_R(Iday, method="non_parametric_si",
+                        config = make_config(list(si_distr = si_distr, t_start = t_start, t_end = t_end)))
+temp <- Rs.weekly$R %>% select( mean = "Mean(R)", median = "Median(R)", sd = "Std(R)",
+                                lower.CI = "Quantile.0.025(R)", upper.CI = "Quantile.0.975(R)")
+temp$date <- dates[t_end]
+temp <- temp %>% filter(mean > 0)
+latest.R <- round(temp$median[nrow(temp)],2)
+
+p1 <- ggplot(data=temp, aes(x=date)) +
+  geom_ribbon(aes(ymin=lower.CI, ymax=upper.CI), color="grey70", fill="grey90") +
+  geom_line(aes(y=median), color="black") + 
+  theme + ylim(0, 3) + labs(x="Time", y=paste0("R (",window," d window)"), title="R estimated from Reinfections")
+p1
+#
+ggsave(p1, file = paste0(git.path, "BGD_Covid-19/B.1.351_resurgence/output/R_from_reinfections.png"), units = "cm", dpi = "retina", width = 35, height = 20)
+
+
+
+#####################################################################
+t_start <-seq(2, length(days) -13)   
+t_end <- t_start + 13                
+res <- estimate_R(incid = BGD$case_10da[days], 
+                  method = "non_parametric_si",
+                  config = make_config(list(
+                    si_distr = si_distr, 
+                    t_start = t_start, 
+                    t_end = t_end)))
+plot(t_end, res$R$`Mean(R)`, type="l", ylim=c(0,4))
+lines(t_end, res$R$`Quantile.0.025(R)`, type="l", col="grey")
+lines(t_end, res$R$`Quantile.0.975(R)`, type="l", col="grey")
+lines(t_end, rep(1, length(t_end)))
+lines(t_end, rep(2, length(t_end)))
+
+
 ## EpiFilter: provides formally smoothed and exact estimates
 # Method based on Bayesian recursive filtering and smoothing
 # Source functions
@@ -313,10 +411,7 @@ points(tset, Iplt, pch = 19, col = 'black', cex=0.1)
 ######################################################################
 #  Try with estimate_R
 ######################################################################
-theme <- theme_clean() + theme(axis.title=element_text(size=15), axis.text=element_text(size=12), 
-                               legend.text=element_text(size=14), legend.title=element_text(size=15), 
-                               plot.background = element_rect(color = "white"), 
-                               strip.text=element_text(size=15), title=element_text(size=17))
+
 
 window <- 7
 t_start <- seq(2, nday-window) # starting at 2 as conditional on the past observations
