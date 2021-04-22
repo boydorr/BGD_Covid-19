@@ -24,56 +24,32 @@ theme <- theme_clean() + theme(axis.title=element_text(size=15), axis.text=eleme
 
 # Coronavirus package (also from JHU)
 data("coronavirus")
-BGD <- coronavirus %>% 
-  filter(country == "Bangladesh") %>% 
-  spread(type, cases) %>% 
+covid19_df <- refresh_coronavirus_jhu()
+
+BGD <- covid19_df %>%
+  filter(location == "Bangladesh") %>% 
+  spread(data_type, value) %>% 
   arrange(date) %>%
-  mutate(deaths = death, cases = confirmed) %>% 
-  mutate(cumulative_death = cumsum(death), cumulative_cases = cumsum(confirmed)) %>% 
-  mutate(case_05da = round(zoo::rollmean(cases, k = 5, fill = NA, align = "right"),0),
-         case_07da = round(zoo::rollmean(cases, k = 7, fill = NA, align = "right"),0),
-         case_10da = round(zoo::rollmean(cases, k = 10, fill = NA, align = "right"),0),
-         case_14da = round(zoo::rollmean(cases, k = 14, fill = NA, align = "right"),0),
-         death_05da = round(zoo::rollmean(deaths, k = 5, fill = NA, align = "right"),0),
-         death_07da = round(zoo::rollmean(deaths, k = 7, fill = NA, align = "right"),0),
-         death_10da = round(zoo::rollmean(deaths, k = 10, fill = NA, align = "right"),0),
-         death_14da = round(zoo::rollmean(deaths, k = 14, fill = NA, align = "right"),0)) %>%
+  mutate(deaths = deaths_new, cases = cases_new) %>% 
+  mutate(cumulative_death = cumsum(deaths), cumulative_cases = cumsum(cases)) %>% 
+  mutate(cases_07 = floor(rollmean(cases, k = 7, fill = NA, align="right")),
+         cases_14 = floor(rollmean(cases, k = 14, fill = NA, align="right")),
+         deaths_07 = floor(rollmean(deaths, k = 7, fill = NA, align="right")),
+         deaths_14 = floor(rollmean(deaths, k = 14, fill = NA, align="right")))  %>%
   ungroup()
-
-# Quick stats on monthly and annual cases and deaths
-monthly_BGD <- BGD %>% 
-  mutate(year = year(date), 
-         month = factor(floor_date(date, "month"))) %>% 
-  group_by(month, year) %>%
-  summarise(case_n = sum(cases),
-            death_n = sum(deaths))
-monthly_BGD
-
-yearly_BGD <- BGD %>% 
-  mutate(year = year(date), 
-         month = factor(floor_date(date, "month"))) %>% 
-  group_by(year) %>%
-  summarise(case_n = sum(cases),
-            death_n = sum(deaths))
-yearly_BGD
-sum(yearly_BGD$case_n)
-
-# 2021 cases 
-61446/138142 # Dhaka
-11731/138142 # Chittagong
-# March 2021 cases 
-45844/65079 # Dhaka 
-6499/65079 # Chittagong
 
 # reinfection data
 reinfections <- readRDS(paste0(git.path, "BGD_COVID-19/B.1.351_resurgence/data/a2i_reinfection_summary.rda"))
-
+reinfections <- reinfections %>%
+  mutate(reinfections_07da = floor(rollmean(reinfections_60, k = 7, fill = NA, align="right")),
+         reinfections_07da_90 = floor(rollmean(reinfections_90, k = 7, fill = NA, align="right"))) %>%
+  ungroup()
 ######################################################################
 # Examine Rt overcourse of pandemic
-days = 71:440
+days = 70:440
 dates = BGD$date[days-5] # 1 April 2020 - 5 April 2021
 Iday = BGD$cases[days]; nday <- length(Iday)
-Iday_07da = BGD$case_07da[(days)-2]; nday_07da <- length(Iday_07da)
+Iday_07da = BGD$cases_07[(days)-2]; nday_07da <- length(Iday_07da)
 
 window <- 7
 t_start <- seq(2, nday-window) # starting at 2 as conditional on the past observations
@@ -108,22 +84,27 @@ temp$date <- dates[t_end]
 temp <- temp %>% filter(mean > 0)
 latest.R <- round(temp$median[nrow(temp)],2)
 
-p1 <- ggplot(data=temp, aes(x=date)) +
+Rt <- ggplot(data=temp, aes(x=date)) +
   geom_ribbon(aes(ymin=lower.CI, ymax=upper.CI), color="grey70", fill="grey90") +
   geom_line(aes(y=median), color="black") + 
-  theme + ylim(0, 3) + labs(x="Time", y=paste0("R (",window," d window)"), 
-                            title=paste0("Bangladesh, latest median R number = ",latest.R))
-p1
+  theme + ylim(0, 3) + labs(x="", y=paste0("R (",window," d window)"), title="")
+Rt
+ggsave(Rt, file = paste0(git.path, "BGD_Covid-19/B.1.351_resurgence/output/Rt.svg"), units = "cm", dpi = "retina", width = 15, height = 9)
+ggsave(Rt, file = paste0(git.path, "BGD_Covid-19/B.1.351_resurgence/output/Rt.png"), units = "cm", dpi = "retina", width = 15, height = 9)
+
 #
 #####################################################################
 # Reinfections
-days = which(reinfections$days > (as.Date("2021-01-23")+10))
+days = which(reinfections$days > as.Date("2020-12-17"))
 dates <- reinfections$days[days-5]
-Iday = reinfections$reinfections_90[days]; nday <- length(Iday)
+Iday = reinfections$reinfections_60[days]; nday <- length(Iday)
+Iday_07 = reinfections$reinfections_07da[days]
+
 window <- 7
 t_start <- seq(7, nday-window) # starting at 2 as conditional on the past observations
 t_end <- t_start + window 
 
+# From daily reinfections
 Rs.weekly <- estimate_R(Iday, method="non_parametric_si",
                         config = make_config(list(si_distr = si_distr, t_start = t_start, t_end = t_end)))
 temp <- Rs.weekly$R %>% select( mean = "Mean(R)", median = "Median(R)", sd = "Std(R)",
@@ -132,32 +113,114 @@ temp$date <- dates[t_end]
 temp <- temp %>% filter(mean > 0)
 latest.R <- round(temp$median[nrow(temp)],2)
 
-p1 <- ggplot(data=temp, aes(x=date)) +
+Rt_reinfections <- ggplot(data=temp, aes(x=date)) +
   geom_ribbon(aes(ymin=lower.CI, ymax=upper.CI), color="grey70", fill="grey90") +
   geom_line(aes(y=median), color="black") + 
-  theme + ylim(0, 3) + labs(x="Time", y=paste0("R (",window," d window)"), title="R estimated from Reinfections")
-p1
+  theme + ylim(0, 3) + labs(x="", y="R", title="Reinfections")
+Rt_reinfections
+
+## From daily reinfections - 7 day rolling avg
+Rs.weekly <- estimate_R(Iday_07, method="non_parametric_si",
+                        config = make_config(list(si_distr = si_distr, t_start = t_start, t_end = t_end)))
+temp <- Rs.weekly$R %>% select( mean = "Mean(R)", median = "Median(R)", sd = "Std(R)",
+                                lower.CI = "Quantile.0.025(R)", upper.CI = "Quantile.0.975(R)")
+temp$date <- dates[t_end]
+temp <- temp %>% filter(mean > 0)
+latest.R <- round(temp$median[nrow(temp)],2)
+
+Rt_reinfections <- ggplot(data=temp, aes(x=date)) +
+  geom_ribbon(aes(ymin=lower.CI, ymax=upper.CI), color="grey70", fill="grey90") +
+  geom_line(aes(y=median), color="black") + 
+  theme + ylim(0, 4) + labs(x="", y="R", title="Reinfections")
+Rt_reinfections
 #
-ggsave(p1, file = paste0(git.path, "BGD_Covid-19/B.1.351_resurgence/output/R_from_reinfections.png"), units = "cm", dpi = "retina", width = 35, height = 20)
+#####################################################################
+# 2nd wave - Variant info
+voc <- read.csv(paste0(git.path,"BGD_Covid-19/B.1.351_resurgence/output/var_freq_20210418.csv"))
+startdates <- as.Date(c("2020-12-17", "2020-12-03","2021-01-06")) 
+enddate <- as.Date("2021-04-11") 
+
+# 2nd wave - Incidence and dates
+# proportion of cases
+prop_cases = c(seq(from = 0, to =  voc[11,1], length.out = 15+31), 
+  seq(from = voc[11,1], to =  voc[12,1], length.out = 28),
+  seq(from = voc[12,1], to =  voc[13,1], length.out = 31),
+  seq(from = voc[13,1], to =  voc[14,1], length.out = 11))
+
+prop_cases_min = c(seq(from = 0, to =  voc[11,2], length.out = 29+31), 
+               seq(from = voc[11,2], to =  voc[12,2], length.out = 28),
+               seq(from = voc[12,2], to =  voc[13,2], length.out = 31),
+               seq(from = voc[13,2], to =  voc[14,2], length.out = 11))
+
+prop_cases_max = c(seq(from = 0, to =  voc[11,3], length.out = 26),
+                   seq(from = voc[11,3], to =  voc[12,3], length.out = 28),
+                   seq(from = voc[12,3], to =  voc[13,3], length.out = 31),
+                   seq(from = voc[13,3], to =  voc[14,3], length.out = 11))
+
+# time series of days
+d1 = which(BGD$date == startdates[1]):which(BGD$date == enddate)
+d2 = which(BGD$date == startdates[2]):which(BGD$date == enddate)
+d3 = which(BGD$date == startdates[3]):which(BGD$date == enddate)
+
+length(prop_cases); length(d1)
+length(prop_cases_min); length(d2)
+length(prop_cases_max); length(d3)
+
+# time series of cases
+Iday <- round(BGD$cases[d1]*prop_cases); Iday[1] <- 1
+Iday_min <- round(BGD$cases[d2]*prop_cases_min); Iday_min[1] <-1
+Iday_max <- round(BGD$cases[d3]*prop_cases_max); Iday_max[1] <-1
+
+nday <- length(Iday)
+nday_min <- length(Iday_min)
+nday_max <- length(Iday_max)
+
+window <- 7
+
+t_start <- seq(2, nday-window) # starting at 2 as conditional on the past observations
+t_end <- t_start + window 
+Rs <- estimate_R(Iday, method="non_parametric_si",
+                        config = make_config(list(si_distr = si_distr, t_start = t_start, t_end = t_end)))
+temp <- Rs$R %>% select( mean = "Mean(R)", median = "Median(R)", sd = "Std(R)", lower.CI = "Quantile.0.025(R)", upper.CI = "Quantile.0.975(R)")
+temp$date <- BGD$date[d1[-c(1:8)]]
+
+t_start <- seq(7, nday_min-window) # starting at 2 as conditional on the past observations
+t_end <- t_start + window 
+Rs_min <- estimate_R(Iday_min, method="non_parametric_si",
+                 config = make_config(list(si_distr = si_distr, t_start = t_start, t_end = t_end)))
+temp_min <- Rs_min$R %>% select( mean = "Mean(R)", median = "Median(R)", sd = "Std(R)", lower.CI = "Quantile.0.025(R)", upper.CI = "Quantile.0.975(R)")
+temp_min$date <- BGD$date[d2[-c(1:13)]]
+
+t_start <- seq(7, nday_max-window) # starting at 2 as conditional on the past observations
+t_end <- t_start + window 
+Rs_max <- estimate_R(Iday_max, method="non_parametric_si",
+                     config = make_config(list(si_distr = si_distr, t_start = t_start, t_end = t_end)))
+temp_max <- Rs_max$R %>% select( mean = "Mean(R)", median = "Median(R)", sd = "Std(R)", lower.CI = "Quantile.0.025(R)", upper.CI = "Quantile.0.975(R)")
+temp_max$date <- BGD$date[d3[-c(1:13)]]
+
+Rt_voc <- ggplot(data=temp, aes(x=date)) +
+  geom_ribbon(data = temp_min, aes(ymin=lower.CI, ymax=upper.CI), color="grey70", fill="grey90") +
+  geom_line(data = temp_min, aes(y=median), color="black") + 
+  geom_ribbon(data = temp_max, aes(ymin=lower.CI, ymax=upper.CI), color="grey70", fill="grey90") +
+  geom_line(data = temp_max, aes(y=median), color="black") + 
+  geom_ribbon(data=temp, aes(ymin=lower.CI, ymax=upper.CI), color="grey70", fill="grey70") +
+  geom_line(data=temp, aes(y=median), color="black") + 
+  theme + ylim(0, 4) + xlim(as.Date("2021-01-15"), as.Date("2021-04-11")) + labs(x="", y="", title="B.1.351")
+Rt_voc
+
+# Put all the plots together
+p1 <- Rt + 
+  annotation_custom(ggplotGrob(Rt_reinfections), xmin = ymd("2020-05-01"), xmax = ymd("2020-11-01"), ymin = 1.75, ymax = 3.6) +
+  annotation_custom(ggplotGrob(Rt_voc), xmin = ymd("2020-10-30"), xmax = ymd("2021-04-15"), ymin = 1.75, ymax = 3.6)
+p1
+
+#p1 
+ggsave(p1, file = paste0(git.path, "BGD_Covid-19/B.1.351_resurgence/output/Rt.svg"), units = "cm", dpi = "retina", width = 15, height = 10)
+ggsave(p1, file = paste0(git.path, "BGD_Covid-19/B.1.351_resurgence/output/Rt.png"), units = "cm", dpi = "retina", width = 15, height = 10)
 
 
 
 #####################################################################
-t_start <-seq(2, length(days) -13)   
-t_end <- t_start + 13                
-res <- estimate_R(incid = BGD$case_10da[days], 
-                  method = "non_parametric_si",
-                  config = make_config(list(
-                    si_distr = si_distr, 
-                    t_start = t_start, 
-                    t_end = t_end)))
-plot(t_end, res$R$`Mean(R)`, type="l", ylim=c(0,4))
-lines(t_end, res$R$`Quantile.0.025(R)`, type="l", col="grey")
-lines(t_end, res$R$`Quantile.0.975(R)`, type="l", col="grey")
-lines(t_end, rep(1, length(t_end)))
-lines(t_end, rep(2, length(t_end)))
-
-
 ## EpiFilter: provides formally smoothed and exact estimates
 # Method based on Bayesian recursive filtering and smoothing
 # Source functions
@@ -172,26 +235,6 @@ dates = BGD$date[days-5] # 1 April 2020 - 5 April 2021
 Iday = BGD$cases[days]
 Iday_05da = BGD$case_05da[(days)-2]
 Iday_10da = BGD$case_10da[(days)-5]
-
-# 2nd wave - Variant info
-voc = read.csv(paste0(f.path,"variants.csv"))
-B.1.351 = voc$X20H.501Y.V2[11:13] # Jan - March (first detected on 24th Jan!)
-sequences = voc$freq[11:13] 
-var_freq = binconf(x=B.1.351, n=sequences)
-# 2nd wave - Incidence and dates
-extrapolate_days <- 15+14+14+30
-days2 = (length(days) - extrapolate_days - 4): (length(days)-4)
-var_cases = round(Iday_10da[days2] *
-  c(seq(from = var_freq[1,1], to = var_freq[2,1], length.out= 15+14),
-    seq(from = var_freq[2,1], to = var_freq[3,1], length.out= 14+31)), 0) 
-var_max = round(Iday_10da[days2] *
-  c(seq(from = var_freq[1,2], to = var_freq[2,1], length.out= 15+14),
-    seq(from = var_freq[2,1], to = var_freq[3,3], length.out= 14+31)), 0) 
-var_min = round(Iday_10da[days2] *
-  c(seq(from = var_freq[1,3], to = var_freq[2,1], length.out= 15+14),
-    seq(from = var_freq[2,1], to = var_freq[3,2], length.out= 14+31)), 0)
-dates2 = dates[days2]
-plot(dates2,var_cases)
 
 # Total infectiousness
 # Wave 1 
@@ -666,7 +709,7 @@ res_max <- estimate_R(incid = var_max,
 plot(t_window, var_cases, type="l")
 lines(t_window, var_min, type="l", col="grey")
 lines(t_window, var_max, type="l", col="grey")
-
+s
 plot(dates[t_window[9:74]], res$R$`Mean(R)`, type="l", ylim=c(0,3), 
      xlim=c(as.Date("2021-02-14"),as.Date("2021-4-01")))
 lines(dates[t_window[9:74]], res_min$R$`Quantile.0.025(R)`, type="l", col="grey")
