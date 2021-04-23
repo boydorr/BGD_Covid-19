@@ -15,15 +15,15 @@ Statistics (SMS). The group arose from a Shared Interest Group on COVID-19 Surve
 - Yacob Haddou @ UoG, IBAHCM, PhD Researcher
 - Fergus J Chadwick @ UoG, IBAHCM, PhD Researcher
 - Mikolaj E Kundegorski @ UoG, IBAHCM, PhD Researcher
-- Elaine Ferguson @ UoG, IBAHCM, NOT SURE 
+- Elaine Ferguson @ UoG, IBAHCM, Post-doc Researcher
 - Craig Wilkie @ UoG, SMS, Post-doc Researcher
 - Ben Swallow @ UoG, SMS, Lecturer in Statistics
 - Janine Illian @ UoG, SMS, Professor in Statistical Sciences 
 - Davina Hill @ UoG, IBAHCM, Lecturer in Welfare Physiology
 - Jason Matthiopoulos @ UoG, IBAHCM, Professor of Spatial Ecology 
 - Luca Nelli @ UoG, IBAHCM, Research Associate
-- Jess Clark NOT SURE
-- Jess Enright NOT SURE
+- Jess Clark @ UoG, IBAHCM, Post-doc Researcher
+- Jess Enright @ UoG, School of Computing Science, Lecturer
 
 
 https://docs.google.com/document/d/1cfRme9Gx3AKOMKE5D-oGwdJuFJM1BwfebbL2JGdz_SA/edit#heading=h.3fp68zimti96
