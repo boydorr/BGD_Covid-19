@@ -36,7 +36,7 @@ BGD %>%
 dhaka = 18305671 # https://en.wikipedia.org/wiki/Dhaka_District
 
 summary_BGD <- BGD %>% 
-  filter(date>"2021-01-01" & date<"2021-04-01") %>% 
+  filter(date>"2021-01-01" & date<"2021-04-17") %>% 
   mutate(
     vacc_1e5pop = 1e5*(total_vaccinations/population),
     cases_1e5pop = 1e5*(confirmed/population),

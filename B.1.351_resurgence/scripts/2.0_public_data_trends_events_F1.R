@@ -46,7 +46,9 @@ data <- covid19_df %>%
 data[is.na(data)] <- 0
 
 # keep range of dates for the submitted figure
-data <- data %>% filter(date > ymd("2020-01-21")) # %>% filter(date < ymd("2021-04-14")) # Revisit on 17 April 2021
+data <- data %>% 
+  filter(date > ymd("2020-01-21")) %>% 
+  filter(date < ymd("2021-04-15")) # Revisit on 17 April 2021
 
 # reinfection data
 reinfections <- readRDS(paste0(git.path, "BGD_COVID-19/B.1.351_resurgence/data/a2i_reinfection_summary.rda"))
@@ -68,28 +70,25 @@ inset
 #'------------------------------------------------------------------
 #'**
 startdate = ymd("2020-01-01")
-enddate = ymd("2021-04-14")
+enddate = ymd("2021-04-21")
 
-main <- ggplot(data, aes(x=date)) + 
-        geom_segment(aes(x = ymd("2020-03-26"), y = 8000, xend = ymd("2020-03-26"), yend = 0, color="1st lockdown (26/03/2020 - 31/05/2020)"), size=0.6, linetype = "solid") +
-        geom_segment(aes(x = ymd("2020-03-26"), y = 0, xend = ymd("2020-05-31"), yend = 0, color="1st lockdown (26/03/2020 - 31/05/2020)"), size=0.7, linetype = "solid") +
-        geom_segment(aes(x = ymd("2020-05-31"), y = 8000, xend = ymd("2020-05-31"), yend = 0, color="1st lockdown (26/03/2020 - 31/05/2020)"),size=0.7, linetype = "solid") +   
-        
-        geom_segment(aes(x = ymd("2021-04-05"), y = 8000, xend = ymd("2021-04-05"), yend = 0, color="2nd lockdown (05/04/2021 - 12/04/2021)"), size=0.7, linetype = "solid") +
-        geom_segment(aes(x = ymd("2021-04-05"), y = 0, xend = ymd("2021-04-12"), yend = 0, color="2nd lockdown (05/04/2021 - 12/04/2021)"), size=0.7, linetype = "solid") +
-        geom_segment(aes(x = ymd("2021-04-12"), y = 8000, xend = ymd("2021-04-12"), yend = 0, color="2nd lockdown (05/04/2021 - 12/04/2021)"),size=0.7, linetype = "solid") + 
-        
-        geom_segment(aes(x = ymd("2020-03-08"), y = 8000, xend = ymd("2020-03-08"), yend = 0, color="SARS-CoV-2 first detected (08/03/2020)"), size=0.6, linetype = "solid") +
-        
-        geom_segment(aes(x = ymd("2020-12-31"), y = 8000, xend = ymd("2020-12-31"), yend = 0, color="B.1.1.7 first record (31/12/2020)"), size=0.7, linetype = "solid") +
-        geom_segment(aes(x = ymd("2021-01-24"), y = 8000, xend = ymd("2021-01-24"), yend = 0, color="B.1.351 first record (24/01/2021)"), size=0.7, linetype = "solid") +
-        
-        geom_line(aes(y = cases), color="black", alpha=0.2) +
-                geom_line(aes(y = cases_07), color="black", alpha=1, size=1) +
-                geom_line(aes(y = deaths*30), color="darkred", alpha=0.2) +
-                geom_line(aes(y = deaths_07*30), color="darkred", alpha=1, size=1) +  
-        
-        geom_point(data = reinfections, aes(x = days, y = reinfections_90*30), color="black", alpha=1, size=1.3, shape=9) + 
+ld1 = data.frame(date = c(ymd("2020-03-26"), ymd("2020-05-31")), ylow = c(0, 0), yhigh = c(8000, 8000))
+ld2 = data.frame(date = c(ymd("2021-04-05"), ymd("2021-04-21")), ylow = c(0, 0), yhigh = c(8000, 8000))
+
+main <- ggplot(data, aes(x=date)) +         
+  geom_ribbon(data = ld1, aes(ymin=ylow, ymax=yhigh), color="grey90", fill="grey90") + 
+  geom_ribbon(data = ld2, aes(ymin=ylow, ymax=yhigh), color="grey90", fill="grey90") + 
+
+  geom_segment(aes(x = ymd("2020-03-08"), y = 8000, xend = ymd("2020-03-08"), yend = 0, color="SARS-CoV-2 first detected (08/03/2020)"), size=0.6, linetype = "solid") +
+  geom_segment(aes(x = ymd("2020-12-31"), y = 8000, xend = ymd("2020-12-31"), yend = 0, color="voc B.1.1.7 first record (31/12/2020)"), size=0.7, linetype = "solid") +
+  geom_segment(aes(x = ymd("2021-01-24"), y = 8000, xend = ymd("2021-01-24"), yend = 0, color="voc B.1.351 first record (24/01/2021)"), size=0.7, linetype = "solid") +
+  
+  geom_line(data = data, aes(y = cases), color="black", alpha=0.2) +
+  geom_line(aes(y = cases_07), color="black", alpha=1, size=1) +
+  geom_line(aes(y = deaths*30), color="darkred", alpha=0.2) +
+  geom_line(aes(y = deaths_07*30), color="darkred", alpha=1, size=1) +  
+  
+  geom_point(data = reinfections, aes(x = days, y = reinfections_90*30), color="black", alpha=1, size=1.3, shape=9) + 
   
         scale_x_date(limits=c(startdate, enddate), date_breaks="2 month", date_labels = "%m/%Y") + 
         scale_y_continuous(sec.axis = sec_axis(~ ./30, name = "Deaths (7-day rolling mean) & reinfections")) + 
@@ -98,6 +97,7 @@ main <- ggplot(data, aes(x=date)) +
 main
 
 p1 <- main + annotation_custom(ggplotGrob(inset), xmin = ymd("2020-01-01"), xmax = ymd("2020-10-15"), ymin = 4500, ymax = 8500)
+p1
 
 #p1 
 ggsave(p1, file = paste0(git.path, "BGD_Covid-19/B.1.351_resurgence/output/Fig_1_trends_events.svg"), units = "cm", dpi = "retina", width = 35, height = 20)
