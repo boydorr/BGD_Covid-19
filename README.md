@@ -25,5 +25,4 @@ Statistics (SMS). The group arose from a Shared Interest Group on COVID-19 Surve
 - Jess Clark @ UoG, IBAHCM, Post-doc Researcher
 - Jess Enright @ UoG, School of Computing Science, Lecturer
 
-
-https://docs.google.com/document/d/1cfRme9Gx3AKOMKE5D-oGwdJuFJM1BwfebbL2JGdz_SA/edit#heading=h.3fp68zimti96
+The team works closely with partners in Bangladesh from the UN Interagency Support Team for COVID-19 response, a2i, IEDCR, Iccdr'b and CHRF; and partners in the US at UC berkeley, and Colombia University.
