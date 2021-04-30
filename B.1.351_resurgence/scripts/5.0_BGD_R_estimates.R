@@ -4,7 +4,7 @@ git.path <- "insert your git folder here/"
 git.path <- "/Users/katiehampson/Github/"
 
 # devtools::install_github("RamiKrispin/coronavirus") # Install coronavirus package - to show JH data
-library(coronavirus); update_dataset()
+library(coronavirus) # update_dataset()
 library(dplyr)
 library(tidyr)
 library(tidyverse)
@@ -38,12 +38,6 @@ BGD <- covid19_df %>%
          deaths_14 = floor(rollmean(deaths, k = 14, fill = NA, align="right")))  %>%
   ungroup()
 
-# reinfection data
-reinfections <- readRDS(paste0(git.path, "BGD_COVID-19/B.1.351_resurgence/data/a2i_reinfection_summary.rda"))
-reinfections <- reinfections %>%
-  mutate(reinfections_07da = floor(rollmean(reinfections_60, k = 7, fill = NA, align="right")),
-         reinfections_07da_90 = floor(rollmean(reinfections_90, k = 7, fill = NA, align="right"))) %>%
-  ungroup()
 ######################################################################
 # Examine Rt overcourse of pandemic
 days = 70:440
@@ -96,47 +90,54 @@ ggsave(Rt, file = paste0(git.path, "BGD_Covid-19/B.1.351_resurgence/output/Rt.sv
 ggsave(Rt, file = paste0(git.path, "BGD_Covid-19/B.1.351_resurgence/output/Rt.png"), units = "cm", dpi = "retina", width = 15, height = 9)
 
 #
-#####################################################################
-# Reinfections
-days = which(reinfections$days > as.Date("2020-12-17"))
-dates <- reinfections$days[days-5]
-Iday = reinfections$reinfections_60[days]; nday <- length(Iday)
-Iday_07 = reinfections$reinfections_07da[days]
-
-window <- 7
-t_start <- seq(7, nday-window) # starting at 2 as conditional on the past observations
-t_end <- t_start + window 
+# #####################################################################
+# # reinfection data
+# reinfections <- readRDS(paste0(git.path, "BGD_COVID-19/B.1.351_resurgence/data/a2i_reinfection_summary.rda"))
+# reinfections <- reinfections %>%
+#   mutate(reinfections_07da = floor(rollmean(reinfections_60, k = 7, fill = NA, align="right")),
+#          reinfections_07da_90 = floor(rollmean(reinfections_90, k = 7, fill = NA, align="right"))) %>%
+#   ungroup()
+# 
+# # Reinfections
+# days = which(reinfections$days > as.Date("2020-12-17"))
+# dates <- reinfections$days[days-5]
+# Iday = reinfections$reinfections_60[days]; nday <- length(Iday)
+# Iday_07 = reinfections$reinfections_07da[days]
+# 
+# window <- 7
+# t_start <- seq(7, nday-window) # starting at 2 as conditional on the past observations
+# t_end <- t_start + window 
 
 # From daily reinfections
-Rs.weekly <- estimate_R(Iday, method="non_parametric_si",
-                        config = make_config(list(si_distr = si_distr, t_start = t_start, t_end = t_end)))
-temp <- Rs.weekly$R %>% select( mean = "Mean(R)", median = "Median(R)", sd = "Std(R)",
-                                lower.CI = "Quantile.0.025(R)", upper.CI = "Quantile.0.975(R)")
-temp$date <- dates[t_end]
-temp <- temp %>% filter(mean > 0)
-latest.R <- round(temp$median[nrow(temp)],2)
-
-Rt_reinfections <- ggplot(data=temp, aes(x=date)) +
-  geom_ribbon(aes(ymin=lower.CI, ymax=upper.CI), color="grey70", fill="grey90") +
-  geom_line(aes(y=median), color="black") + 
-  theme + ylim(0, 3) + labs(x="", y="R", title="Reinfections")
-Rt_reinfections
-
-## From daily reinfections - 7 day rolling avg
-Rs.weekly <- estimate_R(Iday_07, method="non_parametric_si",
-                        config = make_config(list(si_distr = si_distr, t_start = t_start, t_end = t_end)))
-temp <- Rs.weekly$R %>% select( mean = "Mean(R)", median = "Median(R)", sd = "Std(R)",
-                                lower.CI = "Quantile.0.025(R)", upper.CI = "Quantile.0.975(R)")
-temp$date <- dates[t_end]
-temp <- temp %>% filter(mean > 0)
-latest.R <- round(temp$median[nrow(temp)],2)
-
-Rt_reinfections <- ggplot(data=temp, aes(x=date)) +
-  geom_ribbon(aes(ymin=lower.CI, ymax=upper.CI), color="grey70", fill="grey90") +
-  geom_line(aes(y=median), color="black") + 
-  theme + ylim(0, 4) + labs(x="", y="R", title="Reinfections")
-Rt_reinfections
-#
+# Rs.weekly <- estimate_R(Iday, method="non_parametric_si",
+#                         config = make_config(list(si_distr = si_distr, t_start = t_start, t_end = t_end)))
+# temp <- Rs.weekly$R %>% select( mean = "Mean(R)", median = "Median(R)", sd = "Std(R)",
+#                                 lower.CI = "Quantile.0.025(R)", upper.CI = "Quantile.0.975(R)")
+# temp$date <- dates[t_end]
+# temp <- temp %>% filter(mean > 0)
+# latest.R <- round(temp$median[nrow(temp)],2)
+# 
+# Rt_reinfections <- ggplot(data=temp, aes(x=date)) +
+#   geom_ribbon(aes(ymin=lower.CI, ymax=upper.CI), color="grey70", fill="grey90") +
+#   geom_line(aes(y=median), color="black") + 
+#   theme + ylim(0, 3) + labs(x="", y="R", title="Reinfections")
+# Rt_reinfections
+# 
+# ## From daily reinfections - 7 day rolling avg
+# Rs.weekly <- estimate_R(Iday_07, method="non_parametric_si",
+#                         config = make_config(list(si_distr = si_distr, t_start = t_start, t_end = t_end)))
+# temp <- Rs.weekly$R %>% select( mean = "Mean(R)", median = "Median(R)", sd = "Std(R)",
+#                                 lower.CI = "Quantile.0.025(R)", upper.CI = "Quantile.0.975(R)")
+# temp$date <- dates[t_end]
+# temp <- temp %>% filter(mean > 0)
+# latest.R <- round(temp$median[nrow(temp)],2)
+# 
+# Rt_reinfections <- ggplot(data=temp, aes(x=date)) +
+#   geom_ribbon(aes(ymin=lower.CI, ymax=upper.CI), color="grey70", fill="grey90") +
+#   geom_line(aes(y=median), color="black") + 
+#   theme + ylim(0, 4) + labs(x="", y="R", title="Reinfections")
+# Rt_reinfections
+# #
 #####################################################################
 # 2nd wave - Variant info
 voc <- read.csv(paste0(git.path,"BGD_Covid-19/B.1.351_resurgence/output/var_freq_20210418.csv"))
@@ -212,9 +213,12 @@ Rt_voc <- ggplot(data=temp, aes(x=date)) +
 Rt_voc
 
 # Put all the plots together
-p1 <- Rt + 
-  annotation_custom(ggplotGrob(Rt_reinfections), xmin = ymd("2020-05-01"), xmax = ymd("2020-11-01"), ymin = 2, ymax = 4.5) +
-  annotation_custom(ggplotGrob(Rt_voc), xmin = ymd("2020-10-30"), xmax = ymd("2021-04-15"), ymin = 2, ymax = 4.5)
+# p1 <- Rt + 
+#   annotation_custom(ggplotGrob(Rt_reinfections), xmin = ymd("2020-05-01"), xmax = ymd("2020-11-01"), ymin = 2, ymax = 4.5) +
+#   annotation_custom(ggplotGrob(Rt_voc), xmin = ymd("2020-10-30"), xmax = ymd("2021-04-15"), ymin = 2, ymax = 4.5)
+# p1
+
+p1 <- Rt + annotation_custom(ggplotGrob(Rt_voc), xmin = ymd("2020-6-30"), xmax = ymd("2021-01-15"), ymin = 2, ymax = 4.5)
 p1
 
 #p1 

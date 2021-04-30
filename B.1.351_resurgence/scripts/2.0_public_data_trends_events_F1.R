@@ -7,7 +7,7 @@ git.path <- "/Users/katiehampson/Github/"
 # Load libraries
 #devtools::install_github("RamiKrispin/coronavirus")
 library(tidyverse)
-library(coronavirus); update_dataset()
+library(coronavirus); #update_dataset()
 library(zoo)
 library(ggthemes)
 library(lubridate)
@@ -51,7 +51,7 @@ data <- data %>%
   filter(date < ymd("2021-04-15")) # Revisit on 17 April 2021
 
 # reinfection data
-reinfections <- readRDS(paste0(git.path, "BGD_COVID-19/B.1.351_resurgence/data/a2i_reinfection_summary.rda"))
+# reinfections <- readRDS(paste0(git.path, "BGD_COVID-19/B.1.351_resurgence/data/a2i_reinfection_summary.rda"))
 
 #'------------------------------------------------------------------
 var_freq <- read.csv(paste0(git.path,"BGD_Covid-19/B.1.351_resurgence/output/var_freq_20210418.csv"))
@@ -88,10 +88,11 @@ main <- ggplot(data, aes(x=date)) +
   geom_line(aes(y = deaths*30), color="darkred", alpha=0.2) +
   geom_line(aes(y = deaths_07*30), color="darkred", alpha=1, size=1) +  
   
-  geom_point(data = reinfections, aes(x = days, y = reinfections_90*30), color="black", alpha=1, size=1.3, shape=9) + 
+#  geom_point(data = reinfections, aes(x = days, y = reinfections_90*30), color="black", alpha=1, size=1.3, shape=9) + 
   
         scale_x_date(limits=c(startdate, enddate), date_breaks="2 month", date_labels = "%m/%Y") + 
-        scale_y_continuous(sec.axis = sec_axis(~ ./30, name = "Deaths (7-day rolling mean) & reinfections")) + 
+#        scale_y_continuous(sec.axis = sec_axis(~ ./30, name = "Deaths (7-day rolling mean) & reinfections")) + 
+  scale_y_continuous(sec.axis = sec_axis(~ ./30, name = "Deaths (7-day rolling mean)")) + 
         ggthemes::scale_color_few() +
         labs(x="", y="Cases (7-day rolling mean)", color="Key events") + theme 
 main
