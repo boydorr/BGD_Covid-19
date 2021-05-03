@@ -9,20 +9,18 @@ The group is a collaboration between the University of Glasgow’s Institute of 
 Statistics (SMS). The group arose from a Shared Interest Group on COVID-19 Surveillance and has expertise in epidemiology, observational data modelling, data integration and policy development.
 
 **Members:**
-
-
-- Katie Hampson @ UoG, IBAHCM, Professor of Disease Ecology and Public Health
-- Yacob Haddou @ UoG, IBAHCM, PhD Researcher
 - Fergus J Chadwick @ UoG, IBAHCM, PhD Researcher
-- Mikolaj E Kundegorski @ UoG, IBAHCM, PhD Researcher
-- Elaine Ferguson @ UoG, IBAHCM, Post-doc Researcher
-- Craig Wilkie @ UoG, SMS, Post-doc Researcher
-- Ben Swallow @ UoG, SMS, Lecturer in Statistics
-- Janine Illian @ UoG, SMS, Professor in Statistical Sciences 
-- Davina Hill @ UoG, IBAHCM, Lecturer in Welfare Physiology
-- Jason Matthiopoulos @ UoG, IBAHCM, Professor of Spatial Ecology 
-- Luca Nelli @ UoG, IBAHCM, Research Associate
 - Jess Clark @ UoG, IBAHCM, Post-doc Researcher
 - Jess Enright @ UoG, School of Computing Science, Lecturer
+- Elaine Ferguson @ UoG, IBAHCM, Post-doc Researcher
+- Yacob Haddou @ UoG, IBAHCM, PhD Researcher
+- Katie Hampson @ UoG, IBAHCM, Professor of Disease Ecology and Public Health
+- Davina Hill @ UoG, IBAHCM, Lecturer in Welfare Physiology
+- Janine Illian @ UoG, SMS, Professor in Statistical Sciences 
+- Mikolaj E Kundegorski @ UoG, IBAHCM, PhD Researcher
+- Jason Matthiopoulos @ UoG, IBAHCM, Professor of Spatial Ecology 
+- Luca Nelli @ UoG, IBAHCM, Research Associate
+- Ben Swallow @ UoG, SMS, Lecturer in Statistics
+- Craig Wilkie @ UoG, SMS, Post-doc Researcher
 
 The team works closely with partners in Bangladesh from the UN Interagency Support Team for COVID-19 response, a2i, IEDCR, Iccdr'b and CHRF; and partners in the US at UC berkeley, and Colombia University.
