@@ -698,7 +698,7 @@ shinyUI(
                                    parameters describing the various interventions, including timing, compliance, and impact on transmission, can be adjusted in the sidebar tabs."
                                    
                            )),
-                           h5(HTML("A detailed description of the model and of how this app has been used in Bangladesh, along with further analyses, can be found in the associated <a class='table_a' href=https://github.com/boydorr/BGD_Covid-19/tree/main/BGD_NPI_model/Preprint>preprint</a>. 
+                           h5(HTML("A detailed description of the model and of how this app has been used in Bangladesh, along with further analyses, can be found in the associated <a class='table_a' href=https://www.medrxiv.org/content/10.1101/2021.04.19.21255673v1.full.pdf>preprint</a>. 
                                    R code for the model and app can be found in our <a class='table_a' href=https://github.com/boydorr/BGD_Covid-19/tree/main/BGD_NPI_model/App>Gihub repository</a>."))
                        )
                      ),
@@ -779,13 +779,17 @@ shinyUI(
                   column(width=10,
                          box(width = 12,
                              br(),
-                             h3(HTML("<center> Description of analyses </center>")),
+                             h3(HTML("<center> Background </center>")),
+                             h5(HTML("This tool was developed in collaboration with multiple partners during the early stage of the pandemic in 2020.
+                                  A detailed description of the model and of how this app has been used in Bangladesh, along with further analyses, 
+                                  can be found in the associated <a class='table_a' href=https://www.medrxiv.org/content/10.1101/2021.04.19.21255673v1.full.pdf>preprint</a>. 
+                                   Code for the model and app can be found in our 
+                                     <a class='table_a' href=https://github.com/boydorr/BGD_Covid-19/tree/main/BGD_NPI_model>Gihub repository</a>.")),
                              h5("To understand how the epidemic could progress and the potential impacts of different responses we
-                                developed a relatively simple deterministic SEIR framework. We assume persons infected with the virus progress
+                                developed a relatively simple deterministic SEIR framework. We assume persons infected with the virus 
                                 are either asymptomatic for the duration of their infectious period or enter a pre-symptomatic infectious state and then progress
-                                symptomatic infection. A proportion of symptomatic people are hospitalised and/or die. The rates and probabilities 
-                                of movement between states are
-                                detailed in the technical details tab, informed by published studies of COVID-19"),
+                                to symptomatic infection. A proportion of symptomatic people are hospitalised and/or die. The rates and probabilities 
+                                of movement between states are detailed in the technical details tab, informed by published studies of COVID-19"),
                              h5("We assume that transmission can be reduced through response measures, but that the degree to which
                                 transmission is reduced depends upon how well interventions can be implemented, adhered to and enforced.
                                 i.e. as a result of investment, technological and sociological capacity, communications, trust etc."),
@@ -796,10 +800,15 @@ shinyUI(
                                 Immediate economic costs, from intervention implementation, testing, and healthcare provision, and also from
                                 loss of work due to illness or measures that limit people from working, are also explored.
                                 We summarize these impacts over 12 months to better understand the longer-term consequences of decisions that
-                                need to be taken quickly."),
+                                need to be taken quickly. We further calibrated the model to the resurgence in 2021 to better understand 
+                                factors (R0 of new variants, prior immunity, NPIs) led to the resurgence and the potential for control measures 
+                                to mitigate impacts."),
                              h5("There is considerable uncertainty in quantitative predictions therefore we focus on order of magnitude
                                 impacts. We also caveat that while this framework can help us to understand the consequences of different
-                                decisions, outcomes will depend on how interventions are delivered and complied with."),
+                                decisions, outcomes will depend on how interventions are delivered and complied with. We use publicly available data 
+                                on the course of the pandemic to calibrate the model, and caution that recorded cases and deaths are known 
+                                to be underestimated in most countries. Caution is therefore needed in considering how
+                                model trajectories and data compare."),
                              br()
                          )
                   ),

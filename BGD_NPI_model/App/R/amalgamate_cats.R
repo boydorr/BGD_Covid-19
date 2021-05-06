@@ -1,15 +1,3 @@
-#
-## Function to add new categories to model output by summing other categories 
-#__________________________________________
-
-# Arguments
-#   modelOutput = output from simulating from the covid model: a dataframe describing the number of 
-#                 individuals in each disease state through time
-
-# Output
-#   daily vector of proportion working days lost of length nrow(modelOutput)
-
-
 
 
 amalgamate_cats <- function(modelOutput){ 
