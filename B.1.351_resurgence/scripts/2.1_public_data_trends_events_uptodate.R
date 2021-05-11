@@ -48,7 +48,7 @@ write.csv(data, paste0(git.path, "BGD_Covid-19/B.1.351_resurgence/output/covid_s
 
 # keep range of dates for the submitted figure
 data <- data %>% 
-  filter(date > ymd("2020-01-21")) # %>% filter(date < ymd("2021-04-15")) # Revisit on 17 April 2021
+  filter(date > ymd("2020-01-21")) 
 
 # reinfection data
 # reinfections <- readRDS(paste0(git.path, "BGD_COVID-19/B.1.351_resurgence/data/a2i_reinfection_summary.rda"))
@@ -102,8 +102,8 @@ p1 <- main + annotation_custom(ggplotGrob(inset), xmin = ymd("2020-01-01"), xmax
 p1
 
 #p1 
-ggsave(p1, file = paste0(git.path, "BGD_Covid-19/B.1.351_resurgence/output/Fig_1_trends_events.svg"), units = "cm", dpi = "retina", width = 35, height = 20)
-ggsave(p1, file = paste0(git.path, "BGD_Covid-19/B.1.351_resurgence/output/Fig_1_trends_events.png"), units = "cm", dpi = "retina", width = 35, height = 20)
+ggsave(p1, file = paste0(git.path, "BGD_Covid-19/B.1.351_resurgence/output/Timeseries",Sys.Date(),".svg"), units = "cm", dpi = "retina", width = 35, height = 20)
+ggsave(p1, file = paste0(git.path, "BGD_Covid-19/B.1.351_resurgence/output/Timeseries",Sys.Date(),".png"), units = "cm", dpi = "retina", width = 35, height = 20)
 
 ##########################################################
 # Clean plot for showing on presentations
