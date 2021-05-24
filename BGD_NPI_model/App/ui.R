@@ -502,19 +502,20 @@ shinyUI(
         mainPanel(
           tabsetPanel(
             #----- Add tab for Interventions Dhaka -----------------------------------------
-            tabPanel("Interventions Dhaka",
+            tabPanel("Interventions 2020",
                      br(),
                      #----- Add row for description of content -----------------
                      fluidRow(
                        box(width=10,
                            h5(HTML("Forecasts are shown for <strong>mortality</strong>, severe cases requiring <strong>hospital care</strong>,
-                              proportion of <strong>working days lost</strong>, and <strong>case detection</strong> by tests (rapid and/or lab) in Dhaka District. These metrics are shown both as time series and
+                              proportion of <strong>working days lost</strong>, and <strong>case detection</strong> by tests (rapid tests and/or RT-PCR) in Dhaka District. These metrics are shown both as time series and
                               summarized over 12 months (barplots to the right).")),
-                           h5(HTML("The costs effectiveness of the intervention scenarios is also described in the bottom three barplots. 
-                              <strong>Total costs</strong> include the costs of implementing the selected interventions (which may arise from advertising, community support teams, mask distribution, and tests) and providing hospital beds for COVID-19 patients.
-                              The <strong>cost per death averted</strong> for each of the two scenarios is calculated by comparison with a scenario in which no interventions are implemented. 
-                              <strong>% return on investment (ROI)</strong> in interventions (in terms of saved healthcare costs) is again estimated relative to a scenario with no interventions.")),
-                           h5("All plots show outputs for both a baseline scenario and a comparison scenario to allow the impact of different interventions to be compared. The interventions applied in these two scenarios can be adjusted via the 'Comparison' and 'Baseline' tabs of the sidebar.")
+                           h5(HTML("The costs effectiveness of the intervention scenarios is described in the bottom three barplots. 
+                              <strong>Total costs</strong> include costs of implementing the selected interventions (e.g. from advertising, community support teams, mask distribution, and tests) and providing hospital care for COVID-19 patients.
+                              The <strong>cost per death averted</strong> is calculated by comparison with a scenario with no interventions implemented. 
+                              <strong>% return on investment (ROI)</strong> (in terms of saved healthcare costs) is also estimated relative to no interventions.")),
+                           h5("All plots show outputs for both a baseline scenario and a comparison scenario so the impact of interventions can be compared. 
+                              The interventions applied can be adjusted via the 'Comparison' and 'Baseline' tabs in the sidebar.")
                               
                              
                        ),
@@ -586,13 +587,13 @@ shinyUI(
                      fluidRow(
                        
                        box(width=12.5,
-                           h5("Forecasts for 2021 in populations of different sizes and population age distributions (with defaults representing Dhaka District)."),
-                           h5("The number of days to forecast following 1st March 2021 (beginning of the third COVID-19 wave) can be selected (minimum 30), along with the number of infectious
-                              people and the percentage of the population that is already immune at the start of the forecast."),
-                           h5("The interventions applied during the forecast period can be selected in the 2021 tab
-                              of the sidebar."),
+                           h5("This tab can be used to generate forecasts for 2021 in populations of different sizes and age distributions (defaults represent Dhaka District)."),
+                           h5("The number of days to forecast following 1st March 2021 (beginning of the third COVID-19 wave) can be selected (minimum 30), 
+                              along with starting infections and the percentage of the population immune (from prior infection or vaccination) at the forecast start.
+                              Interventions applied during the forecast period can be selected in the 2021 tab of the sidebar. 
+                              Once selected, inputs need to be confirmed and the model run using the grey button below."),
                            h5("The proportions of cases that are symptomatic, hospitalised and fatal increase as the 
-                              average age of the population increases.  The age distribution can be adjusted at the bottom of this tab.")
+                              average age of the population increases. The age distribution can be adjusted at the bottom of this tab.")
                            
                        )
                      ),
@@ -693,12 +694,12 @@ shinyUI(
                      fluidRow(
                        box(width=12, #title="", solidHeader = TRUE,
                            h5(HTML("We use an SEIR model to explore impacts of control measures on COVID-19 transmission in Dhaka District.",
-                                   "R<sub>0</sub> and the impact of lockdown on transmission were tuned to match the trend in deaths prior to June 2020 (see early epidemic forecasts below)",
-                                   "Other epidemiological and population parameters were obtained from literature values; parameters and their sources are detailed in the tables below. The majority of the
-                                   parameters describing the various interventions, including timing, compliance, and impact on transmission, can be adjusted in the sidebar tabs."
+                                   "R<sub>0</sub> and the impact of lockdown were tuned to match the trend in deaths prior to June 2020 (see early epidemic forecasts below).",
+                                   "Other epidemiological and population parameters were obtained from the literature. Parameters and their sources are detailed in the tables below. 
+                                   Most parameters describing the interventions, including timing, compliance, and impacts on transmission, can be adjusted in the sidebar tabs."
                                    
                            )),
-                           h5(HTML("A detailed description of the model and of how this app has been used in Bangladesh, along with further analyses, can be found in the associated <a class='table_a' href=https://www.medrxiv.org/content/10.1101/2021.04.19.21255673v1.full.pdf>preprint</a>. 
+                           h5(HTML("A detailed description of the model and of how this app has been used in Bangladesh, along with further analyses, can be found in our <a class='table_a' href=https://www.medrxiv.org/content/10.1101/2021.04.19.21255673v1.full.pdf>preprint</a>. 
                                    R code for the model and app can be found in our <a class='table_a' href=https://github.com/boydorr/BGD_Covid-19/tree/main/BGD_NPI_model/App>Gihub repository</a>."))
                        )
                      ),
@@ -780,35 +781,33 @@ shinyUI(
                          box(width = 12,
                              br(),
                              h3(HTML("<center> Background </center>")),
-                             h5(HTML("This tool was developed in collaboration with multiple partners during the early stage of the pandemic in 2020.
+                             h5(HTML("This tool was developed in collaboration with multiple partners in early 2020.
                                   A detailed description of the model and of how this app has been used in Bangladesh, along with further analyses, 
-                                  can be found in the associated <a class='table_a' href=https://www.medrxiv.org/content/10.1101/2021.04.19.21255673v1.full.pdf>preprint</a>. 
-                                   Code for the model and app can be found in our 
+                                  can be found in our <a class='table_a' href=https://www.medrxiv.org/content/10.1101/2021.04.19.21255673v1.full.pdf>preprint</a>. 
+                                   Code for the model and app is in our 
                                      <a class='table_a' href=https://github.com/boydorr/BGD_Covid-19/tree/main/BGD_NPI_model>Gihub repository</a>.")),
-                             h5("To understand how the epidemic could progress and the potential impacts of different responses we
+                             h5("To understand how the epidemic could progress in Bangladesh and the potential impacts of different responses we
                                 developed a relatively simple deterministic SEIR framework. We assume persons infected with the virus 
-                                are either asymptomatic for the duration of their infectious period or enter a pre-symptomatic infectious state and then progress
+                                are either asymptomatic for the duration of their infectious period or enter a pre-symptomatic infectious state before progressing
                                 to symptomatic infection. A proportion of symptomatic people are hospitalised and/or die. The rates and probabilities 
-                                of movement between states are detailed in the technical details tab, informed by published studies of COVID-19"),
-                             h5("We assume that transmission can be reduced through response measures, but that the degree to which
-                                transmission is reduced depends upon how well interventions can be implemented, adhered to and enforced.
-                                i.e. as a result of investment, technological and sociological capacity, communications, trust etc."),
+                                of movement between states are detailed in the technical details tab, informed by published studies."),
+                             h5("We assume that transmission can be reduced through response measures, but the size of the reduction depends 
+                                on how well interventions are implemented, adhered to and enforced. i.e. as a result of investment, technological and sociological capacity, communications, trust etc."),
                              h5("The timing and duration of the epidemic and associated responses will have major impacts on morbidity,
-                                mortality and the economy. The epidemic has the potential to overwhelm health systems and result in catastrophic
+                                mortality and the economy, with potential to overwhelm health systems and cause catastrophic
                                 consequences for families, communities and society as a whole. These knock on effects are beyond the scope of
                                 our model. However, we attempt to lay out short-term impacts on morbidity and hospital demand relative to capacity.
-                                Immediate economic costs, from intervention implementation, testing, and healthcare provision, and also from
-                                loss of work due to illness or measures that limit people from working, are also explored.
-                                We summarize these impacts over 12 months to better understand the longer-term consequences of decisions that
-                                need to be taken quickly. We further calibrated the model to the resurgence in 2021 to better understand 
-                                factors (R0 of new variants, prior immunity, NPIs) led to the resurgence and the potential for control measures 
+                                Immediate economic costs, from intervention implementation, testing, and healthcare provision, and from
+                                loss of work due to illness or restrictions, are also explored.
+                                We summarize these impacts over 12 months to better understand longer-term consequences of decisions that
+                                need to be taken quickly. We further calibrate the model to the resurgence in 2021 to better understand 
+                                factors (R0 of new variants, prior immunity, NPIs) that led to the resurgence and the potential for control measures 
                                 to mitigate impacts."),
                              h5("There is considerable uncertainty in quantitative predictions therefore we focus on order of magnitude
-                                impacts. We also caveat that while this framework can help us to understand the consequences of different
-                                decisions, outcomes will depend on how interventions are delivered and complied with. We use publicly available data 
-                                on the course of the pandemic to calibrate the model, and caution that recorded cases and deaths are known 
-                                to be underestimated in most countries. Caution is therefore needed in considering how
-                                model trajectories and data compare."),
+                                impacts. We caveat that while this framework helps us to understand the consequences of different
+                                decisions, outcomes depend on how interventions are delivered and complied with. We use publicly available data 
+                                on the course of the pandemic to calibrate the model, and caution that recorded cases and deaths are underestimated 
+                                in most countries. Caution is therefore needed in comparing model trajectories and data."),
                              br()
                          )
                   ),
