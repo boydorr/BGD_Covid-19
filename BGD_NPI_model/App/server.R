@@ -669,8 +669,7 @@ shinyServer(function(input, output, session) {
     axis(2,at=pretty(yRange),labels=format(pretty(yRange),scientific=FALSE,big.mark = ','))
     graphics::box(bty="l")
     lines(out_baseline()$time, c(0,diff(out_baseline()$CumSymp)), col="orange", lwd=2)
-    lines(out_baseline()$time, c(0,diff(out_baseline()$CumSevere)), col="brown3", lwd=2)
-    lines(out_baseline()$time, c(0,diff(out_baseline()$CumICU)), col="darkred", type = "l", lwd=2)
+    lines(out_baseline()$time, c(0,diff(out_baseline()$CumSevere)), col="darkred", lwd=2)
     lines(out_baseline()$time, out_baseline()$D, col=1, type = "l", lwd=2)
     
 
@@ -725,8 +724,7 @@ shinyServer(function(input, output, session) {
 
     lines(out_baseline()$time, c(0,diff(out_baseline()$CumCases)), col="red", lwd=2)
     lines(out_baseline()$time, c(0,diff(out_baseline()$CumSymp)), col="orange", lwd=2)
-    lines(out_baseline()$time, c(0,diff(out_baseline()$CumSevere)), col="brown3", lwd=2)
-    lines(out_baseline()$time, c(0,diff(out_baseline()$CumICU)), col="darkred", type = "l", lwd=2)
+    lines(out_baseline()$time, c(0,diff(out_baseline()$CumSevere)), col="darkred", lwd=2)
     lines(out_baseline()$time, out_baseline()$D, col=1, type = "l", lwd=2)
 
     axis(2, at=axTicks(2),
@@ -746,9 +744,9 @@ shinyServer(function(input, output, session) {
     # text(Sys.Date()-start_date-5, yRange[2]/4, col="black", "Today")
 
     legend("topleft",
-           c("Daily cases","Symptomatic","Severe","Critical","Total fatal", "Reported daily cases", "Reported total deaths"),
-           col=c("red","orange","brown3","darkred","black","red","black"),
-           lty=c(1,1,1,1,1,2,2), lwd=c(2,2,2,2,2,1,1), bty="n")
+           c("Daily cases","Symptomatic","Severe","Total fatal", "Reported daily cases", "Reported total deaths"),
+           col=c("red","orange","darkred","black","red","black"),
+           lty=c(1,1,1,1,2,2), lwd=c(2,2,2,2,1,1), bty="n")
 
   })
   
@@ -782,17 +780,16 @@ shinyServer(function(input, output, session) {
   output$epi_ts_upazila <- renderPlot({
     
     par(mgp=c(2,1,0), mar=c(3,3,2,0))
-    yRange = c(0, max(diff(c(0,out_upazila()$CumCases)),out_upazila()$D*1.2))
+    yRange = c(0, max(diff(c(0,out_upazila()$CumSymp)),out_upazila()$D*1.2))
     xRange_date <- c(start_date_upa+15, start_date_upa+upa_days())
     xRange_num <- c(15,upa_days())
-    plot(out_upazila()$time, diff(c(0,out_upazila()$CumCases)), col="red", type = "l", xlab = "", ylab = "Count", lwd=2,
+    plot(out_upazila()$time, diff(c(0,out_upazila()$CumSymp)), col="orange", type = "l", xlab = "", ylab = "Count", lwd=2,
          ylim=yRange, xlim=xRange_num, axes=F,cex.lab=1.3)
     axis(1, at=start_date_upa %m+% months(0:(month(xRange_date[2])-month(start_date_upa))) - start_date_upa,
          labels = paste(month.abb[month(start_date_upa %m+% months(0:(month(xRange_date[2])-month(start_date_upa))))], year(start_date_upa %m+% months(0:(month(xRange_date[2])-month(start_date_upa))))))
     axis(2,at=pretty(yRange),labels=format(pretty(yRange),scientific=FALSE,big.mark = ','))
     graphics::box(bty="l")
     # lines(out_upazila()$time, out_upazila()$CumCases, col="cyan", lwd=3)
-    lines(out_upazila()$time, diff(c(0,out_upazila()$CumSymp)), col="orange", lwd=2)
     lines(out_upazila()$time, diff(c(0,out_upazila()$CumSevere)), col="darkred", lwd=2)
     lines(out_upazila()$time, out_upazila()$D, col=1, type = "l", lwd=2)
     
@@ -802,9 +799,9 @@ shinyServer(function(input, output, session) {
     
     # Legend
     legend("topright",
-           c("Daily new cases","Daily new symptomatic","Daily new severe","Cumulative deaths", "Reported daily cases Dhaka", "Reported cumulative deaths Dhaka"),
-           col=c("red","orange","darkred","black","red","black"),
-           lty=c(1,1,1,1,2,2), lwd=c(2,2,2,2,1,1),bg=rgb(1,1,1,0.7),box.col=1)
+           c("Daily new symptomatic","Daily new severe","Cumulative deaths", "Reported daily cases Dhaka", "Reported cumulative deaths Dhaka"),
+           col=c("orange","darkred","black","red","black"),
+           lty=c(1,1,1,2,2), lwd=c(2,2,2,1,1),bg=rgb(1,1,1,0.7),box.col=1)
     
     
   })
@@ -878,9 +875,9 @@ shinyServer(function(input, output, session) {
     datatable(
       age_dep_pars_display, # from params_table.R
       colnames=c("Age Group", 
-                 HTML("% Symptomatic <a class='table_a' href=https://doi.org/10.1038/s41591-020-0962-9>[ref] </a><br>"), 
-                 HTML("% Hospitalised <a class='table_a' href=https://doi.org/10.1101/2020.05.06.20092734>[ref] </a><br>"), 
-                 HTML("% Fatal <a class='table_a' href=https://doi.org/10.1101/2020.05.06.20092734>[ref] </a><br>")), 
+                 HTML("% Symptomatic</br><a class='table_a' href=https://doi.org/10.1038/s41591-020-0962-9>(Davies et al. 2020)</a><br>"), 
+                 HTML("% Hospitalised</br><a class='table_a' href=https://doi.org/10.1101/2020.05.06.20092734>(Davies et al. 2020)</a><br>"), 
+                 HTML("% Fatal</br><a class='table_a' href=https://doi.org/10.1101/2020.05.06.20092734>(Davies et al. 2020)</a><br>")), 
       escape=F, rownames=F, # Allow html to be recognised
       options = list(dom = 't', ordering=F, "pageLength" = 40,# Remove all extra formatting in datatable
                      autoWidth = TRUE,columnDefs = list(list(width = '180px', targets = "_all"))

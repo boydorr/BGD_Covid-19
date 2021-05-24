@@ -604,7 +604,7 @@ shinyUI(
                        box(width=12.5, solidHeader=TRUE,
                            splitLayout(
                              numericInput(inputId = "upa_days", label = h4(HTML("<strong>Number of days to forecast from 1st March</strong>")), min=30, max = 365,
-                                          value = 61, width = "300px"),
+                                          value = 120, width = "300px"),
                         
                              # h5("Defaults to the estimated population of Dhaka District in 2020."),
                              numericInput(inputId = "upa_pop", label = h4(HTML("<strong>Population size</strong>")),
@@ -700,7 +700,7 @@ shinyUI(
                                    
                            )),
                            h5(HTML("A detailed description of the model and of how this app has been used in Bangladesh, along with further analyses, can be found in our <a class='table_a' href=https://www.medrxiv.org/content/10.1101/2021.04.19.21255673v1.full.pdf>preprint</a>. 
-                                   R code for the model and app can be found in our <a class='table_a' href=https://github.com/boydorr/BGD_Covid-19/tree/main/BGD_NPI_model/App>Gihub repository</a>."))
+                                   R code for the model and app can be found in our <a class='table_a' href=https://github.com/boydorr/BGD_Covid-19/tree/main/BGD_NPI_model/App>Github repository</a>."))
                        )
                      ),
                      br(),
@@ -785,7 +785,7 @@ shinyUI(
                                   A detailed description of the model and of how this app has been used in Bangladesh, along with further analyses, 
                                   can be found in our <a class='table_a' href=https://www.medrxiv.org/content/10.1101/2021.04.19.21255673v1.full.pdf>preprint</a>. 
                                    Code for the model and app is in our 
-                                     <a class='table_a' href=https://github.com/boydorr/BGD_Covid-19/tree/main/BGD_NPI_model>Gihub repository</a>.")),
+                                     <a class='table_a' href=https://github.com/boydorr/BGD_Covid-19/tree/main/BGD_NPI_model>Github repository</a>.")),
                              h5("To understand how the epidemic could progress in Bangladesh and the potential impacts of different responses we
                                 developed a relatively simple deterministic SEIR framework. We assume persons infected with the virus 
                                 are either asymptomatic for the duration of their infectious period or enter a pre-symptomatic infectious state before progressing
