@@ -222,7 +222,9 @@ covid_model <- function(t, y, parms) {
     if(syndromic == T & t>=syn_start & t<syn_end){
       targets_nonCovid_mild <- (mild_nonCovid/365)*((1-NC_syn)*(S_n+S_E+S_I + E_f+E_b+E_ss+E_sa+E_t + R_n+R_E+R_I+R_Is_f+R_Ia_f+R_I_b) + (S_q + E_q+E_qE + R_qR+R_Is_qs+R_Ia_qa+R_Is_q+R_Ia_q)) 
       targets_covid_mild <- ((Ip_f+Ip_sa)*(1-NC_syn)+Ip_q+2*Ip_qp)/dur_p 
-      prop_covid <- targets_covid_mild/(targets_covid_mild+targets_nonCovid_mild)
+      if((targets_covid_mild+targets_nonCovid_mild)>0){
+        prop_covid <- targets_covid_mild/(targets_covid_mild+targets_nonCovid_mild)
+      }else{prop_covid <- 0}
       
       # Total positive rapid tests 
       dRapidTotal <- (targets_covid_mild - #total targets with covid that are amenable to testing

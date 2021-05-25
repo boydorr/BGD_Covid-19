@@ -1,8 +1,34 @@
-# these libraries need to be loaded
-library(tidyverse)
 
-# read the Dataset sheet into “R”. The dataset will be called "data".
+# devtools::install_github("RamiKrispin/coronavirus") # Install coronavirus package - to show JH data
+# ALTERNATIVE DATA THAT CAN BE UPDATED IN REAL-TIME:
+library(coronavirus); #system.time(update_dataset(silence=T))
+library(dplyr)
+library(tidyr)
+
+# 1. Johns Hopkins direct
+covid19_df <- refresh_coronavirus_jhu()
+BGD <- covid19_df %>%
+  filter(location == "Bangladesh") %>% 
+  spread(data_type, value) %>% 
+  arrange(date) %>%
+  mutate(deaths = deaths_new, cases = cases_new) %>% 
+  mutate(cumulative_death = cumsum(deaths), cumulative_cases = cumsum(cases)) %>% 
+  ungroup()
+
+# # 2. Coronavirus package (also from JHU)
+# data("coronavirus")
+# BGD_df <- coronavirus %>% 
+#   filter(country == "Bangladesh") %>% 
+#   spread(type, cases) %>% 
+#   arrange(date) %>%
+#   mutate(deaths = death, cases = confirmed) %>% 
+#   mutate(cumulative_death = cumsum(death), cumulative_cases = cumsum(confirmed)) %>% 
+#   ungroup()
+
+# ECDC - now archived though
+# read the Dataset sheet into R. The dataset will be called "data".
 data <- read.csv("data/ecdc_data.csv")
+# data <- read.csv("https://opendata.ecdc.europa.eu/covid19/casedistribution/csv", na.strings = "", fileEncoding = "UTF-8-BOM")
 
 cases <- data %>%
   transmute(date = as.Date(dateRep, "%d/%m/%Y"), 
@@ -13,32 +39,33 @@ cases <- data %>%
          cumulative_cases = cumsum(cases),
          date = date-1) %>%  #dates are recorded as day after they happened.  Change to day they happened
   ungroup()
-
-# first_cases <- cases %>%
-#   filter(cases>0) %>%
-#   group_by(country) %>%
-#   summarise(min(date))
-# length(which(first_cases$`min(date)`<as.Date("2020-02-01")))
-
 bangladesh = subset(cases, country == "Bangladesh")
-bangladesh$cumulative_cases <- cumsum(bangladesh$cases)
 
-# par(mfrow=c(1,1), mgp=c(2,1,0))
-# # set up the axis limits
-# xmin <- min(bangladesh$date)
-# xmax <- max(bangladesh$date)
-# ymax <- max(bangladesh$cases)
-# xtick <- seq(xmin, xmax, by=7)
-# 
-# plot(bangladesh$date, bangladesh$cases, type='l',lwd=3,
-#      main="New Reported Cases", xlab="Date", ylab="Cases per day",
-#      xlim=c(xmin,xmax),  ylim=c(0,ymax), col='blue', xaxt="n")
-# axis(side=1, labels = FALSE)
-# text(x=xtick,  y=-150, labels = format(xtick,"%b-%d"), srt = 0, xpd = TRUE, cex=0.75)
-# points(bangladesh$date, bangladesh$deaths, pch=19, col='red')
-# points(bangladesh$date, bangladesh$cumulative_death, pch=19, col='red')
-# points(bangladesh$date, bangladesh$cumulative_death*10, pch=19, col='red', cex=0.25) # 10x underdetection
+# # COMPARE DATASETS - everythign seems to align
+# plot(BGD_df$date, BGD_df$cases, type = "l")
+# lines(BGD$date, BGD$cases, type = "l", col="red")
+# lines(bangladesh$date, bangladesh$cases, col="green")
 
-# startdate <- as.Date("2020-01-01") 
-# time <- as.Date(out0[,1]+startdate)
+# plot(BGD_df$date, BGD_df$deaths, type="l")
+# lines(BGD$date, BGD$deaths, col="red", type="l")
+# lines(bangladesh$date, bangladesh$deaths, col="green")
+
+
+## Proportion cases in Dhaka (from the dashboard)
+district_cases <- read.csv("data/district_cases_dashboard_19.11.csv")
+propDhaka <- district_cases$X.[which(district_cases$Distirct=="Dhaka")]/sum(district_cases$X.)
+
+bangladesh$dhaka_cases <- bangladesh$cases*propDhaka
+bangladesh$dhaka_deaths <- bangladesh$deaths*propDhaka
+bangladesh$dhaka_cum_deaths <- bangladesh$cumulative_death*propDhaka
+
+BGD$dhaka_cases <- BGD$cases*propDhaka
+BGD$dhaka_deaths <- BGD$deaths*propDhaka
+BGD$dhaka_cum_deaths <- BGD$cumulative_death*propDhaka
+
+propDhaka2021 <- 0.62
+BGD$dhaka_cases_2021 <- BGD$cases*propDhaka2021
+BGD$dhaka_deaths_2021 <- BGD$deaths*propDhaka2021
+BGD$dhaka_cum_deaths_2021 <- BGD$cumulative_death*propDhaka2021
+
 

@@ -301,7 +301,7 @@ shinyServer(function(input, output, session) {
     updateNumericInput(session, inputId = "upa_demog_9", value = round(dhaka_pop_by_age$prop[9]*100,1))
     updateSliderInput(session, inputId = "upa_immune", value = 25)
     updateNumericInput(session, inputId = "upa_infectious", value = 11451)
-    updateNumericInput(session, inputId = "upa_days", value = 60)
+    updateNumericInput(session, inputId = "upa_days", value = 120)
 
   })
   

@@ -104,7 +104,7 @@ parms_baseline <- c(parms_baseline, calc_fractions(age_dep_pars,dhaka_pop_by_age
 ##   (1-fa)*((propPresympTrans/(1-propPresympTrans))*beta_s*dur_s + beta_s*dur_s)
 
 R0<-3.57 # target R0
-R0_upa<-3.5 # R0 estimated for 2021 wave
+R0_upa<-3.3 # R0 estimated for 2021 wave
 parms_baseline["beta_s"] <- R0/(parms_baseline["fa"]*(parms_baseline["asympTrans"]*(parms_baseline["propPresympTrans"]/(1-parms_baseline["propPresympTrans"]) + 1))*parms_baseline["dur_s"] + 
                                   (1-parms_baseline["fa"])*((parms_baseline["propPresympTrans"]/(1-parms_baseline["propPresympTrans"]))*parms_baseline["dur_s"] + 
                                                               parms_baseline["dur_s"]))

@@ -427,7 +427,7 @@ shinyUI(
                                 #----- R0 -------------------------
                                 sliderInput(inputId = "upa_R0", label = HTML(paste("R", tags$sub(0), sep = "")),
                                             min = minR0,  max = 6.5, value = R0_upa, step = 0.01),
-                                h6("Defaults to 3.5. This value was tuned to data for Dhaka District in March 2021, assuming 25% of the population was already immune and 11451 initial infectious."),
+                                h6("Defaults to 3.3. This value was tuned to data for Dhaka District in March 2021, assuming 25% of the population was already immune and 11451 initial infectious."),
                                 hr(class = "dot"),
                                 #----- Lockdown inputs -------------------------
                                 radioButtons(inputId = "upa_ld", "Include a lockdown phase?",
@@ -591,7 +591,8 @@ shinyUI(
                            h5("The number of days to forecast following 1st March 2021 (beginning of the third COVID-19 wave) can be selected (minimum 30), 
                               along with starting infections and the percentage of the population immune (from prior infection or vaccination) at the forecast start.
                               Interventions applied during the forecast period can be selected in the 2021 tab of the sidebar. 
-                              Once selected, inputs need to be confirmed and the model run using the grey button below."),
+                              Once selected, inputs need to be confirmed and the model run using the grey button below. The parameters that can be adjusted in this tab
+                               can be returned to their default settings by pressing the 'Reset defaults' button"),
                            h5("The proportions of cases that are symptomatic, hospitalised and fatal increase as the 
                               average age of the population increases. The age distribution can be adjusted at the bottom of this tab.")
                            

@@ -15,10 +15,22 @@ parms <- c(dur_E=as.numeric(parms_baseline["dur_inc"]-parms_baseline["dur_p"]),
            parms_baseline["dur_p"],
            parms_baseline["dur_s"],
            parms_baseline["dur_a"],
-           parms_baseline["fa"],
-           parms_baseline["beta_a"]*(parms_baseline["probHHtrans"]*(parms_baseline["HHsize"]-1))/R0,
-           parms_baseline["beta_p"]*(parms_baseline["probHHtrans"]*(parms_baseline["HHsize"]-1))/R0,
-           parms_baseline["beta_s"]*(parms_baseline["probHHtrans"]*(parms_baseline["HHsize"]-1))/R0)
+           parms_baseline["fa"])
+
+parms <- c(parms,
+           "beta_s"=as.numeric((parms_baseline["probHHtrans"]*(parms_baseline["HHsize"]-1))/
+                                 (parms_baseline["fa"]*(parms_baseline["asympTrans"]*(parms_baseline["propPresympTrans"]/(1-parms_baseline["propPresympTrans"]) + 1))*parms_baseline["dur_s"] + 
+                                    (1-parms_baseline["fa"])*((parms_baseline["propPresympTrans"]/(1-parms_baseline["propPresympTrans"]))*parms_baseline["dur_s"] + 
+                                                                parms_baseline["dur_s"])))
+)
+parms <- c(parms,
+           "beta_p"=as.numeric(((parms_baseline["propPresympTrans"]/(1-parms_baseline["propPresympTrans"]))*parms["beta_s"]*parms_baseline["dur_s"])/parms_baseline["dur_p"])
+)
+parms <- c(parms,
+           "beta_a"=as.numeric(((parms_baseline["asympTrans"]*(parms_baseline["propPresympTrans"]/(1-parms_baseline["propPresympTrans"]) + 1))*parms["beta_s"]*parms_baseline["dur_s"])/parms_baseline["dur_a"])
+)
+
+
 
 #Propensity matrix
 v  <- matrix(c(-1,+1,0,0,0,0, #S->E 

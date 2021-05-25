@@ -41,10 +41,6 @@ parms_baseline["beta_s"] <- R0/(parms_baseline["fa"]*(parms_baseline["asympTrans
                                                                           parms_baseline["dur_s"]))
 parms_baseline["beta_p"] <- ((parms_baseline["propPresympTrans"]/(1-parms_baseline["propPresympTrans"]))*parms_baseline["beta_s"]*parms_baseline["dur_s"])/parms_baseline["dur_p"]
 parms_baseline["beta_a"] <- ((parms_baseline["asympTrans"]*(parms_baseline["propPresympTrans"]/(1-parms_baseline["propPresympTrans"]) + 1))*parms_baseline["beta_s"]*parms_baseline["dur_s"])/parms_baseline["dur_a"]
-dur_hh_vec <- duration_household_infection(parms_baseline,50000)
-parms_baseline["dur_hh"] <- dur_hh_vec[1]
-parms_baseline["dur_hha"] <- dur_hh_vec[2]
-parms_baseline["dur_hhs"] <- dur_hh_vec[3]
 
 
 # Select ld_effect
