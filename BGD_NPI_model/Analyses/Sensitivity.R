@@ -50,8 +50,8 @@ system.time({
                 intro_date_now <- intro_date
                 times_model_now <- c(as.numeric(intro_date_now-start_date):as.numeric(end_date-start_date))
                 
-                R0_now<-R0
                 parms<-parms_baseline
+
                 
                 if(par_ranges$Parameter[par]!="Intro"){
                         par_values<-seq(par_ranges$min[par],par_ranges$max[par],length.out = 100)
@@ -67,9 +67,6 @@ system.time({
                                 intro_date_now <- par_values[value]
                                 times_model_now <- c(as.numeric(intro_date_now-start_date):as.numeric(end_date-start_date))
                                 
-                        }else if(par_ranges$Parameter[par]=="R0"){
-                                R0_now<-par_values[value]   
-                                
                         }else if(par_ranges$Parameter[par]=="delay_hosp"){
                                 parms["delay_hosp"]<-par_values[value]->parms["delay_ICU"]
                                 
@@ -77,7 +74,7 @@ system.time({
                         
                         
                         # Recalculate betas
-                        parms["beta_s"] <- R0_now/(parms["fa"]*(parms["asympTrans"]*(parms["propPresympTrans"]/(1-parms["propPresympTrans"]) + 1))*parms["dur_s"] + 
+                        parms["beta_s"] <- parms["R0"]/(parms["fa"]*(parms["asympTrans"]*(parms["propPresympTrans"]/(1-parms["propPresympTrans"]) + 1))*parms["dur_s"] + 
                                                            (1-parms["fa"])*((parms["propPresympTrans"]/(1-parms["propPresympTrans"]))*parms["dur_s"] + 
                                                                                     parms["dur_s"]))
                         parms["beta_p"] <- ((parms["propPresympTrans"]/(1-parms["propPresympTrans"]))*parms["beta_s"]*parms["dur_s"])/parms["dur_p"]

@@ -36,14 +36,7 @@ pop_references = c("<a class='table_a' href=https://population.un.org/wpp/Downlo
                "<a class='table_a' href='http://203.112.218.65:8008/Census.aspx?MenuKey=43'>Bangladesh Bureau of Statistics</a>", # Proportion at-home carers
                "<a class='table_a' href='http://bbs.portal.gov.bd/sites/default/files/files/bbs.portal.gov.bd/page/b343a8b4_956b_45ca_872f_4cf9b2f1a6e0/Comparative Matrix HIES_fnl.pdf'>Bangladesh Bureau of Statistics, Household Income and Expenditure Survey (HIES) 2016</a>", # Average household size
                "<a class='table_a' href='http://www.who.int/data/gho/data/indicators/indicator-details/GHO/hospital-beds-(per-10-000-population)'>World Health Organisation</a>") # Hospital beds
-# # Describe lockdown situation
-# # reduces symptomatic transmission to ZERO, for proportion of nonlocked down persons
-# # In bangladesh as of May 5th, R = 1.2: https://epiforecasts.io/covid/posts/national/bangladesh/
-# trans_types <- pc_trans(parms_baseline) # pre-symptomatic transmission, asymptomatic, symptomatic
-# R0 <- calc_R0(parms_baseline)
-# lockdown_pc <- (1-0.05)*(1-0.2)
-# R_lockdown <- (trans_types[1] + trans_types[2])*R0  + (1-lockdown_pc)*trans_types[3] # R_lockdown
-# 
+
 
 
 

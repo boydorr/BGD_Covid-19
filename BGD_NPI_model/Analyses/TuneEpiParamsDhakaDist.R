@@ -35,8 +35,8 @@ times_model <- c(as.numeric(intro_date-start_date):as.numeric(end_date-start_dat
 
 
 # Select R0
-R0<-3.57 # target R0
-parms_baseline["beta_s"] <- R0/(parms_baseline["fa"]*(parms_baseline["asympTrans"]*(parms_baseline["propPresympTrans"]/(1-parms_baseline["propPresympTrans"]) + 1))*parms_baseline["dur_s"] + 
+parms_baseline["R0"]<-3.57 # target R0
+parms_baseline["beta_s"] <- parms_baseline["R0"]/(parms_baseline["fa"]*(parms_baseline["asympTrans"]*(parms_baseline["propPresympTrans"]/(1-parms_baseline["propPresympTrans"]) + 1))*parms_baseline["dur_s"] + 
                                         (1-parms_baseline["fa"])*((parms_baseline["propPresympTrans"]/(1-parms_baseline["propPresympTrans"]))*parms_baseline["dur_s"] + 
                                                                           parms_baseline["dur_s"]))
 parms_baseline["beta_p"] <- ((parms_baseline["propPresympTrans"]/(1-parms_baseline["propPresympTrans"]))*parms_baseline["beta_s"]*parms_baseline["dur_s"])/parms_baseline["dur_p"]

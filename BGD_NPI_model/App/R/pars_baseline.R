@@ -5,7 +5,7 @@ start_date <- as.Date("2020-01-01")
 start_date_upa <- as.Date("2021-03-01")
 
 # End date for model
-if(!is.element("end_date",ls())){end_date <- as.Date("2020-12-31")}
+if(!is.element("end_date",ls())){end_date <- as.Date("2021-01-01")}
 
 # time periods of interest
 times <- seq(0, as.numeric(end_date-start_date), 1)
@@ -31,7 +31,8 @@ dhakapop2020 <- round(bdeshpop2020*propDhakaPop)
 
 
 # Parameters for baseline scenario (with just standard lockdown)
-parms_baseline <- c(dur_inc=5.8, dur_p=2, dur_s=7, dur_a=7.7, # duration of incubation & residence in each infectious class (days)
+parms_baseline <- c(R0=3.57,
+                    dur_inc=5.8, dur_p=2, dur_s=7, dur_a=7.7, # duration of incubation & residence in each infectious class (days)
                     dur_ICU=7, dur_hosp=5,delay_ICU=7,delay_hosp=7,delay_death=20.2, 
                     dur_hh=10.56,dur_hha=9.87,dur_hhs=12.16,
                     ld=T, # Is there a lockdown period?
@@ -103,9 +104,7 @@ parms_baseline <- c(parms_baseline, calc_fractions(age_dep_pars,dhaka_pop_by_age
 ## R0 <- fa*asympTrans*(propPresympTrans/(1-propPresympTrans) + 1)*beta_s*dur_s + 
 ##   (1-fa)*((propPresympTrans/(1-propPresympTrans))*beta_s*dur_s + beta_s*dur_s)
 
-R0<-3.57 # target R0
-R0_upa<-3.3 # R0 estimated for 2021 wave
-parms_baseline["beta_s"] <- R0/(parms_baseline["fa"]*(parms_baseline["asympTrans"]*(parms_baseline["propPresympTrans"]/(1-parms_baseline["propPresympTrans"]) + 1))*parms_baseline["dur_s"] + 
+parms_baseline["beta_s"] <- parms_baseline["R0"]/(parms_baseline["fa"]*(parms_baseline["asympTrans"]*(parms_baseline["propPresympTrans"]/(1-parms_baseline["propPresympTrans"]) + 1))*parms_baseline["dur_s"] + 
                                   (1-parms_baseline["fa"])*((parms_baseline["propPresympTrans"]/(1-parms_baseline["propPresympTrans"]))*parms_baseline["dur_s"] + 
                                                               parms_baseline["dur_s"]))
 parms_baseline["beta_p"] <- ((parms_baseline["propPresympTrans"]/(1-parms_baseline["propPresympTrans"]))*parms_baseline["beta_s"]*parms_baseline["dur_s"])/parms_baseline["dur_p"]

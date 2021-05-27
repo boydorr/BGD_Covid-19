@@ -25,12 +25,15 @@ shinyServer(function(input, output, session) {
   # Adjust baseline parameters based on selected R0
   parms_baseline_adjust <- reactive({
 
+    # Update R0
+    parms_edit <- parms_baseline
+    parms_edit["R0"] <- input$bl_R0
+    
     # Calculate multiplier to be applied to betas based on input R0
-    beta_multiplier <- input$bl_R0/R0
+    beta_multiplier <- input$bl_R0/parms_baseline["R0"]
     
 
     # Adjust baseline transmission rates based on the multiplier
-    parms_edit <- parms_baseline
     parms_edit[c("beta_p","beta_a","beta_s")] <-
       parms_edit[c("beta_p","beta_a","beta_s")]*beta_multiplier
 
@@ -141,11 +144,14 @@ shinyServer(function(input, output, session) {
   # Parameters for scenario to be compared with baseline
   parms_intervention <- reactive({
 
+    # Update R0
+    parms_edit <- parms_baseline
+    parms_edit["R0"] <- input$int_R0
+    
     # Calculate multiplier to be applied to betas based on input R0
-    beta_multiplier <- input$int_R0/R0
+    beta_multiplier <- input$int_R0/parms_baseline["R0"]
     
     # Adjust transmission rates based on the multiplier
-    parms_edit <- parms_baseline
     parms_edit[c("beta_p","beta_a","beta_s")] <-
       parms_edit[c("beta_p","beta_a","beta_s")]*beta_multiplier
     
@@ -226,11 +232,14 @@ shinyServer(function(input, output, session) {
   
   parms_upazila <- eventReactive(input$upa_go,{
 
+    # Update R0
+    parms_edit <- parms_baseline
+    parms_edit["R0"] <- input$upa_R0
+    
     # Calculate multiplier to be applied to betas based on input R0
-    beta_multiplier <- input$upa_R0/R0
+    beta_multiplier <- input$upa_R0/parms_baseline["R0"]
     
     # Adjust transmission rates based on the multiplier
-    parms_edit <- parms_baseline
     parms_edit[c("beta_p","beta_a","beta_s")] <-
       parms_edit[c("beta_p","beta_a","beta_s")]*beta_multiplier
     

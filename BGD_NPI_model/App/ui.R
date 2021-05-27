@@ -217,11 +217,11 @@ shinyUI(
                                 h6(HTML("Adjust R<sub>0</sub>, intervention, and testing settings for the comparison scenario on the 'Interventions Dhaka' tab (coloured red on output plots).")),
                                 #----- R0 -------------------------
                                 sliderInput(inputId = "int_R0", label = HTML(paste("R", tags$sub(0), sep = "")),
-                                            min = minR0,  max = 6, value = R0, step = 0.01),
+                                            min = minR0,  max = 6, value = parms_baseline["R0"], step = 0.01),
                                 hr(class = "dot"),
                                 #----- Lockdown inputs -------------------------
                                 sliderInput(inputId = "int_ld_dates", label = "Lockdown period:",
-                                            min = start_date,  max = end_date,
+                                            min = start_date,  max=end_date,
                                             value = c(start_date+parms_baseline[c("ld_start","ld_end")]),
                                             timeFormat = "%d %b %y",step=1,ticks=F),
                                 numericInput(inputId = "int_ld_improve", label = "Days to full effectiveness:",
@@ -236,7 +236,7 @@ shinyUI(
                                 conditionalPanel(
                                   condition="input.int_ld2 == 'TRUE'",
                                   sliderInput(inputId = "int_ld2_dates", label = "Implementation period:",
-                                              min = start_date + parms_baseline["ld_end"],  max = end_date,
+                                              min = start_date + parms_baseline["ld_end"],  max=end_date,
                                               value = c(start_date+parms_baseline[c("ld2_start","ld2_end")]),
                                               timeFormat = "%d %b %y",step=1,ticks=F),
                                   numericInput(inputId = "int_ld2_improve", label = "Days to full effectiveness:",
@@ -254,7 +254,7 @@ shinyUI(
                                 conditionalPanel(
                                   condition="input.int_mask == 'TRUE'",
                                   sliderInput(inputId = "int_mask_dates", label = "Implementation period:",
-                                              min = start_date,  max = end_date,
+                                              min = start_date,  max=end_date,
                                               value = c(start_date+parms_baseline[c("mask_start","mask_end")]),
                                               timeFormat = "%d %b %y",step=1,ticks=F),
                                   numericInput(inputId = "int_mask_improve", label = "Days to scale up:",
@@ -273,7 +273,7 @@ shinyUI(
                                 conditionalPanel(
                                   condition="input.int_lab == 'TRUE'",
                                   sliderInput(inputId = "int_lab_dates", label = "Implementation period:",
-                                              min = start_date,  max = end_date,
+                                              min = start_date,  max=end_date,
                                               value = c(start_date+parms_baseline[c("lab_start","lab_end")]),
                                               timeFormat = "%d %b %y",step=1,ticks=F),
                                   numericInput(inputId = "int_lab_improve", label = "Days to scale up:",
@@ -293,7 +293,7 @@ shinyUI(
                                 conditionalPanel(
                                   condition="input.int_syndromic == 'TRUE'",
                                   sliderInput(inputId = "int_syn_dates", label = "Implementation period:",
-                                              min = start_date,  max = end_date,
+                                              min = start_date,  max=end_date,
                                               value = c(start_date+parms_baseline[c("syn_start","syn_end")]),
                                               timeFormat = "%d %b %y",step=1,ticks=F),
                                   numericInput(inputId = "int_syn_improve", label = "Days to scale up:",
@@ -324,11 +324,11 @@ shinyUI(
                                   hr(class = "dot"),
                                   #----- R0 -------------------------
                                   sliderInput(inputId = "bl_R0", label = HTML(paste("R", tags$sub(0), sep = "")),
-                                              min = minR0,  max = 6, value = R0, step = 0.01),
+                                              min = minR0,  max = 6, value = parms_baseline["R0"], step = 0.01),
                                   hr(class = "dot"),
                                   #----- Lockdown inputs -------------------------
                                   sliderInput(inputId = "bl_ld_dates", label = "Lockdown period:",
-                                              min = start_date,  max = end_date,
+                                              min = start_date,  max=end_date,
                                               value = c(start_date+parms_baseline[c("ld_start","ld_end")]),
                                               timeFormat = "%d %b %y",step=1,ticks=F),
                                   numericInput(inputId = "bl_ld_improve", label = "Days to full effectiveness:",
@@ -343,7 +343,7 @@ shinyUI(
                                   conditionalPanel(
                                     condition="input.bl_ld2 == 'TRUE'",
                                     sliderInput(inputId = "bl_ld2_dates", label = "Implementation period:",
-                                                min = start_date + parms_baseline["ld_end"],  max = end_date,
+                                                min = start_date + parms_baseline["ld_end"],  max=end_date,
                                                 value = c(start_date+parms_baseline[c("ld2_start","ld2_end")]),
                                                 timeFormat = "%d %b %y",step=1,ticks=F),
                                     numericInput(inputId = "bl_ld2_improve", label = "Days to full effectiveness:",
@@ -361,7 +361,7 @@ shinyUI(
                                   conditionalPanel(
                                     condition="input.bl_mask == 'TRUE'",
                                     sliderInput(inputId = "bl_mask_dates", label = "Implementation period:",
-                                                min = start_date,  max = end_date,
+                                                min = start_date,  max=end_date,
                                                 value = c(start_date+parms_baseline[c("mask_start","mask_end")]),
                                                 timeFormat = "%d %b %y",step=1,ticks=F),
                                     numericInput(inputId = "bl_mask_improve", label = "Days to scale up:",
@@ -380,7 +380,7 @@ shinyUI(
                                   conditionalPanel(
                                     condition="input.bl_lab == 'TRUE'",
                                     sliderInput(inputId = "bl_lab_dates", label = "Implementation period:",
-                                                min = start_date,  max = end_date,
+                                                min = start_date,  max=end_date,
                                                 value = c(start_date+parms_baseline[c("lab_start","lab_end")]),
                                                 timeFormat = "%d %b %y",step=1,ticks=F),
                                     numericInput(inputId = "bl_lab_improve", label = "Days to scale up:",
@@ -400,7 +400,7 @@ shinyUI(
                                   conditionalPanel(
                                     condition="input.bl_syndromic == 'TRUE'",
                                     sliderInput(inputId = "bl_syn_dates", label = "Implementation period:",
-                                                min = start_date,  max = end_date,
+                                                min = start_date,  max=end_date,
                                                 value = c(start_date+parms_baseline[c("syn_start","syn_end")]),
                                                 timeFormat = "%d %b %y",step=1,ticks=F),
                                     numericInput(inputId = "bl_syn_improve", label = "Days to scale up:",
@@ -426,23 +426,23 @@ shinyUI(
                                 
                                 #----- R0 -------------------------
                                 sliderInput(inputId = "upa_R0", label = HTML(paste("R", tags$sub(0), sep = "")),
-                                            min = minR0,  max = 6.5, value = R0_upa, step = 0.01),
-                                h6("Defaults to 3.3. This value was tuned to data for Dhaka District in March 2021, assuming 25% of the population was already immune and 11451 initial infectious."),
+                                            min = minR0,  max = 6.5, value = 3.32, step = 0.01),
+                                h6("Defaults to 3.32. This value was tuned to data for Dhaka District in March 2021, assuming 25% of the population was already immune and 11451 initial infectious."),
                                 hr(class = "dot"),
                                 #----- Lockdown inputs -------------------------
                                 radioButtons(inputId = "upa_ld", "Include a lockdown phase?",
-                                             choices = list("Yes" = TRUE,"No" = FALSE), inline=TRUE, selected=FALSE),
+                                             choices = list("Yes" = TRUE,"No" = FALSE), inline=TRUE, selected=TRUE),
                                 conditionalPanel(
                                   condition="input.upa_ld == 'TRUE'",
                                   sliderInput(inputId = "upa_ld_dates", label = "Lockdown period:",
-                                              min = start_date_upa,  max = start_date_upa + 60,timeFormat = "%d %b %y",step=1,ticks=F,
-                                              value = c(start_date_upa,start_date_upa+30)),
+                                              min = start_date_upa,  max = start_date_upa + 120,timeFormat = "%d %b %y",step=1,ticks=F,
+                                              value = c(as.Date("2021-04-05"),as.Date("2021-06-01"))),
                                   numericInput(inputId = "upa_ld_improve", label = "Days to full effectiveness:",
-                                               value = parms_baseline["ld_improve"], width = "100%", min=0),
+                                               value = 9, width = "100%", min=0),
                                   sliderInput(inputId = "upa_fEW", label = "% workforce not under lockdown:",
                                               min = 0,  max = 100, value = (parms_baseline["fEW"]/parms_baseline["propWorkers"])*100, post="%"),
                                   sliderInput(inputId = "upa_ld_compliance", label = "Compliance:",
-                                              min = 0,  max = 100, value = (1-parms_baseline["fNC"])*100, post="%")
+                                              min = 0,  max = 100, value = (1-0.2)*100, post="%")
                                 ),
                                 hr(class = "dot"),
                                 radioButtons(inputId = "upa_ld2", "Add a second lockdown phase?",
@@ -450,7 +450,7 @@ shinyUI(
                                 conditionalPanel(
                                   condition="input.upa_ld2 == 'TRUE'",
                                   sliderInput(inputId = "upa_ld2_dates", label = "Implementation period:",
-                                              min = start_date_upa+30,  max = start_date_upa + 60,timeFormat = "%d %b %y",step=1,ticks=F,
+                                              min = start_date_upa+30,  max = start_date_upa + 120,timeFormat = "%d %b %y",step=1,ticks=F,
                                               value = c(start_date_upa+30,start_date_upa+60)),
                                   numericInput(inputId = "upa_ld2_improve", label = "Days to full effectiveness:",
                                                value = parms_baseline["ld2_improve"], width = "100%", min=0),
@@ -463,16 +463,16 @@ shinyUI(
                                 hr(class = "dot"),
                                 #----- Mask wearing inputs ----------------------
                                 radioButtons(inputId = "upa_mask", "Compulsory public mask wearing?",
-                                             choices = list("Yes" = TRUE,"No" = FALSE), inline=TRUE, selected=as.logical(parms_baseline["mask"])),
+                                             choices = list("Yes" = TRUE,"No" = FALSE), inline=TRUE, selected=TRUE),
                                 conditionalPanel(
                                   condition="input.upa_mask == 'TRUE'",
                                   sliderInput(inputId = "upa_mask_dates", label = "Implementation period:",
-                                              min = start_date_upa,  max = start_date_upa + 60,timeFormat = "%d %b %y",step=1,ticks=F,
-                                              value = c(start_date_upa,start_date_upa+60)),
+                                              min = start_date_upa,  max = start_date_upa + 120,timeFormat = "%d %b %y",step=1,ticks=F,
+                                              value = c(as.Date("2021-04-05"),as.Date("2021-06-01"))),
                                   numericInput(inputId = "upa_mask_improve", label = "Days to scale up:",
                                                value = parms_baseline["mask_improve"], width = "100%", min=0),
                                   sliderInput(inputId = "upa_mask_compliance", label = "Compliance:",
-                                              min = 0,  max = 100, value = parms_baseline["mask_compliance"]*100, post="%"),
+                                              min = 0,  max = 100, value = 0.3*100, post="%"),
                                   sliderInput(inputId = "upa_mask_effect_out", label = "Proportion reduction in transmission from mask-wearers:",
                                               min = 0,  max = 1, value = parms_baseline["mask_effect_outward"]),
                                   sliderInput(inputId = "upa_mask_effect_in", label = "Proportion reduction in transmission to mask-wearers:",
@@ -482,16 +482,16 @@ shinyUI(
                                 hr(class = "dot"),
                                 #----- Community inputs ------------------------
                                 radioButtons(inputId = "upa_syndromic", "Community Support Team response (household quarantine)?",
-                                             choices = list("Yes" = TRUE,"No" = FALSE),inline=TRUE, selected=as.logical(parms_baseline["syndromic"])),
+                                             choices = list("Yes" = TRUE,"No" = FALSE),inline=TRUE, selected=TRUE),
                                 conditionalPanel(
                                   condition="input.upa_syndromic == 'TRUE'",
                                   sliderInput(inputId = "upa_syn_dates", label = "Implementation period:",
-                                              min = start_date_upa,  max = start_date_upa + 60,timeFormat = "%d %b %y",step=1,ticks=F,
-                                              value = c(start_date_upa,start_date_upa+60)),
+                                              min = start_date_upa,  max = start_date_upa + 120,timeFormat = "%d %b %y",step=1,ticks=F,
+                                              value = c(as.Date("2021-04-05"),as.Date("2021-06-01"))),
                                   numericInput(inputId = "upa_syn_improve", label = "Days to scale up:",
                                                value = parms_baseline["syn_improve"], width = "100%", min=0),
                                   sliderInput(inputId = "upa_community", label = "Quarantine adherence:",
-                                              min = 0,  max = 100, value = parms_baseline["community"]*100, post="%")
+                                              min = 0,  max = 100, value = 0.3*100, post="%")
                                     
                                   )
                                 )

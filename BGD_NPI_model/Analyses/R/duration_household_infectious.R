@@ -1,7 +1,3 @@
-library(ssar)
-
-set.seed(0)
-
 duration_household_infection <- function(parms_baseline,nsims){
   
   # Parameters
@@ -10,9 +6,9 @@ duration_household_infection <- function(parms_baseline,nsims){
                 parms_baseline["dur_s"],
                 parms_baseline["dur_a"],
                 parms_baseline["fa"],
-                parms_baseline["beta_a"]*(parms_baseline["probHHtrans"]*(parms_baseline["HHsize"]-1))/R0,
-                parms_baseline["beta_p"]*(parms_baseline["probHHtrans"]*(parms_baseline["HHsize"]-1))/R0,
-                parms_baseline["beta_s"]*(parms_baseline["probHHtrans"]*(parms_baseline["HHsize"]-1))/R0)
+                parms_baseline["beta_a"]*(parms_baseline["probHHtrans"]*(parms_baseline["HHsize"]-1))/parms_baseline["R0"],
+                parms_baseline["beta_p"]*(parms_baseline["probHHtrans"]*(parms_baseline["HHsize"]-1))/parms_baseline["R0"],
+                parms_baseline["beta_s"]*(parms_baseline["probHHtrans"]*(parms_baseline["HHsize"]-1))/parms_baseline["R0"])
   
   #Propensity matrix
   v  <- matrix(c(-1,+1,0,0,0,0, #S->E 

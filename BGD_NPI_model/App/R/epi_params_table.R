@@ -31,7 +31,7 @@ Parameter = c("Introduction Date",
               "% symptomatic cases that die")
 
 Value = c(as.character(intro_date),
-          R0,
+          parms_baseline["R0"],
           round(parms_baseline["beta_a"],2),
           round(parms_baseline["beta_p"],2),
           round(parms_baseline["beta_s"],2),
@@ -44,16 +44,16 @@ Value = c(as.character(intro_date),
           parms_baseline["dur_hosp"],
           parms_baseline["dur_ICU"],
           parms_baseline["recuperation"],
-          parms_baseline["propHHtrans"],
+          parms_baseline["probHHtrans"],
           parms_baseline["dur_hh"],
           parms_baseline["dur_hha"],
           parms_baseline["dur_hhs"],
           parms_baseline["propPresympTrans"]*100,
           parms_baseline["asympTrans"]*100,
-          parms_baseline["fa"]*100,
-          parms_baseline["fHosp"]*100,
+          round(parms_baseline["fa"]*100,2),
+          round(parms_baseline["fHosp"]*100,2),
           parms_baseline["probICU"]*100,
-          parms_baseline["fd"]*100
+          round(parms_baseline["fd"]*100,2)
           
  )
 

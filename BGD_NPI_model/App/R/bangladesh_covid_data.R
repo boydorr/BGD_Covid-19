@@ -50,7 +50,6 @@ bangladesh = subset(cases, country == "Bangladesh")
 # lines(BGD$date, BGD$deaths, col="red", type="l")
 # lines(bangladesh$date, bangladesh$deaths, col="green")
 
-
 ## Proportion cases in Dhaka (from the dashboard)
 district_cases <- read.csv("data/district_cases_dashboard_19.11.csv")
 propDhaka <- district_cases$X.[which(district_cases$Distirct=="Dhaka")]/sum(district_cases$X.)
