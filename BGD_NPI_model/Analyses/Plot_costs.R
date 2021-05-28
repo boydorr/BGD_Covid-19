@@ -43,10 +43,8 @@ stats <- data.frame(scenarios=scenarios,
                     hosp=NA,
                     wdl=NA,
                     excess_beds=NA,
-                    total_cost_high=NA,
-                    total_cost_low=NA,
-                    int_cost_high=NA,
-                    int_cost_low=NA)
+                    total_cost=NA,
+                    int_cost=NA)
 
 
 # Function to calculate statistics for given intervention scenario
@@ -63,9 +61,7 @@ get_stats <- function(parms){
   wdl<-(sum(wdl)/length(wdl))
   
   # Costs
-  costs_high <- costs(out,parms)
-  costs_low <- costs(out,parms,mask_per_person = 1.2/2,bed_cost = 50)
-  
+  costs <- costs(out,parms)
   
   # Statistics
   c(deaths=max(out$D),
@@ -73,11 +69,9 @@ get_stats <- function(parms){
     hosp=max(out$CumSevere),
     wdl=wdl,
     excess_beds=sum(pmax(0,(out$Hosp+out$ICU)-beds))/sum(out$Hosp+out$ICU),
-    total_cost_high=costs_high$total,
-    total_cost_low=costs_low$total,
-    int_cost_high=sum(costs_high[c("lockdown_advertising","CST","mask")]),
-    int_cost_low=sum(costs_low[c("lockdown_advertising","CST","mask")]))
-
+    total_cost=costs$total,
+    int_cost=sum(costs[c("lockdown_advertising","CST","mask")]))
+  
 }
 
 
@@ -207,14 +201,11 @@ stats[24,2:ncol(stats)] <- get_stats(parms)
 
 # Cost/death averted
 deaths_averted <- stats$deaths[1] - stats$deaths
-cost_diff_high <- stats$total_cost_high - stats$total_cost_high[1]
-cost_diff_low <- stats$total_cost_low - stats$total_cost_low[1]
-stats$cost_death_averted_high <- cost_diff_high/deaths_averted
-stats$cost_death_averted_low <- cost_diff_low/deaths_averted
+cost_diff <- stats$total_cost - stats$total_cost[1]
+stats$cost_death_averted <- cost_diff/deaths_averted
 
 # % ROI
-stats$ROI_high <- -100*cost_diff_high/stats$int_cost_high
-stats$ROI_low <- -100*cost_diff_low/stats$int_cost_low
+stats$ROI <- -100*cost_diff/stats$int_cost
 
 
 
@@ -223,134 +214,66 @@ stats$ROI_low <- -100*cost_diff_low/stats$int_cost_low
 # _______________________
 
 # Open figure
-tiff(filename="Figs/Costs.tiff",width=160,height=210,units="mm",pointsize=12,res=200)
-par(mar=c(3.28,2.7,0.3,1.7))
+tiff(filename="Figs/Costs.tiff",width=160,height=85,units="mm",pointsize=12,res=200)
+par(mar=c(1.8,1.7,0.4,1))
 
 
 
 #Plot 1: Total costs (high cost scenario)
 #-----------
 
-par(fig=c(0,1,0.7,1))
-yRange = c(0, max(stats$total_cost_high)/1000000)
-xRange = c(1, 11.5)
+par(fig=c(0,0.33,0.3,1))
+yRange = c(0, max(stats$total_cost)/1000000)
+xRange = c(1, 5)
 plot(NA,xlim=xRange,ylim=yRange,xlab="",ylab="",bty="l",axes=F)
-title(ylab="Total cost ($1,000,000)", line=1.6,cex.lab=0.9)
+title(ylab="Total cost ($1,000,000)", line=0.9,cex.lab=1)
 graphics::box(bty="l")
-axis(2,cex.axis=0.7,padj=1)
-axis(1,at=c(1:5,7:11+0.5),labels=rep(c("NI","L","L+Q","L+M","L+Q+M"),2),cex.axis=0.7,padj=-1)
-mtext("High cost scenario",side=1,adj=0.15,line=1.6,cex=0.9)
-mtext("Low cost scenario",side=1,adj=0.85,line=1.6,cex=0.9)
+axis(2,cex.axis=0.7,padj=1.9,tcl=-0.25)
+axis(1,at=c(1:5),labels=c("NI","L","L+Q","L+M","L+Q+M"),cex.axis=0.64,padj=-2,tcl=-0.25)
 
-points(x=c(1,rep(2,4),3,rep(4,9),rep(5,9),7.5,rep(8.5,4),9.5,rep(10.5,9),rep(11.5,9)),y=c(stats$total_cost_high,stats$total_cost_low)/1000000,
+points(x=c(1,rep(2,4),3,rep(4,9),rep(5,9)),y=c(stats$total_cost)/1000000,
        pch=c(16,1:4,1,rep(1:3,3),rep(1:3,3)),col=c(1,colorRampPalette(c(1,4,"white"))(6)[2:5],"red3",rep(c(rep("dodgerblue",3),rep("darkorange",3),rep(2,3)),2)))
 
-legend("topright","A",text.font=2,bty="n",cex=1)
-
-
-
-
-
-# #Plot 2: Total costs (low cost scenario)
-# #-----------
-# 
-# par(fig=c(0.5,1,0.7,1),new=T)
-# yRange = c(0, max(stats$total_cost_high)/1000000)
-# xRange = c(1, 5)
-# plot(NA,xlim=xRange,ylim=yRange,xlab="",ylab="",bty="l",axes=F)
-# title(ylab="Total cost ($1,000,000)", line=1.6)
-# graphics::box(bty="l")
-# axis(2,cex.axis=0.7,padj=1)
-# axis(1,at=1:5,labels=c("NI","L","L+Q","L+M","L+Q+M"),cex.axis=0.7,padj=-1)
-# 
-# points(x=c(1,rep(2,4),3,rep(4,9),rep(5,9)),y=stats$total_cost_low/1000000,
-#        pch=c(16,1:4,1,rep(1:3,3),rep(1:3,3)),col=c(1,rep("navy",4),2,rep(c(rep("navy",3),rep("darkorange",3),rep(2,3)),2)))
-# 
-# legend("topright","B",text.font=2,bty="n",cex=1)
-
+legend(xRange[2]-1,yRange[2]*1.09,"A",text.font=2,bty="n",cex=1)
 
 
 
 #Plot 2: Cost/death averted (high cost scenario)
 #-----------
 
-par(fig=c(0,1,0.4,0.7),new=T)
-yRange = c(min(c(stats$cost_death_averted_high[2:nrow(stats)],stats$cost_death_averted_low[2:nrow(stats)])), max(c(stats$cost_death_averted_high[2:nrow(stats)],stats$cost_death_averted_low[2:nrow(stats)])))/1000
-xRange = c(1, 9)
+par(fig=c(0.33,0.66,0.3,1),new=T)
+yRange = c(min(stats$cost_death_averted[2:nrow(stats)]), max(stats$cost_death_averted[2:nrow(stats)]))/1000
+xRange = c(1, 4)
 plot(NA,xlim=xRange,ylim=yRange,xlab="",ylab="",bty="l",axes=F)
-title(ylab="Cost/death averted ($1,000)", line=1.6,cex.lab=0.9)
+title(ylab="Cost/death averted ($1,000)", line=0.9,cex.lab=0.9)
 graphics::box(bty="l")
-axis(2,cex.axis=0.7,padj=1,cex=0.9)
-axis(1,at=c(1:4,6:9),labels=rep(c("L","L+Q","L+M","L+Q+M"),2),cex.axis=0.7,padj=-1)
-mtext("High cost scenario",side=1,adj=0.15,line=1.6,cex=0.9)
-mtext("Low cost scenario",side=1,adj=0.85,line=1.6,cex=0.9)
+axis(2,cex.axis=0.7,padj=1.9,tcl=-0.25)
+axis(1,at=c(1:4),labels=c("L","L+Q","L+M","L+Q+M"),cex.axis=0.64,padj=-2,tcl=-0.25)
 
-points(x=c(rep(1,4),2,rep(3,9),rep(4,9),rep(6,4),7,rep(8,9),rep(9,9)),y=c(stats$cost_death_averted_high[2:nrow(stats)],stats$cost_death_averted_low[2:nrow(stats)])/1000,
+points(x=c(rep(1,4),2,rep(3,9),rep(4,9)),y=c(stats$cost_death_averted[2:nrow(stats)])/1000,
        pch=c(1:4,1,rep(1:3,3),rep(1:3,3)),col=c(colorRampPalette(c(1,4,"white"))(6)[2:5],"red3",rep(c(rep("dodgerblue",3),rep("darkorange",3),rep(2,3)),2)))
 
-legend("topright","B",text.font=2,bty="n",cex=1)
-
-
-
-
-# #Plot 4: Cost/death averted (low cost scenario)
-# #-----------
-# 
-# par(fig=c(0.5,1,0.4,0.7),new=T)
-# yRange = c(min(stats$cost_death_averted_low[2:nrow(stats)]), max(stats$cost_death_averted_high[2:nrow(stats)]))
-# xRange = c(1, 5)
-# plot(NA,xlim=xRange,ylim=yRange,xlab="",ylab="",bty="l",axes=F)
-# title(ylab="Cost/death averted", line=1.6)
-# graphics::box(bty="l")
-# axis(2,cex.axis=0.7,padj=1)
-# axis(1,at=1:4,labels=c("L","L+Q","L+M","L+Q+M"),cex.axis=0.7,padj=-1)
-# 
-# points(x=c(rep(2,4),3,rep(4,9),rep(5,9)),y=(stats$cost_death_averted_low[2:nrow(stats)]),
-#        pch=c(16,1:4,1,rep(1:3,3),rep(1:3,3)),col=c(1,rep("navy",4),2,rep(c(rep("navy",3),rep("darkorange",3),rep(2,3)),2)))
-# 
-# legend("topright","D",text.font=2,bty="n",cex=1)
-
+legend(xRange[2]-0.8,yRange[2]*1.11,"B",text.font=2,bty="n",cex=1)
 
 
 
 #Plot 3: % Return on investment
 #-----------
 
-par(fig=c(0,1,0.1,0.4),new=T)
-yRange = c(min(c(stats$ROI_high[2:nrow(stats)],stats$ROI_low[2:nrow(stats)])), max(c(stats$ROI_high[2:nrow(stats)],stats$ROI_low[2:nrow(stats)])))
-xRange = c(1, 9)
+par(fig=c(0.66,1,0.3,1),new=T)
+yRange = c(min(stats$ROI[2:nrow(stats)]), max(stats$ROI[2:nrow(stats)]))
+xRange = c(1, 4)
 plot(NA,xlim=xRange,ylim=yRange,xlab="",ylab="",bty="l",axes=F)
-title(ylab="% Return on investment", line=1.6,cex.lab=0.9)
+title(ylab="% Return on investment", line=0.9,cex.lab=0.9)
 graphics::box(bty="l")
-axis(2,cex.axis=0.7,padj=1,at=c(0,10000,20000))
-axis(1,at=c(1:4,6:9),labels=rep(c("L","L+Q","L+M","L+Q+M"),2),cex.axis=0.7,padj=-1)
-mtext("High cost scenario",side=1,adj=0.15,line=1.6,cex=0.9)
-mtext("Low cost scenario",side=1,adj=0.85,line=1.6,cex=0.9)
+axis(2,cex.axis=0.7,padj=1.9,at=c(0,5000,10000,15000),tcl=-0.25)
+axis(1,at=c(1:4),labels=c("L","L+Q","L+M","L+Q+M"),cex.axis=0.64,padj=-2,tcl=-0.25)
 
-points(x=c(rep(1,4),2,rep(3,9),rep(4,9),rep(6,4),7,rep(8,9),rep(9,9)),y=c(stats$ROI_high[2:nrow(stats)],stats$ROI_low[2:nrow(stats)]),
+points(x=c(rep(1,4),2,rep(3,9),rep(4,9)),y=stats$ROI[2:nrow(stats)],
        pch=c(1:4,1,rep(1:3,3),rep(1:3,3)),col=c(colorRampPalette(c(1,4,"white"))(6)[2:5],"red3",rep(c(rep("dodgerblue",3),rep("darkorange",3),rep(2,3)),2)))
 
-legend("topright","C",text.font=2,bty="n",cex=1)
+legend(xRange[2]-0.8,yRange[2]*1.1,"C",text.font=2,bty="n",cex=1)
 
-
-
-
-# #Plot 6: Cost (low)
-# #-----------
-# 
-# par(fig=c(0.5,1,0.1,0.4),new=T)
-# yRange = c(0, max(stats$cost_low)/1000000)
-# xRange = c(1, 5)
-# plot(NA,xlim=xRange,ylim=yRange,xlab="",ylab="",bty="l",axes=F)
-# title(ylab="Cost ($1,000,000)", line=1.6)
-# graphics::box(bty="l")
-# axis(2,cex.axis=0.7,padj=1)
-# axis(1,at=1:5,labels=c("NI","L","L+Q","L+M","L+Q+M"),cex.axis=0.7,padj=-1)
-# 
-# points(x=c(1,rep(2,4),3,rep(4,9),rep(5,9)),y=(stats$cost_low)/1000000,
-#        pch=c(16,1:4,1,rep(1:3,3),rep(1:3,3)),col=c(1,rep("navy",4),2,rep(c(rep("navy",3),rep("darkorange",3),rep(2,3)),2)))
-# 
-# legend("topright","F",text.font=2,bty="n",cex=1)
 
 
 
@@ -358,18 +281,18 @@ legend("topright","C",text.font=2,bty="n",cex=1)
 # Legends
 #-------------
 
-par(fig=c(0,1,0,0.1),new=T)
+par(fig=c(0,1,0,0.3),new=T)
 par(mar=c(0,0,0,0))
 plot(NA,axes=F,xlab="",ylab="",xlim=c(0,1),ylim=c(0,1))
 
 
-legend(0.18,1.08,
+legend(0.18,1.06,
        legend=c("as implemented","+1month","+2months","+3months"),
        col=colorRampPalette(c(1,4,"white"))(6)[2:5],pch=1:4,bty="n",title="Lockdown options (L)",title.adj = 0,cex=0.8,pt.cex = 1)
-legend(0.45,1.08,
+legend(0.45,1.06,
        legend=as.expression(lapply(c(0.2,0.5,0.8), function(d) {bquote(italic(epsilon^m)==.(d))} )),
        col=c("dodgerblue","darkorange",2),lty=1,bty="n",title="Mask options (L+M/L+Q+M)",title.adj = 5,cex=0.8,pt.cex = 1)
-legend(0.72,1.08,
+legend(0.72,1.06,
        legend=as.expression(lapply(c(0,0.5,1), function(d) {bquote(italic(rho^m)==.(d))} )),
        pch=1:3,bty="n",xjust=0,title=" ",cex=0.8,pt.cex = 1)
 
