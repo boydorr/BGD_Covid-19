@@ -8,7 +8,6 @@ source("R/covid_model.R")
 source("R/worker_days_lost.R")
 source("R/amalgamate_cats.R")
 source("R/calc_fractions.R")
-source("R/Costs.R")
 
 
 ## Parameter ranges
@@ -42,8 +41,6 @@ stats <- data.frame(scenarios=scenarios,
                     cases=NA,
                     hosp=NA,
                     wdl=NA,
-                    # cost=NA,
-                    # CE=NA,
                     excess_beds=NA)
 
 
@@ -195,21 +192,6 @@ parms["f_mask_effect_inward"] <- 1
 stats[24,2:ncol(stats)] <- get_stats(parms)
 
 
-
-# # Costs for this scenario
-# s_costs = costs(out, bed_cost = 200, CST_cost = 100, mask_cost = 1)
-# 
-# 
-# m = 1000000
-# # Status quo
-# sq_costs$deaths; sq_costs$hospital/m
-# 
-# s1_costs$deaths
-# s1_deaths_averted = sq_costs$deaths-s1_costs$deaths; s1_deaths_averted
-# s1_costs$hospital/m
-# s1_comp_cost = s1_costs$hospital + s1_costs$CST; s1_comp_cost/m
-# CE(s1_deaths_averted, s1_comp_cost-sq_costs$hospital)
-# 
 
 
 

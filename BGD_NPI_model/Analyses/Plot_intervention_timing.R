@@ -8,7 +8,6 @@ source("R/covid_model.R")
 source("R/worker_days_lost.R")
 source("R/amalgamate_cats.R")
 source("R/calc_fractions.R")
-source("R/Costs.R")
 
 
 ## Parameter ranges
@@ -44,8 +43,6 @@ stats_sd <- rep(list(data.frame(value=values_sd,
                                 cases=NA,
                                 hosp=NA,
                                 wdl=NA,
-                                # cost=NA,
-                                # CE=NA,
                                 excess_beds=NA)),
                 length(scenarios))
 stats_improve <- rep(list(data.frame(value=values_improve,
@@ -53,8 +50,6 @@ stats_improve <- rep(list(data.frame(value=values_improve,
                                      cases=NA,
                                      hosp=NA,
                                      wdl=NA,
-                                     # cost=NA,
-                                     # CE=NA,
                                      excess_beds=NA)),
                      length(scenarios))
 names(stats_sd)<-scenarios
