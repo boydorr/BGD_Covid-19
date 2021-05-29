@@ -1,7 +1,5 @@
 rm(list=ls())
 
-set.seed(0)
-
 require(deSolve)
 require(data.table)
 require(lubridate)
@@ -10,7 +8,6 @@ source("R/covid_model.R")
 source("R/amalgamate_cats.R")
 source("R/calc_fractions.R")
 source("R/bangladesh_covid_data.R")
-source("R/duration_household_infectious.R")
 
 ## Proportion cases in Dhaka (from the dashboard)
 district_cases <- read.csv("data/district_cases_dashboard_19.11.csv")
@@ -18,7 +15,7 @@ propDhaka <- district_cases$X.[which(district_cases$Distirct=="Dhaka")]/sum(dist
 
 
 
-## Load in baseline parameters and adjust as needed
+## Load in baseline parameters and initial conditions and adjust as needed
 #______________________
 
 ## Load in baseline parameters
@@ -33,18 +30,89 @@ dates <- as.Date(start_date:end_date,origin=as.Date("1970-01-01"))
 times <- seq(0, as.numeric(end_date-start_date), 1)
 times_model <- c(as.numeric(intro_date-start_date):as.numeric(end_date-start_date))
 
+# Initial conditions
+source("R/initial_conds.R")
+
+
+
+
+## Tune R0
+#_______________________
+
+tune_R0 <- function(par,model_parms,y,times,bangladesh,end_date,start_date,dates){
+        
+        # Adjust transmission rates for R0
+        print(par)
+        parms <- model_parms
+        parms["R0"] <- par
+        parms["beta_s"] <- parms["R0"]/(parms["fa"]*(parms["asympTrans"]*(parms["propPresympTrans"]/(1-parms["propPresympTrans"]) + 1))*parms["dur_s"] + 
+                                                (1-parms["fa"])*((parms["propPresympTrans"]/(1-parms["propPresympTrans"]))*parms["dur_s"] + 
+                                                                         parms["dur_s"]))
+        parms["beta_p"] <- ((parms["propPresympTrans"]/(1-parms["propPresympTrans"]))*parms["beta_s"]*parms["dur_s"])/parms["dur_p"]
+        parms["beta_a"] <- ((parms["asympTrans"]*(parms["propPresympTrans"]/(1-parms["propPresympTrans"]) + 1))*parms["beta_s"]*parms["dur_s"])/parms["dur_a"]
+        
+        # Run model 
+        preIntro <- data.frame(time=0:(min(times_model)-1))
+        preIntro <- cbind(preIntro, matrix(0, ncol=length(y), nrow=nrow(preIntro), dimnames = list(NULL,names(y))))
+        preIntro$S_n<-parms_baseline["population"]
+        out <- amalgamate_cats(rbind(preIntro,as.data.frame(lsoda(y, times_model, covid_model, parms=parms)))) 
+        
+        # Difference between cumulative deaths from data and model at end date
+        return(abs(out$D[which(dates==as.Date("2020-03-26"))]-bangladesh$cumulative_death[which(bangladesh$date==as.Date("2020-03-26"))]*propDhaka))
+}
+
+# Optimise
+opt <- optim(par=3,fn=tune_R0,model_parms=parms_baseline,y=y,times=times,method="Brent",
+             bangladesh=bangladesh,lower=0,upper=30,
+             end_date=end_date,start_date=start_date,dates=dates)
+
+opt$par
+opt$value
+opt$convergence
 
 # Select R0
-parms_baseline["R0"]<-3.57 # target R0
+parms_baseline["R0"] <- round(opt$par,2)
 parms_baseline["beta_s"] <- parms_baseline["R0"]/(parms_baseline["fa"]*(parms_baseline["asympTrans"]*(parms_baseline["propPresympTrans"]/(1-parms_baseline["propPresympTrans"]) + 1))*parms_baseline["dur_s"] + 
-                                        (1-parms_baseline["fa"])*((parms_baseline["propPresympTrans"]/(1-parms_baseline["propPresympTrans"]))*parms_baseline["dur_s"] + 
-                                                                          parms_baseline["dur_s"]))
+                                                          (1-parms_baseline["fa"])*((parms_baseline["propPresympTrans"]/(1-parms_baseline["propPresympTrans"]))*parms_baseline["dur_s"] + 
+                                                                                            parms_baseline["dur_s"]))
 parms_baseline["beta_p"] <- ((parms_baseline["propPresympTrans"]/(1-parms_baseline["propPresympTrans"]))*parms_baseline["beta_s"]*parms_baseline["dur_s"])/parms_baseline["dur_p"]
 parms_baseline["beta_a"] <- ((parms_baseline["asympTrans"]*(parms_baseline["propPresympTrans"]/(1-parms_baseline["propPresympTrans"]) + 1))*parms_baseline["beta_s"]*parms_baseline["dur_s"])/parms_baseline["dur_a"]
 
 
+
+
+
+## Tune lockdown effect
+#_______________________
+
+tune_ld_effect <- function(par,model_parms,y,times,bangladesh,end_date,start_date,dates){
+        
+        # Adjust transmission rates for R0
+        parms <- model_parms
+        parms["ld_effect"] <- par
+        
+        # Run model 
+        preIntro <- data.frame(time=0:(min(times_model)-1))
+        preIntro <- cbind(preIntro, matrix(0, ncol=length(y), nrow=nrow(preIntro), dimnames = list(NULL,names(y))))
+        preIntro$S_n<-parms_baseline["population"]
+        out <- amalgamate_cats(rbind(preIntro,as.data.frame(lsoda(y, times_model, covid_model, parms=parms)))) 
+        
+        # Difference between cumulative deaths from data and model at end date
+        return(abs(out$D[which(dates==as.Date("2020-06-01"))]-bangladesh$cumulative_death[which(bangladesh$date==as.Date("2020-06-01"))]*propDhaka))
+}
+
+# Optimise
+opt <- optim(par=0.5,fn=tune_ld_effect,model_parms=parms_baseline,y=y,times=times,method="Brent",
+             bangladesh=bangladesh,lower=0,upper=1,
+             end_date=end_date,start_date=start_date,dates=dates)
+
+opt$par
+opt$value
+opt$convergence
+
+
 # Select ld_effect
-parms_baseline["ld_effect"] <- 0.97
+parms_baseline["ld_effect"] <- round(opt$par,2)
 
 
 
@@ -53,20 +121,10 @@ parms_baseline["ld_effect"] <- 0.97
 ## Run model
 #______________________
 
-# Initial conditions
-source("R/initial_conds.R")
-
-# Run model 
 preIntro <- data.frame(time=0:(min(times_model)-1))
 preIntro <- cbind(preIntro, matrix(0, ncol=length(y), nrow=nrow(preIntro), dimnames = list(NULL,names(y))))
 preIntro$S_n<-parms_baseline["population"]
-out <- amalgamate_cats(rbind(preIntro,as.data.frame(lsoda(y, times_model, covid_model, parms=parms_baseline)))) 
-
-# Check by plotting
-# par(mfrow=c(3,3))
-# for(i in 2:40){
-#         plot(out$time, out[,i], col="navy", type = "l",lwd=2, xlab = "Days", ylab = names(out)[i])
-# }
+out <- amalgamate_cats(rbind(preIntro,as.data.frame(lsoda(y, times_model, covid_model, parms=parms)))) 
 
 # Check difference between data and model at beginning of lockdown
 out$D[which(dates==as.Date("2020-03-26"))]-bangladesh$cumulative_death[which(bangladesh$date==as.Date("2020-03-26"))]*propDhaka
@@ -255,3 +313,4 @@ legend("topright","D",text.font=2,box.col = "white")
 
 # Close figure
 dev.off()
+
