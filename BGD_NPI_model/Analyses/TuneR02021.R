@@ -44,10 +44,12 @@ parms_baseline["ld_improve"] <- 9
 parms_baseline["fNC"]<-0.2
 parms_baseline["mask"]<-1
 parms_baseline["mask_start"]<-as.Date("2021-04-05")-start_date; parms_baseline["mask_end"]<- as.Date("2021-06-01")-start_date
+parms_baseline["mask_improve"] <- 9
 parms_baseline["mask_compliance"]<-0.3
 parms_baseline["syndromic"]<-1
 parms_baseline["syn_start"]<-as.Date("2021-04-05")-start_date; parms_baseline["syn_end"]<- as.Date("2021-06-01")-start_date
 parms_baseline["community"]<-0.3
+parms_baseline["syn_improve"] <- 9
 
 ## Initial conditions function
 inits <- function(parms,infectious,immune){
@@ -197,7 +199,7 @@ for(i in 1:nrow(R_ests)){
         
         # Optimise
         opt <- optim(par=sqrt(3),fn=tune_peak,model_parms=parms_baseline,y=y,times=times,method="SANN",
-                     infectious=infectious,immune=immune,BGD=BGD,control=list(maxit=1000,trace=1,REPORT=20),
+                     infectious=infectious,immune=immune,BGD=BGD,control=list(maxit=400,trace=1,REPORT=20),
                      end_date=end_date,start_date=start_date,dates=dates)
 
         # Run with optimised value
@@ -307,7 +309,7 @@ axis(2,cex.axis=0.8)
 date_ticks <- as.numeric(seq(start_date,end_date,by="month") - start_date)
 date_labels <- paste(month.abb[month(seq(start_date,end_date,by="month"))], (year(seq(start_date,end_date,by="month")))-2000,sep="")
 axis(1,at=date_ticks,labels=date_labels,cex.axis=0.8)
-legend("topleft", c(immunity_vec,"data"),title="Initial immune",bty="n",
+legend("topleft", c(immunity_vec,"data"),title="Initial proportion immune",bty="n",
        lty=c(2:5,1), lwd=c(rep(1,length(immunity_vec)),2),cex=0.9)
 
 
@@ -545,7 +547,7 @@ title(xlab="Date", line=2,cex.lab=1.2)
 axis(2,cex.axis=0.9,padj=0.8)
 axis(1,at=date_ticks,labels=date_labels,cex.axis=0.9,padj=-0.8)
 
-legend("topleft", c(round(infectious_vec[1:(length(infectious_vec)-1)]),"data"),title="Initial infectious",
+legend("topleft", c(round(infectious_vec[1:(length(infectious_vec)-1)]),"data"),title="Initial infectious:",
        col=c("red","orange","blue2","black"), lwd=c(rep(1,length(infectious_vec)-1),2),cex=1,bty="n")
 
 for(i in 1:nrow(R_ests_sub)){
@@ -585,7 +587,7 @@ title(ylab="Cumulative deaths", line=2,cex.lab=1.2)
 title(xlab="Date", line=2,cex.lab=1.2)
 axis(2,cex.axis=0.9,padj=0.8)
 axis(1,at=date_ticks,labels=date_labels,cex.axis=0.9,padj=-0.8)
-legend("topleft", c(immunity_vec[1:(length(immunity_vec)-1)],"data"),title="Initial immune",bty="n",
+legend("topleft", c(immunity_vec[1:(length(immunity_vec)-1)],"data"),title="Initial immune:",bty="n",
        lty=c(2:4,1), lwd=c(rep(1,length(immunity_vec)-1),2),cex=1)
 
 
@@ -627,7 +629,7 @@ dates <- as.Date(start_date:end_date,origin=as.Date("1970-01-01"))
 times <- seq(0, as.numeric(end_date-start_date), 1)
 xRange = c(0, end_date-start_date-1)
 ind <- which((BGD$date-start_date)<=xRange[2] & (BGD$date-start_date)>=xRange[1])
-yRange = c(0, max(BGD$dhaka_deaths_2021[ind])*11.2)
+yRange = c(0, max(BGD$dhaka_deaths_2021[ind])*11.4)
 plot((BGD$date-start_date)[ind], BGD$dhaka_deaths_2021[ind],
      col=1, type = "l", lty=2, ylim=yRange, xlim=xRange, ylab="",bty="l",axes=F,lwd=1,xlab="")
 graphics::box(bty="l")
@@ -668,7 +670,7 @@ dates <- as.Date(start_date:end_date,origin=as.Date("1970-01-01"))
 times <- seq(0, as.numeric(end_date-start_date), 1)
 xRange = c(0, end_date-start_date-1)
 ind <- which((BGD$date-start_date)<=xRange[2] & (BGD$date-start_date)>=xRange[1])
-yRange = c(0, max(BGD$dhaka_deaths_2021[ind])*11.2)
+yRange = c(0, max(BGD$dhaka_deaths_2021[ind])*11.4)
 plot((BGD$date-start_date)[ind], BGD$dhaka_deaths_2021[ind],
      col=1, type = "l", lty=2, ylim=yRange, xlim=xRange, ylab="",bty="l",axes=F,lwd=1,xlab="")
 graphics::box(bty="l")
