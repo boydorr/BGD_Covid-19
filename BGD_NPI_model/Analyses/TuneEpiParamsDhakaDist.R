@@ -42,7 +42,6 @@ source("R/initial_conds.R")
 tune_R0 <- function(par,model_parms,y,times,bangladesh,end_date,start_date,dates){
         
         # Adjust transmission rates for R0
-        print(par)
         parms <- model_parms
         parms["R0"] <- par
         parms["beta_s"] <- parms["R0"]/(parms["fa"]*(parms["asympTrans"]*(parms["propPresympTrans"]/(1-parms["propPresympTrans"]) + 1))*parms["dur_s"] + 
@@ -57,8 +56,14 @@ tune_R0 <- function(par,model_parms,y,times,bangladesh,end_date,start_date,dates
         preIntro$S_n<-parms_baseline["population"]
         out <- amalgamate_cats(rbind(preIntro,as.data.frame(lsoda(y, times_model, covid_model, parms=parms)))) 
         
-        # Difference between cumulative deaths from data and model at end date
-        return(abs(out$D[which(dates==as.Date("2020-03-26"))]-bangladesh$cumulative_death[which(bangladesh$date==as.Date("2020-03-26"))]*propDhaka))
+        # Difference between cumulative deaths from data and model
+        modelled <- out$D[which(dates<=as.Date("2020-03-26") & dates%in%bangladesh$date)]
+        data <- bangladesh$cumulative_death[which(bangladesh$date<=as.Date("2020-03-26"))]*propDhaka
+        return(sum((modelled-data)^2))
+        
+        
+        # # Difference between cumulative deaths from data and model at end date
+        # return(abs(out$D[which(dates==as.Date("2020-03-26"))]-bangladesh$cumulative_death[which(bangladesh$date==as.Date("2020-03-26"))]*propDhaka))
 }
 
 # Optimise
@@ -97,8 +102,14 @@ tune_ld_effect <- function(par,model_parms,y,times,bangladesh,end_date,start_dat
         preIntro$S_n<-parms_baseline["population"]
         out <- amalgamate_cats(rbind(preIntro,as.data.frame(lsoda(y, times_model, covid_model, parms=parms)))) 
         
-        # Difference between cumulative deaths from data and model at end date
-        return(abs(out$D[which(dates==as.Date("2020-06-01"))]-bangladesh$cumulative_death[which(bangladesh$date==as.Date("2020-06-01"))]*propDhaka))
+        # Difference between cumulative deaths from data and model
+        modelled <- out$D[which(dates<=as.Date("2020-06-01") & dates>=as.Date("2020-03-26") & dates%in%bangladesh$date)]
+        data <- bangladesh$cumulative_death[which(bangladesh$date<=as.Date("2020-06-01") & bangladesh$date>=as.Date("2020-03-26"))]*propDhaka
+        return(sum((modelled-data)^2))
+        
+        
+        # # Difference between cumulative deaths from data and model at end date
+        # return(abs(out$D[which(dates==as.Date("2020-06-01"))]-bangladesh$cumulative_death[which(bangladesh$date==as.Date("2020-06-01"))]*propDhaka))
 }
 
 # Optimise
@@ -124,7 +135,7 @@ parms_baseline["ld_effect"] <- round(opt$par,2)
 preIntro <- data.frame(time=0:(min(times_model)-1))
 preIntro <- cbind(preIntro, matrix(0, ncol=length(y), nrow=nrow(preIntro), dimnames = list(NULL,names(y))))
 preIntro$S_n<-parms_baseline["population"]
-out <- amalgamate_cats(rbind(preIntro,as.data.frame(lsoda(y, times_model, covid_model, parms=parms)))) 
+out <- amalgamate_cats(rbind(preIntro,as.data.frame(lsoda(y, times_model, covid_model, parms=parms_baseline)))) 
 
 # Check difference between data and model at beginning of lockdown
 out$D[which(dates==as.Date("2020-03-26"))]-bangladesh$cumulative_death[which(bangladesh$date==as.Date("2020-03-26"))]*propDhaka
@@ -135,7 +146,7 @@ out$D[which(dates==as.Date("2020-06-01"))]-bangladesh$cumulative_death[which(ban
 # Modelled and data cases at the end of lockdown
 modelled_cases <- out$CumCases[which(dates==as.Date("2020-06-01"))]
 data_cases <- bangladesh$cumulative_cases[which(bangladesh$date==as.Date("2020-06-01"))]*propDhaka
-data_cases/modelled_cases
+data_cases/modelled_cases # 0.05728463
 
 
 
@@ -143,7 +154,7 @@ data_cases/modelled_cases
 #______________________
 
 # Open figure
-tiff(filename="Figs/ModelTuning.tiff",width=160,height=150,units="mm",pointsize=12,res=200)
+tiff(filename="Figs/ModelTuning.tiff",width=160,height=150,units="mm",pointsize=12,res=300)
 par(mfrow=c(2,2))
 par(mar=c(3,2.7,1,1.7))
 
@@ -199,7 +210,7 @@ legend("topright","A",text.font=2,box.col = "white")
 
 # Compare with data to end of lockdown
 # yRange = c(0, max(diff(out$CumCases)))
-yRange = c(0, 320)
+yRange = c(0, 480)
 xRange = c(60, end_date-start_date)
 plot((bangladesh$date-start_date)[which((bangladesh$date-start_date)<=xRange[2])], bangladesh$cumulative_death[which((bangladesh$date-start_date)<=xRange[2])]*propDhaka, col=1, type = "l", lwd=1, lty=2,
      ylim=yRange, xlim=xRange, ylab="",bty="l",axes=F,xlab="")
@@ -238,14 +249,14 @@ legend("topright","B",text.font=2,box.col = "white")
 #-----------
 
 # yRange = c(0, max(diff(out$CumCases)))
-yRange = c(0, 300000)
+yRange = c(0, 480000)
 xRange = c(60, end_date-start_date)
 plot((bangladesh$date-start_date)[which((bangladesh$date-start_date)<=xRange[2])], bangladesh$cumulative_cases[which((bangladesh$date-start_date)<=xRange[2])]*propDhaka, col=1, type = "l", lwd=1, lty=2,
      ylim=yRange, xlim=xRange, ylab="",bty="l",axes=F,xlab="")
 title(ylab="Count", line=1.6)
 title(xlab="Date", line=1.6)
 graphics::box(bty="l")
-axis(2,cex.axis=0.8,padj=0.5,at=c(0,100000,200000,300000),labels=c(0,expression("1x10"^5),expression("2x10"^5),expression("3x10"^5)))
+axis(2,cex.axis=0.8,padj=0.5,at=c(0,100000,200000,300000,400000),labels=c(0,expression("1x10"^5),expression("2x10"^5),expression("3x10"^5),expression("4x10"^5)))
 axis(1,at=date_ticks,labels=date_labels,cex.axis=0.8,padj=-1)
 
 lines(out$time, out$CumCases, col=1, lwd=1)
@@ -284,18 +295,21 @@ date_labels <- date_labels[seq(1,length(date_labels),2)]
 compliance_t<-rep(0,as.Date("2021-01-01")-start_date)
 for(t in parms_baseline["ld_start"]:(as.Date("2021-01-01")-start_date-1)){
 
-        # what proportion of the way through the improvement stage are we?
-        if(parms_baseline["ld_improve"]>0){ld_improve_stage <- min(1,(t-parms_baseline["ld_start"])/parms_baseline["ld_improve"])
-        }else if(ld_improve==0){ld_improve_stage <- 1} # implement max effect straight away
-
-        # what is the current level of non-compliance?
-        # compliance increases during the improvement stage and then decreases
-        compliance_t[t] <-1- min(1,parms_baseline["fNC"] +
-                             (1-ld_improve_stage)*(1-parms_baseline["fNC"]) +
-                             ifelse(ld_improve_stage<1,0,1-parms_baseline["fNC"]-(exp(-parms_baseline["ld_decline"]*(t-parms_baseline["ld_start"]-parms_baseline["ld_improve"]))*(1-parms_baseline["fNC"]-parms_baseline["ld_min_compliance"])+parms_baseline["ld_min_compliance"])))
+        ld_sigmoid_max <- ((1-parms_baseline["fNC"])-parms_baseline["ld_min_compliance"])*(1+exp((-parms_baseline["ld_sigmoid_mid"])*parms_baseline["ld_decline"])) + parms_baseline["ld_min_compliance"]
+        compliance_t[t] <-(ld_sigmoid_max-parms_baseline["ld_min_compliance"])/(1+exp((t-parms_baseline["ld_start"]-parms_baseline["ld_sigmoid_mid"])*parms_baseline["ld_decline"])) + parms_baseline["ld_min_compliance"]
+        
+        # # what proportion of the way through the improvement stage are we?
+        # if(parms_baseline["ld_improve"]>0){ld_improve_stage <- min(1,(t-parms_baseline["ld_start"])/parms_baseline["ld_improve"])
+        # }else if(ld_improve==0){ld_improve_stage <- 1} # implement max effect straight away
+        # 
+        # # what is the current level of compliance?
+        # # compliance increases during the improvement stage and then decreases
+        # compliance_t[t] <-1- min(1,parms_baseline["fNC"] +
+        #                      (1-ld_improve_stage)*(1-parms_baseline["fNC"]) +
+        #                      ifelse(ld_improve_stage<1,0,1-parms_baseline["fNC"]-(exp(-parms_baseline["ld_decline"]*(t-parms_baseline["ld_start"]-parms_baseline["ld_improve"]))*(1-parms_baseline["fNC"]-parms_baseline["ld_min_compliance"])+parms_baseline["ld_min_compliance"])))
 
 }
-plot(compliance_t*100,ylim=c(0,100),
+plot(compliance_t*100,ylim=c(0,110),
      ylab="", xlab="",
      type="l",bty="l",col=1,lwd=1,axes=F,lty=2)
 title(ylab="% population compliant with lockdown", line=1.6)
@@ -306,7 +320,7 @@ lines(compliance_t_short*100,lwd=1)
 box(bty="l")
 axis(1,at=date_ticks,labels=date_labels,cex.axis=0.8,padj=-1)
 axis(2,cex.axis=0.8,padj=1)
-legend(0,100*1.04,
+legend(0,110*1.04,
        c("Implemented lockdown end date","Extended lockdown"),lty=1:2,bty="n",cex=0.8)
 legend("topright","D",text.font=2,box.col = "white")
 

@@ -199,7 +199,7 @@ stats[24,2:ncol(stats)] <- get_stats(parms)
 # _______________________
 
 # Open figure
-tiff(filename="Figs/Intervention_outcomes.tiff",width=160,height=170,units="mm",pointsize=12,res=250)
+tiff(filename="Figs/Intervention_outcomes.tiff",width=160,height=160,units="mm",pointsize=12,res=350)
 par(mar=c(3,2.7,0.8,1.7))
 
 
@@ -207,19 +207,26 @@ par(mar=c(3,2.7,0.8,1.7))
 #Plot 1: deaths
 #-----------
 
-par(fig=c(0,0.5,0.575,1))
+par(fig=c(0,0.5,0.5,1))
 yRange = c(0, max(stats$deaths)/1000)
-xRange = c(1, 5)
+xRange = c(0.9, 5.1)
 plot(NA,xlim=xRange,ylim=yRange,xlab="",ylab="",bty="l",axes=F)
 title(ylab="Deaths (thousands)", line=1.6)
 graphics::box(bty="l")
 axis(2,cex.axis=0.7,padj=1)
 axis(1,at=1:5,labels=c("NI","L","L+Q","L+M","L+Q+M"),cex.axis=0.7,padj=-1)
 
-points(x=c(1,rep(2,4),3,rep(4,9),rep(5,9)),y=stats$deaths/1000,lwd=1.5,
-       pch=c(16,1:4,1,rep(1:3,3),rep(1:3,3)),col=c(1,colorRampPalette(c(1,4,"white"))(6)[2:5],"red3",rep(c(rep("dodgerblue",3),rep("darkorange",3),rep(2,3)),2)))
+points(x=c(1,3),y=stats$deaths[c(1,6)]/1000,lwd=1.5,cex=0.8,
+       pch=c(16,16),col=1)
+arrows(c(2,rep(4,3)+c(-0.15,0,0.15),rep(5,3)+c(-0.15,0,0.15)), stats$deaths[c(2,7,10,13,16,19,22)]/1000, 
+       c(2,rep(4,3)+c(-0.15,0,0.15),rep(5,3)+c(-0.15,0,0.15)), stats$deaths[c(5,9,12,15,18,21,24)]/1000, 
+       length=0.03, angle=90, code=3,col=c(1,rep(c("dodgerblue","darkorange","red"),2)))
 
 legend("topright","A",text.font=2,bty="n",cex=1)
+legend(0.8,16,
+       legend=as.expression(mapply(function(c,d) {bquote(.(c)~ (italic(epsilon^m)==.(d)))},c("low","medium","high"),c(0.2,0.5,0.8) )),
+       col=c("dodgerblue","darkorange",2),lty=1,bty="n",title="Mask (M) filtration efficiency:",
+       cex=0.75,lwd=1.5,pt.cex = 1)
 
 
 
@@ -228,17 +235,23 @@ legend("topright","A",text.font=2,bty="n",cex=1)
 #Plot 2: Hospitalisations
 #-----------
 
-par(fig=c(0.5,1,0.575,1),new=T)
+par(fig=c(0.5,1,0.5,1),new=T)
 yRange = c(0, max(stats$hosp)/1000)
-xRange = c(1, 5)
+xRange = c(0.9, 5.1)
 plot(NA,xlim=xRange,ylim=yRange,xlab="",ylab="",bty="l",axes=F)
 title(ylab="Hospitalisations (thousands)", line=1.6)
 graphics::box(bty="l")
 axis(2,cex.axis=0.7,padj=1)
 axis(1,at=1:5,labels=c("NI","L","L+Q","L+M","L+Q+M"),cex.axis=0.7,padj=-1)
 
-points(x=c(1,rep(2,4),3,rep(4,9),rep(5,9)),y=stats$hosp/1000,lwd=1.5,
-       pch=c(16,1:4,1,rep(1:3,3),rep(1:3,3)),col=c(1,colorRampPalette(c(1,4,"white"))(6)[2:5],"red3",rep(c(rep("dodgerblue",3),rep("darkorange",3),rep(2,3)),2)))
+# points(x=c(1,rep(2,4),3,rep(4,9),rep(5,9)),y=stats$hosp/1000,lwd=1.5,
+#        pch=c(16,1:4,1,rep(1:3,3),rep(1:3,3)),col=c(1,colorRampPalette(c(1,4,"white"))(6)[2:5],"red3",rep(c(rep("dodgerblue",3),rep("darkorange",3),rep(2,3)),2)))
+
+points(x=c(1,3),y=stats$hosp[c(1,6)]/1000,lwd=1.5,cex=0.8,
+       pch=c(16,16),col=1)
+arrows(c(2,rep(4,3)+c(-0.15,0,0.15),rep(5,3)+c(-0.15,0,0.15)), stats$hosp[c(2,7,10,13,16,19,22)]/1000, 
+       c(2,rep(4,3)+c(-0.15,0,0.15),rep(5,3)+c(-0.15,0,0.15)), stats$hosp[c(5,9,12,15,18,21,24)]/1000, 
+       length=0.03, angle=90, code=3,col=c(1,rep(c("dodgerblue","darkorange","red"),2)))
 
 legend("topright","B",text.font=2,bty="n",cex=1)
 
@@ -248,17 +261,24 @@ legend("topright","B",text.font=2,bty="n",cex=1)
 #Plot 3: Working days lost
 #-----------
 
-par(fig=c(0,0.5,0.15,0.575),new=T)
+par(fig=c(0,0.5,0,0.5),new=T)
 yRange = c(0, max(stats$wdl)*100)
-xRange = c(1, 5)
+xRange = c(0.9, 5.1)
 plot(NA,xlim=xRange,ylim=yRange,xlab="",ylab="",bty="l",axes=F)
 title(ylab="% working days lost", line=1.6)
 graphics::box(bty="l")
 axis(2,cex.axis=0.7,padj=1)
 axis(1,at=1:5,labels=c("NI","L","L+Q","L+M","L+Q+M"),cex.axis=0.7,padj=-1)
 
-points(x=c(1,rep(2,4),3,rep(4,9),rep(5,9)),y=(stats$wdl)*100,lwd=1.5,
-       pch=c(16,1:4,1,rep(1:3,3),rep(1:3,3)),col=c(1,colorRampPalette(c(1,4,"white"))(6)[2:5],"red3",rep(c(rep("dodgerblue",3),rep("darkorange",3),rep(2,3)),2)))
+# points(x=c(1,rep(2,4),3,rep(4,9),rep(5,9)),y=(stats$wdl)*100,lwd=1.5,
+#        pch=c(16,1:4,1,rep(1:3,3),rep(1:3,3)),col=c(1,colorRampPalette(c(1,4,"white"))(6)[2:5],"red3",rep(c(rep("dodgerblue",3),rep("darkorange",3),rep(2,3)),2)))
+
+points(x=c(1,3),y=stats$wdl[c(1,6)]*100,lwd=1.5,cex=0.8,
+       pch=c(16,16),col=1)
+arrows(c(2,rep(4,3)+c(-0.15,0,0.15),rep(5,3)+c(-0.15,0,0.15)), stats$wdl[c(2,7,10,13,16,19,22)]*100, 
+       c(2,rep(4,3)+c(-0.15,0,0.15),rep(5,3)+c(-0.15,0,0.15)), stats$wdl[c(5,9,12,15,18,21,24)]*100, 
+       length=0.03, angle=90, code=3,col=c(1,rep(c("dodgerblue","darkorange","red"),2)))
+
 
 legend("topright","C",text.font=2,bty="n",cex=1)
 
@@ -268,40 +288,30 @@ legend("topright","C",text.font=2,bty="n",cex=1)
 #Plot 4: % patient days without bed capacity
 #-----------
 
-par(fig=c(0.5,1,0.15,0.575),new=T)
+par(fig=c(0.5,1,0,0.5),new=T)
 yRange = c(0, max(stats$excess_beds)*100)
-xRange = c(1, 5)
+xRange = c(0.9, 5.1)
 plot(NA,xlim=xRange,ylim=yRange,xlab="",ylab="",bty="l",axes=F)
 title(ylab="% days patients lacked beds", line=1.6)
 graphics::box(bty="l")
 axis(2,cex.axis=0.7,padj=1)
 axis(1,at=1:5,labels=c("NI","L","L+Q","L+M","L+Q+M"),cex.axis=0.7,padj=-1)
 
-points(x=c(1,rep(2,4),3,rep(4,9),rep(5,9)),y=(stats$excess_beds)*100,lwd=1.5,
-       pch=c(16,1:4,1,rep(1:3,3),rep(1:3,3)),col=c(1,colorRampPalette(c(1,4,"white"))(6)[2:5],"red3",rep(c(rep("dodgerblue",3),rep("darkorange",3),rep(2,3)),2)))
+# points(x=c(1,rep(2,4),3,rep(4,9),rep(5,9)),y=(stats$excess_beds)*100,lwd=1.5,
+#        pch=c(16,1:4,1,rep(1:3,3),rep(1:3,3)),col=c(1,colorRampPalette(c(1,4,"white"))(6)[2:5],"red3",rep(c(rep("dodgerblue",3),rep("darkorange",3),rep(2,3)),2)))
+
+points(x=c(1,3),y=stats$excess_beds[c(1,6)]*100,lwd=1.5,cex=0.8,
+       pch=c(16,16),col=1)
+arrows(c(2,rep(4,3)+c(-0.15,0,0.15),rep(5,3)+c(-0.15,0,0.15)), stats$excess_beds[c(2,7,10,13,16,19,22)]*100, 
+       c(2,rep(4,3)+c(-0.15,0,0.15),rep(5,3)+c(-0.15,0,0.15)), stats$excess_beds[c(5,9,12,15,18,21,24)]*100, 
+       length=0.03, angle=90, code=3,col=c(1,rep(c("dodgerblue","darkorange","red"),2)))
+lines(c(4+0.15-0.06,4+0.15+0.06),c(stats$excess_beds[13],stats$excess_beds[15]),col=2) # fix zero length intervals
+lines(c(5+0.15-0.06,5+0.15+0.06),c(stats$excess_beds[22],stats$excess_beds[24]),col=2)
 
 legend("topright","D",text.font=2,bty="n",cex=1)
 
 
 
-# Legends
-#-------------
-
-par(fig=c(0,1,0,0.15),new=T)
-par(mar=c(0,0,0,0))
-plot(NA,axes=F,xlab="",ylab="",xlim=c(0,1),ylim=c(0,1))
-
-
-legend(0.18,1,
-       legend=c("as implemented","+1month","+2months","+3months"),lwd=1.5,lty=NA,
-       col=colorRampPalette(c(1,4,"white"))(6)[2:5],pch=1:4,bty="n",title="Lockdown options (L)",title.adj = 0,cex=0.8,pt.cex = 1)
-legend(0.48,1,
-       legend=as.expression(lapply(c(0.2,0.5,0.8), function(d) {bquote(italic(epsilon^m)==.(d))} )),
-       col=c("dodgerblue","darkorange",2),lty=1,bty="n",title="Mask options (L+M/L+Q+M)",
-       title.adj = 5,cex=0.8,lwd=1.5,pt.cex = 1)
-legend(0.72,1,
-       legend=as.expression(lapply(c(0,0.5,1), function(d) {bquote(italic(rho^m)==.(d))} )),
-       pch=1:3,bty="n",xjust=0,title=" ",cex=0.8,lwd=1.5,lty=NA,pt.cex = 1)
 
 
 

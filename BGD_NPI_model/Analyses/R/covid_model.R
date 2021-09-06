@@ -23,7 +23,7 @@ covid_model <- function(t, y, parms) {
     # Household betas (not affected by any of the inerventions)
     #---------------
     
-    # proportion of beta_p, beta_a, beta_m that occurs in the household (in order to have propHHtrans*R0 in HH)
+    # proportion of beta_p, beta_a, beta_m that occurs in the household 
     beta_a_t_hh <- beta_a*(probHHtrans*(HHsize-1))/R0
     beta_p_t_hh <- beta_p*(probHHtrans*(HHsize-1))/R0
     beta_s_t_hh <- beta_s*(probHHtrans*(HHsize-1))/R0
@@ -45,15 +45,13 @@ covid_model <- function(t, y, parms) {
       
     }else if(t>=ld_start & t<ld_end){ 
       
-      # what proportion of the way through the improvement stage are we?
-      if(ld_improve>0){ld_improve_stage <- min(1,(t-ld_start)/ld_improve) 
-      }else if(ld_improve==0){ld_improve_stage <- 1} # implement max effect straight away
-      
       # what is the current level of non-compliance?
-      # compliance increases during the improvement stage and then decreases 
-      NC_ld <- min(1,fNC + 
-                     (1-ld_improve_stage)*(1-fNC) + 
-                     ifelse(ld_improve_stage<1,0,1-fNC-(exp(-ld_decline*(t-ld_start-ld_improve))*(1-fNC-ld_min_compliance)+ld_min_compliance)))
+      # compliance declines according to a sigmoidal curve
+      ld_sigmoid_max <- ((1-fNC)-ld_min_compliance)*(1+exp((-ld_sigmoid_mid)*ld_decline)) + ld_min_compliance
+      if(ld_improve>0){ld_improve_stage <- min(1,(t-ld_start)/ld_improve)
+      }else if(ld_improve==0){ld_improve_stage <- 1} # implement max effect straight away
+      if(ld_improve_stage==1){NC_ld <- 1-((ld_sigmoid_max-ld_min_compliance)/(1+exp((t-ld_start-ld_improve-ld_sigmoid_mid)*ld_decline)) + ld_min_compliance)}
+      if(ld_improve_stage<1){NC_ld <- 1-ld_improve_stage*((ld_sigmoid_max-ld_min_compliance)/(1+exp((-ld_sigmoid_mid)*ld_decline)) + ld_min_compliance)}
       
       # edit betas  
       beta_a_t_bHH <- beta_a_t_bHH*(fEW + (1-fEW)*(NC_ld + (1-ld_effect)*(1-NC_ld)))
@@ -65,15 +63,13 @@ covid_model <- function(t, y, parms) {
     
     if(ld2==T & t>=ld2_start & t<ld2_end){ 
       
-      # what proportion of the way through the improvement stage are we?
-      if(ld2_improve>0){ld2_improve_stage <- min(1,(t-ld2_start)/ld2_improve) 
-      }else if(ld2_improve==0){ld2_improve_stage <- 1} # implement max effect straight away
-      
       # what is the current level of non-compliance?
       # compliance increases during the improvement stage and then decreases 
-      NC_ld2 <- min(1,fNC2 + 
-                     (1-ld2_improve_stage)*(1-fNC2) + 
-                     ifelse(ld2_improve_stage<1,0,1-fNC2-(exp(-ld_decline*(t-ld2_start-ld2_improve))*(1-fNC2-ld_min_compliance)+ld_min_compliance)))
+      ld2_sigmoid_max <- ((1-fNC2)-ld_min_compliance)*(1+exp((-ld_sigmoid_mid)*ld_decline)) + ld_min_compliance
+      if(ld2_improve>0){ld2_improve_stage <- min(1,(t-ld2_start)/ld2_improve)
+      }else if(ld2_improve==0){ld2_improve_stage <- 1} # implement max effect straight away
+      if(ld2_improve_stage==1){NC_ld2 <- 1-((ld2_sigmoid_max-ld_min_compliance)/(1+exp((t-ld_start2-ld2_improve-ld_sigmoid_mid)*ld_decline)) + ld_min_compliance)}
+      if(ld2_improve_stage<1){NC_ld2 <- 1-ld2_improve_stage*((ld2_sigmoid_max-ld_min_compliance)/(1+exp((-ld_sigmoid_mid)*ld_decline)) + ld_min_compliance)}
       
       # edit betas  
       beta_a_t_bHH <- beta_a_t_bHH*(fEW2 + (1-fEW2)*(NC_ld2 + (1-ld_effect)*(1-NC_ld2)))

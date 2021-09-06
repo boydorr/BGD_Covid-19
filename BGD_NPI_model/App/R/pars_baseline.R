@@ -31,27 +31,28 @@ dhakapop2020 <- round(bdeshpop2020*propDhakaPop)
 
 
 # Parameters for baseline scenario (with just standard lockdown)
-parms_baseline <- c(R0=3.57,
+parms_baseline <- c(R0=3.515,
                     dur_inc=5.8, dur_p=2, dur_s=7, dur_a=7.7, # duration of incubation & residence in each infectious class (days)
                     dur_ICU=7, dur_hosp=5,delay_ICU=7,delay_hosp=7,delay_death=20.2, 
                     dur_hh=10.56,dur_hha=9.87,dur_hhs=12.16,
                     ld=T, # Is there a lockdown period?
-                    ld_effect=0.97, # By what proportion do non-household transmissions drop during lockdown for pre/asymptomatic compliant non-workers
+                    ld_effect=0.756, # By what proportion do non-household transmissions drop during lockdown for pre/asymptomatic compliant non-workers
                     ld_start=85, ld_end=85+35+32, # When does the lockdown start (26 Mar) and end (1 Jun)
-                    fEW=0.134, # What proportion of people are essential workers?
-                    fNC=0.2, # What proportion of people are non-compliant to lockdown?
-                    ld_improve=7, # How many days does it take for the full effect of the lockdown to be reached?
-                    ld_decline=0.01, # At what rate does compliance drop after reaching the peak?
+                    fEW=0.52*0.326, # What proportion of people are essential workers?
+                    fNC=0.06673928, # What is the initial (max) proportion of people that are non-compliant to lockdown?
+                    ld_improve=0, # How many days does it take for the full effect of the lockdown to be reached?
+                    ld_decline=0.08072955, # At what rate does compliance drop after reaching the peak?
                     ld_min_compliance=0.3, # what is the minimum compliance to which the lockdown can drop during the declining phase?
+                    ld_sigmoid_mid = 47.87292115, # location (in days after ld_start) of the lockdown compliance function's inflection point
                     ld2=F, # Is there a second lockdown period?
                     ld2_start=85+35+32, ld2_end=85+35+32+60, # When does the lockdown start and end
                     fEW2=0.2, # What proportion of people are essential workers?
-                    fNC2=0.3, # What proportion of people are non-compliant to lockdown?
+                    fNC2=0.3, # What is the initial (max) proportion of people that are non-compliant to lockdown 2?
                     ld2_improve=0, # How many days does it take for the full effect of the lockdown to be reached?
                     lab = F, syndromic = F, # Testing is introduced - laboratory (severe/critical cases) and syndromic (mild cases)
                     capacity_lab = 500, capacity_rapid=2000, community = 0.8, # Testing capacity - for lab tests and for community HWs supporting isolation
-                    lab_start=90, lab_end=max(times_model)+1, # When does lab testing start and end
-                    syn_start=152-7, syn_end=max(times_model)+1, # When does syndromic testing start and end
+                    lab_start=90, lab_end=max(times_model), # When does lab testing start and end
+                    syn_start=152-7, syn_end=max(times_model), # When does syndromic testing start and end
                     lab_improve=7, # How many days does it take for the full effect of the lab testing to be reached?
                     syn_improve=7, # How many days does it take for the full effect of the syndromic testing to be reached?
                     lab_fneg=0.15, # false negative probability for lab test
@@ -62,7 +63,7 @@ parms_baseline <- c(R0=3.57,
                     lab_cost=10, # Temporary number for cost of lab test
                     rapid_cost=3, # Temporary number of cost of rapid test
                     mask = F, # Are masks used?
-                    mask_start=152-7, mask_end=max(times_model)+1, # When does mask wearing start and end
+                    mask_start=152-7, mask_end=max(times_model), # When does mask wearing start and end
                     mask_effect_outward=0.5, # By what proportion does mask wearing reduce viral emissions  from infectious individuals
                     f_mask_effect_inward=0.5, # What proportion of mask_effect_outward is the impact of masks in protecting the wearer from infection
                     mask_compliance=0.8, # What proportion of people comply with mask wearing

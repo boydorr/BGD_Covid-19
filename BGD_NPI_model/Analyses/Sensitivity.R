@@ -4,6 +4,7 @@ require(deSolve)
 require(data.table)
 require(lubridate)
 require(dplyr)
+require(ssar)
 
 source("R/covid_model.R")
 source("R/worker_days_lost.R")

@@ -30,22 +30,23 @@ dhakapop2020 <- round(bdeshpop2020*propDhakaPop)
 
 
 # Parameters for baseline scenario (with just standard lockdown)
-parms_baseline <- c(R0=3.57,
+parms_baseline <- c(R0=3.515,
                     dur_inc=5.8, dur_p=2, dur_s=7, dur_a=7.7, # duration of incubation & residence in each infectious class (days)
                     dur_ICU=7, dur_hosp=5,delay_ICU=7,delay_hosp=7,delay_death=20.2, 
                     dur_hh=10.56,dur_hha=9.87,dur_hhs=12.16,
                     ld=T, # Is there a lockdown period?
-                    ld_effect=0.97, # By what proportion do non-household transmissions drop during lockdown for pre/asymptomatic compliant non-workers
+                    ld_effect=0.756, # By what proportion do non-household transmissions drop during lockdown for pre/asymptomatic compliant non-workers
                     ld_start=85, ld_end=85+35+32, # When does the lockdown start (26 Mar) and end (1 Jun)
-                    fEW=0.134, # What proportion of employed people are essential workers?
-                    fNC=0.2, # What proportion of people are non-compliant to lockdown?
-                    ld_improve=7, # How many days does it take for the full effect of the lockdown to be reached?
-                    ld_decline=0.01, # At what rate does compliance drop after reaching the peak?
+                    ld_improve=0,# How many days does it take for the full effect of the lockdown to be reached?
+                    fEW=0.52*0.326, # What proportion of the population is essential workers?
+                    fNC=0.06673928, # What is the initial (max) proportion of people that are non-compliant to lockdown?
+                    ld_decline=0.08072955, # At what rate does compliance drop?
                     ld_min_compliance=0.3, # what is the minimum compliance to which the lockdown can drop during the declining phase?
+                    ld_sigmoid_mid = 47.87292115, # location (in days after ld_start) of the lockdown compliance function's inflection point
                     ld2=F, # Is there a second lockdown period?
                     ld2_start=85+35+32, ld2_end=85+35+32+60, # When does the lockdown start and end
-                    fEW2=0.134, # What proportion of people are essential workers?
-                    fNC2=0.3, # What proportion of people are non-compliant to lockdown?
+                    fEW2=0.52*0.326, # What proportion of people are essential workers?
+                    fNC2=0.3, # What is the initial (max) proportion of people that are non-compliant to lockdown 2?
                     ld2_improve=0, # How many days does it take for the full effect of the lockdown to be reached?
                     lab = F, syndromic = F, # Testing is introduced - laboratory (severe/critical cases) and syndromic (mild cases)
                     capacity_lab = 100, capacity_rapid=1000, community = 0.8, # Testing capacity - for lab tests and for community HWs supporting isolation

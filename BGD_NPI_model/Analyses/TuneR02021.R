@@ -11,10 +11,10 @@ source("R/bangladesh_covid_data.R")
 
 
 # Values of initial infectious to test
-mean(BGD$dhaka_cases_2021[which(BGD$date>="2021-02-26"& BGD$date<="2021-03-01")]) # probably 10x this
+mean(BGD$dhaka_cases_2021[which(BGD$date>="2021-02-26"& BGD$date<="2021-03-01")]) # based on initial 2020 tuning probably only 6% of actual cases
 # also add some more to account for infectious individuals still there from previous days (mean duration infectiousness ~8 days - let's multiply by half that)
-infectious_vec <- mean(BGD$dhaka_cases_2021[which(BGD$date>="2021-02-26"& BGD$date<="2021-03-01")])*
-        10*4*c(0.5,1,1.5,2)# 11451
+infectious_vec <- (mean(BGD$dhaka_cases_2021[which(BGD$date>="2021-02-26"& BGD$date<="2021-03-01")])/0.06)*
+        4*c(0.5,1,1.5,2)# 19085
 
 # Values of initial immunity to test
 immunity_vec <- c(0,0.25,0.5,0.75)
@@ -41,7 +41,6 @@ start_date <- as.Date("2021-03-01")
 parms_baseline["ld"]<-1; 
 parms_baseline["ld_start"]<-as.Date("2021-04-05")-start_date; parms_baseline["ld_end"]<- as.Date("2021-06-01")-start_date
 parms_baseline["ld_improve"] <- 9
-parms_baseline["fNC"]<-0.2
 parms_baseline["mask"]<-1
 parms_baseline["mask_start"]<-as.Date("2021-04-05")-start_date; parms_baseline["mask_end"]<- as.Date("2021-06-01")-start_date
 parms_baseline["mask_improve"] <- 9
@@ -92,16 +91,23 @@ tune_deaths <- function(par,model_parms,y,times,infectious,immune,BGD,end_date,s
 
         # Run model 
         out <- amalgamate_cats(as.data.frame(lsoda(y, times, covid_model, parms=parms))) 
-
+        
         # Difference between cumulative deaths from data and model at end date
-        return(abs(out$D[which(dates==end_date)]-(BGD$dhaka_cum_deaths_2021[which(BGD$date==end_date)]-BGD$dhaka_cum_deaths_2021[which(BGD$date==start_date)])))
+        modelled <- out$D
+        data <- BGD$dhaka_cum_deaths_2021[which(BGD$date>=start_date & BGD$date<=end_date)]-BGD$dhaka_cum_deaths_2021[which(BGD$date==start_date)]
+        return(sum((modelled-data)^2))
+        
+
+        # # Difference between cumulative deaths from data and model at end date
+        # return(abs(out$D[which(dates==end_date)]-(BGD$dhaka_cum_deaths_2021[which(BGD$date==end_date)]-BGD$dhaka_cum_deaths_2021[which(BGD$date==start_date)])))
 }
+
 
 for(i in 1:nrow(R_ests)){
 
         infectious <- R_ests$infectious[i]
         immune <- R_ests$immune[i]
-
+        
         # Dates for model
         start_date <- as.Date("2021-03-01")
         end_date <- as.Date("2021-04-05") # before new lockdown
@@ -109,7 +115,7 @@ for(i in 1:nrow(R_ests)){
         # time periods of interest
         dates <- as.Date(start_date:end_date,origin=as.Date("1970-01-01"))
         times <- seq(0, as.numeric(end_date-start_date), 1)
-        
+
         # Initial conditions
         y<-inits(parms = parms_baseline, infectious = infectious, immune = immune)
         
@@ -187,7 +193,7 @@ tune_peak <- function(par,model_parms,y,times,infectious,immune,BGD,end_date,sta
         return(ifelse(D_may20<D_may20_data,Inf,abs(peak_data-peak_model)))
 }
 
-
+set.seed(0)
 for(i in 1:nrow(R_ests)){
         
         print(paste("i =",i))
@@ -522,7 +528,7 @@ dev.off()
 #______________________
 
 R_ests <- read.csv("Output/R0ests_2021.csv")
-R_ests_sub <- R_ests[which(R_ests$immune<0.75 & R_ests$infectious<20000),]
+R_ests_sub <- R_ests[which(R_ests$immune<0.75 & R_ests$infectious<30000),]
 
 tiff(filename="Figs/R0_2021_SI.tiff",width=160,height=160,units="mm",pointsize=12,res=250)
 par(mar=c(3.5,3.5,0.8,1))
@@ -538,7 +544,7 @@ date_ticks <- as.numeric(seq(start_date,end_date,by="month") - start_date)
 date_labels <- paste(month.abb[month(seq(start_date,end_date,by="month"))], (year(seq(start_date,end_date,by="month")))-2000,sep="")
 xRange = c(0, end_date-start_date)
 ind <- which((BGD$date-start_date)<=xRange[2] & (BGD$date-start_date)>=xRange[1])
-yRange = c(0, max(BGD$dhaka_cum_deaths_2021[ind]-BGD$dhaka_cum_deaths_2021[ind[1]])*1.2)
+yRange = c(0, max(BGD$dhaka_cum_deaths_2021[ind]-BGD$dhaka_cum_deaths_2021[ind[1]])*1.3)
 plot((BGD$date-start_date)[ind], BGD$dhaka_cum_deaths_2021[ind]-BGD$dhaka_cum_deaths_2021[ind[1]],
      col=1, type = "l", lty=2, ylim=yRange, xlim=xRange, ylab="",bty="l",axes=F,lwd=1,xlab="")
 graphics::box(bty="l")
@@ -629,7 +635,7 @@ dates <- as.Date(start_date:end_date,origin=as.Date("1970-01-01"))
 times <- seq(0, as.numeric(end_date-start_date), 1)
 xRange = c(0, end_date-start_date-1)
 ind <- which((BGD$date-start_date)<=xRange[2] & (BGD$date-start_date)>=xRange[1])
-yRange = c(0, max(BGD$dhaka_deaths_2021[ind])*11.4)
+yRange = c(0, max(BGD$dhaka_deaths_2021[ind])*6)
 plot((BGD$date-start_date)[ind], BGD$dhaka_deaths_2021[ind],
      col=1, type = "l", lty=2, ylim=yRange, xlim=xRange, ylab="",bty="l",axes=F,lwd=1,xlab="")
 graphics::box(bty="l")
@@ -670,7 +676,7 @@ dates <- as.Date(start_date:end_date,origin=as.Date("1970-01-01"))
 times <- seq(0, as.numeric(end_date-start_date), 1)
 xRange = c(0, end_date-start_date-1)
 ind <- which((BGD$date-start_date)<=xRange[2] & (BGD$date-start_date)>=xRange[1])
-yRange = c(0, max(BGD$dhaka_deaths_2021[ind])*11.4)
+yRange = c(0, max(BGD$dhaka_deaths_2021[ind])*6)
 plot((BGD$date-start_date)[ind], BGD$dhaka_deaths_2021[ind],
      col=1, type = "l", lty=2, ylim=yRange, xlim=xRange, ylab="",bty="l",axes=F,lwd=1,xlab="")
 graphics::box(bty="l")

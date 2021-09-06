@@ -1,7 +1,8 @@
 
 # Costs of each strategy 
 costs = function(out,parms, advertising_monthly=4832+24780/6, 
-                 CST_training=200,nCST=2000, CST_monthly=240, 
+                 CST_training=466,nCST=2000,CST_telemed_training=8470, 
+                 CST_monthly=151, manager_monthly=253,nManager=78,coordinator_monthly=447,nCoordinator=22, 
                  mask_per_household=1*5, 
                  bed_cost_general=266/7, bed_cost_icu=649/7,
                  rapid_test=5,lab_test=10){
@@ -13,8 +14,8 @@ costs = function(out,parms, advertising_monthly=4832+24780/6,
   mask_total_cost <- mask_distribution_cost + mask_advertising_cost
   
   # nCST <- (parms["community"]*(parms["population"]/parms["HHsize"]))/20
-  CST_training_cost <- parms["syndromic"]*CST_training*nCST
-  CST_running_cost <- parms["syndromic"]*(CST_monthly/(365/12))*(parms_baseline["syn_end"]-parms_baseline["syn_start"])*nCST
+  CST_training_cost <- parms["syndromic"]*(CST_training*nCST + CST_telemed_training)
+  CST_running_cost <- parms["syndromic"]*((CST_monthly/(365/12))*nCST + (manager_monthly/(365/12))*nManager + (coordinator_monthly/(365/12))*nCoordinator)*(parms["syn_end"]-parms["syn_start"])
   CST_advertising_cost <- max(1,round((parms["syn_end"]-parms["syn_start"])/(365/12)))*advertising_monthly 
   CST_total_cost <- CST_training_cost + CST_running_cost + CST_advertising_cost
   

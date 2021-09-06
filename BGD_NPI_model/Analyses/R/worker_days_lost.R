@@ -33,12 +33,15 @@ worker_days_lost <- function(modelOutput,
   if(model_parms["ld"]==T){
     
     # proportion not complying with lockdown through time
+    ld_sigmoid_max <- ((1-model_parms["fNC"])-model_parms["ld_min_compliance"])*(1+exp((-model_parms["ld_sigmoid_mid"])*model_parms["ld_decline"])) + model_parms["ld_min_compliance"]
     ld_improve_stage <- pmax(0,pmin(1,(times-model_parms["ld_start"])/model_parms["ld_improve"])) 
-    ld_improve_stage[which(is.nan(ld_improve_stage))] <- 1 # can happen if t==ld_start and ld_improve==0
-    ld_improve_stage[which(times>=model_parms["ld_end"])] <- 0
-    NC_ld <- pmin(1,model_parms["fNC"] + 
-                    (1-ld_improve_stage)*(1-model_parms["fNC"]) + 
-                    sapply(1:length(times),function(x){ifelse(ld_improve_stage[x]<1,0,1-model_parms["fNC"]-(exp(-model_parms["ld_decline"]*(times[x]-model_parms["ld_start"]-model_parms["ld_improve"]))*(1-model_parms["fNC"]-model_parms["ld_min_compliance"])+model_parms["ld_min_compliance"]))}))
+    ld_improve_stage[which(is.nan(ld_improve_stage))] <- 1 # can happen if t==ld_start and ld_improve==0    
+    NC_ld<-rep(NA,length(times))
+    NC_ld[which(times>=model_parms["ld_start"] & times<(model_parms["ld_start"]+model_parms["ld_improve"]))] <- 
+      1-ld_improve_stage[which(times>=model_parms["ld_start"] & times<(model_parms["ld_start"]+model_parms["ld_improve"]))]*((ld_sigmoid_max-model_parms["ld_min_compliance"])/(1+exp((-model_parms["ld_sigmoid_mid"])*model_parms["ld_decline"])) + model_parms["ld_min_compliance"])
+    NC_ld[which(ld_improve_stage==1)] <- 
+      1-((ld_sigmoid_max-model_parms["ld_min_compliance"])/(1+exp((times[which(ld_improve_stage==1)]-model_parms["ld_start"]-model_parms["ld_improve"]-model_parms["ld_sigmoid_mid"])*model_parms["ld_decline"])) + model_parms["ld_min_compliance"])
+    NC_ld[which(times>=model_parms["ld_end"]|times<model_parms["ld_start"])] <- 1
     
     # update working days lost
     wdl <- wdl + ((modelOutput$S-modelOutput$S_q) + (modelOutput$E-modelOutput$E_q-modelOutput$E_qE) + # everyone not already off sick/on quarantine
@@ -51,12 +54,16 @@ worker_days_lost <- function(modelOutput,
   if(model_parms["ld2"]==T){
 
     # proportion not complying with lockdown through time
-    ld2_improve_stage <- pmax(0,pmin(1,(times-model_parms["ld2_start"])/model_parms["ld2_improve"]))
-    ld2_improve_stage[which(is.nan(ld2_improve_stage))] <- 1 # can happen if t==ld_start and ld_improve==0
-    ld2_improve_stage[which(times>=model_parms["ld2_end"])] <- 0
-    NC_ld2 <- pmin(1,model_parms["fNC2"] +
-                    (1-ld2_improve_stage)*(1-model_parms["fNC2"]) +
-                    sapply(1:length(times),function(x){ifelse(ld2_improve_stage[x]<1,0,1-model_parms["fNC2"]-(exp(-model_parms["ld_decline"]*(times[x]-model_parms["ld2_start"]-model_parms["ld2_improve"]))*(1-model_parms["fNC2"]-model_parms["ld_min_compliance"])+model_parms["ld_min_compliance"]))}))
+    ld2_sigmoid_max <- ((1-model_parms["fNC2"])-model_parms["ld_min_compliance"])*(1+exp((-model_parms["ld_sigmoid_mid"])*model_parms["ld_decline"])) + model_parms["ld_min_compliance"]
+    ld2_improve_stage <- pmax(0,pmin(1,(times-model_parms["ld2_start"])/model_parms["ld2_improve"])) 
+    ld2_improve_stage[which(is.nan(ld2_improve_stage))] <- 1 # can happen if t==ld_start and ld_improve==0    
+    NC_ld2<-rep(NA,length(times))
+    NC_ld2[which(times>=model_parms["ld2_start"] & times<(model_parms["ld2_start"]+model_parms["ld2_improve"]))] <- 
+      1-ld2_improve_stage[which(times>=model_parms["ld2_start"] & times<(model_parms["ld2_start"]+model_parms["ld2_improve"]))]*((ld2_sigmoid_max-model_parms["ld_min_compliance"])/(1+exp((-model_parms["ld_sigmoid_mid"])*model_parms["ld_decline"])) + model_parms["ld_min_compliance"])
+    NC_ld2[which(ld2_improve_stage==1)] <- 
+      1-((ld2_sigmoid_max-model_parms["ld_min_compliance"])/(1+exp((times[which(ld2_improve_stage==1)]-model_parms["ld2_start"]-model_parms["ld2_improve"]-model_parms["ld_sigmoid_mid"])*model_parms["ld_decline"])) + model_parms["ld_min_compliance"])
+    NC_ld2[which(times>=model_parms["ld2_end"]|times<model_parms["ld2_start"])] <- 1
+    
 
     wdl <- wdl + ((modelOutput$S-modelOutput$S_q) + (modelOutput$E-modelOutput$E_q-modelOutput$E_qE) + # everyone not already off sick/on quarantine
                     (modelOutput$Ip-modelOutput$Ip_q-modelOutput$Ip_qp) + (modelOutput$Ia - modelOutput$Ia_q - modelOutput$Ia_qa) +

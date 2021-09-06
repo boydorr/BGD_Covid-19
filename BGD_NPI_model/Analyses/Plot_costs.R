@@ -214,44 +214,58 @@ stats$ROI <- -100*cost_diff/stats$int_cost
 # _______________________
 
 # Open figure
-tiff(filename="Figs/Costs.tiff",width=160,height=85,units="mm",pointsize=12,res=200)
-par(mar=c(1.8,1.7,0.4,1))
+tiff(filename="Figs/Costs.tiff",width=160,height=70,units="mm",pointsize=12,res=350)
+par(mar=c(1.8,1.7,0.5,1))
 
 
 
 #Plot 1: Total costs (high cost scenario)
 #-----------
 
-par(fig=c(0,0.33,0.3,1))
+par(fig=c(0,0.33,0,1))
 yRange = c(0, max(stats$total_cost)/1000000)
-xRange = c(1, 5)
+xRange = c(0.9, 5.1)
 plot(NA,xlim=xRange,ylim=yRange,xlab="",ylab="",bty="l",axes=F)
 title(ylab="Total cost ($1,000,000)", line=0.9,cex.lab=1)
 graphics::box(bty="l")
 axis(2,cex.axis=0.7,padj=1.9,tcl=-0.25)
 axis(1,at=c(1:5),labels=c("NI","L","L+Q","L+M","L+Q+M"),cex.axis=0.64,padj=-2,tcl=-0.25)
 
-points(x=c(1,rep(2,4),3,rep(4,9),rep(5,9)),y=c(stats$total_cost)/1000000,
-       pch=c(16,1:4,1,rep(1:3,3),rep(1:3,3)),col=c(1,colorRampPalette(c(1,4,"white"))(6)[2:5],"red3",rep(c(rep("dodgerblue",3),rep("darkorange",3),rep(2,3)),2)))
+points(x=c(1,3),y=stats$total_cost[c(1,6)]/1000000,lwd=1.5,cex=0.8,
+       pch=c(16,16),col=1)
+arrows(c(2,rep(4,3)+c(-0.15,0,0.15),rep(5,3)+c(-0.15,0,0.15)), stats$total_cost[c(2,7,10,13,16,19,22)]/1000000, 
+       c(2,rep(4,3)+c(-0.15,0,0.15),rep(5,3)+c(-0.15,0,0.15)), stats$total_cost[c(5,9,12,15,18,21,24)]/1000000, 
+       length=0.03, angle=90, code=3,col=c(1,rep(c("dodgerblue","darkorange","red"),2)))
 
-legend(xRange[2]-1,yRange[2]*1.09,"A",text.font=2,bty="n",cex=1)
+
+# points(x=c(1,rep(2,4),3,rep(4,9),rep(5,9)),y=c(stats$total_cost)/1000000,
+#        pch=c(16,1:4,1,rep(1:3,3),rep(1:3,3)),col=c(1,colorRampPalette(c(1,4,"white"))(6)[2:5],"red3",rep(c(rep("dodgerblue",3),rep("darkorange",3),rep(2,3)),2)))
+
+legend(xRange[2]-1.1,yRange[2]*1.09,"A",text.font=2,bty="n",cex=1)
 
 
 
 #Plot 2: Cost/death averted (high cost scenario)
 #-----------
 
-par(fig=c(0.33,0.66,0.3,1),new=T)
+par(fig=c(0.33,0.66,0,1),new=T)
 yRange = c(min(stats$cost_death_averted[2:nrow(stats)]), max(stats$cost_death_averted[2:nrow(stats)]))/1000
-xRange = c(1, 4)
+xRange = c(0.9, 4.1)
 plot(NA,xlim=xRange,ylim=yRange,xlab="",ylab="",bty="l",axes=F)
 title(ylab="Cost/death averted ($1,000)", line=0.9,cex.lab=0.9)
 graphics::box(bty="l")
 axis(2,cex.axis=0.7,padj=1.9,tcl=-0.25)
 axis(1,at=c(1:4),labels=c("L","L+Q","L+M","L+Q+M"),cex.axis=0.64,padj=-2,tcl=-0.25)
 
-points(x=c(rep(1,4),2,rep(3,9),rep(4,9)),y=c(stats$cost_death_averted[2:nrow(stats)])/1000,
-       pch=c(1:4,1,rep(1:3,3),rep(1:3,3)),col=c(colorRampPalette(c(1,4,"white"))(6)[2:5],"red3",rep(c(rep("dodgerblue",3),rep("darkorange",3),rep(2,3)),2)))
+points(x=c(2),y=stats$cost_death_averted[c(6)]/1000,lwd=1.5,cex=0.8,
+       pch=c(16,16),col=1)
+arrows(c(1,rep(3,3)+c(-0.15,0,0.15),rep(4,3)+c(-0.15,0,0.15)), stats$cost_death_averted[c(2,7,10,13,16,19,22)]/1000, 
+       c(1,rep(3,3)+c(-0.15,0,0.15),rep(4,3)+c(-0.15,0,0.15)), stats$cost_death_averted[c(5,9,12,15,18,21,24)]/1000, 
+       length=0.03, angle=90, code=3,col=c(1,rep(c("dodgerblue","darkorange","red"),2)))
+
+
+# points(x=c(rep(1,4),2,rep(3,9),rep(4,9)),y=c(stats$cost_death_averted[2:nrow(stats)])/1000,
+#        pch=c(1:4,1,rep(1:3,3),rep(1:3,3)),col=c(colorRampPalette(c(1,4,"white"))(6)[2:5],"red3",rep(c(rep("dodgerblue",3),rep("darkorange",3),rep(2,3)),2)))
 
 legend(xRange[2]-0.8,yRange[2]*1.11,"B",text.font=2,bty="n",cex=1)
 
@@ -260,41 +274,32 @@ legend(xRange[2]-0.8,yRange[2]*1.11,"B",text.font=2,bty="n",cex=1)
 #Plot 3: % Return on investment
 #-----------
 
-par(fig=c(0.66,1,0.3,1),new=T)
+par(fig=c(0.66,1,0,1),new=T)
 yRange = c(min(stats$ROI[2:nrow(stats)]), max(stats$ROI[2:nrow(stats)]))
-xRange = c(1, 4)
+xRange = c(0.9, 4.1)
 plot(NA,xlim=xRange,ylim=yRange,xlab="",ylab="",bty="l",axes=F)
 title(ylab="% Return on investment", line=0.9,cex.lab=0.9)
 graphics::box(bty="l")
-axis(2,cex.axis=0.7,padj=1.9,at=c(0,5000,10000,15000),tcl=-0.25)
+axis(2,cex.axis=0.7,padj=1.9,at=c(0,1000,2000,3000),tcl=-0.25)
 axis(1,at=c(1:4),labels=c("L","L+Q","L+M","L+Q+M"),cex.axis=0.64,padj=-2,tcl=-0.25)
 
-points(x=c(rep(1,4),2,rep(3,9),rep(4,9)),y=stats$ROI[2:nrow(stats)],
-       pch=c(1:4,1,rep(1:3,3),rep(1:3,3)),col=c(colorRampPalette(c(1,4,"white"))(6)[2:5],"red3",rep(c(rep("dodgerblue",3),rep("darkorange",3),rep(2,3)),2)))
+points(x=c(2),y=stats$ROI[c(6)],lwd=1.5,cex=0.8,
+       pch=c(16,16),col=1)
+arrows(c(1,rep(3,3)+c(-0.15,0,0.15),rep(4,3)+c(-0.15,0,0.15)), stats$ROI[c(2,7,10,13,16,19,22)], 
+       c(1,rep(3,3)+c(-0.15,0,0.15),rep(4,3)+c(-0.15,0,0.15)), stats$ROI[c(5,9,12,15,18,21,24)], 
+       length=0.03, angle=90, code=3,col=c(1,rep(c("dodgerblue","darkorange","red"),2)))
+
+
+# points(x=c(rep(1,4),2,rep(3,9),rep(4,9)),y=stats$ROI[2:nrow(stats)],
+#        pch=c(1:4,1,rep(1:3,3),rep(1:3,3)),col=c(colorRampPalette(c(1,4,"white"))(6)[2:5],"red3",rep(c(rep("dodgerblue",3),rep("darkorange",3),rep(2,3)),2)))
 
 legend(xRange[2]-0.8,yRange[2]*1.1,"C",text.font=2,bty="n",cex=1)
+legend(1.03,2000,
+       legend=as.expression(mapply(function(c,d) {bquote(.(c)~ (italic(epsilon^m)==.(d)))},c("low","medium","high"),c(0.2,0.5,0.8) )),
+       col=c("dodgerblue","darkorange",2),lty=1,bty="n",title="Mask (M) filtration efficiency:",
+       cex=0.7,lwd=1.5,pt.cex = 1)
 
 
-
-
-
-# Legends
-#-------------
-
-par(fig=c(0,1,0,0.3),new=T)
-par(mar=c(0,0,0,0))
-plot(NA,axes=F,xlab="",ylab="",xlim=c(0,1),ylim=c(0,1))
-
-
-legend(0.18,1.06,
-       legend=c("as implemented","+1month","+2months","+3months"),
-       col=colorRampPalette(c(1,4,"white"))(6)[2:5],pch=1:4,bty="n",title="Lockdown options (L)",title.adj = 0,cex=0.8,pt.cex = 1)
-legend(0.45,1.06,
-       legend=as.expression(lapply(c(0.2,0.5,0.8), function(d) {bquote(italic(epsilon^m)==.(d))} )),
-       col=c("dodgerblue","darkorange",2),lty=1,bty="n",title="Mask options (L+M/L+Q+M)",title.adj = 5,cex=0.8,pt.cex = 1)
-legend(0.72,1.06,
-       legend=as.expression(lapply(c(0,0.5,1), function(d) {bquote(italic(rho^m)==.(d))} )),
-       pch=1:3,bty="n",xjust=0,title=" ",cex=0.8,pt.cex = 1)
 
 
 
