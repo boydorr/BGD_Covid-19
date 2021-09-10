@@ -426,8 +426,8 @@ shinyUI(
                                 
                                 #----- R0 -------------------------
                                 sliderInput(inputId = "upa_R0", label = HTML(paste("R", tags$sub(0), sep = "")),
-                                            min = minR0,  max = 6.5, value = 3.32, step = 0.01),
-                                h6("Defaults to 3.32. This value was tuned to data for Dhaka District in March 2021, assuming 25% of the population was already immune and 11451 initial infectious."),
+                                            min = minR0,  max = 6.5, value = 2.8, step = 0.01),
+                                h6("Defaults to 2.80. This value was tuned to data for Dhaka District in March 2021, assuming 25% of the population was already immune and 19086 initial infectious."),
                                 hr(class = "dot"),
                                 #----- Lockdown inputs -------------------------
                                 radioButtons(inputId = "upa_ld", "Include a lockdown phase?",
@@ -623,7 +623,7 @@ shinyUI(
                            splitLayout(
                              
                              numericInput(inputId = "upa_infectious", label = h4(HTML("<strong>Number infectious at start of forecast</strong>")), min=0, max = 2000000,
-                                          value = 11451, width = "300px"),
+                                          value = 19086, width = "300px"),
                              sliderInput(inputId = "upa_immune", label = h4(HTML("<strong>% population immune at start of forecast</strong>")),
                                          min = 0, max = 100, value = 25, post="%")
                            ),

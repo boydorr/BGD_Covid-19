@@ -11,10 +11,7 @@ source("R/calc_fractions.R")
 source("R/bangladesh_covid_data.R")
 
 
-## Parameter ranges
-par_ranges <- read.csv("data/ParameterRanges.csv",stringsAsFactors = F)
-
-# Parameters for baseline scenario (with no interventions)
+# Parameters for baseline scenario 
 source("R/pars_baseline.R")
 
 # Initial conditions

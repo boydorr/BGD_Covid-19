@@ -1,9 +1,9 @@
 # Vector for each column of interest
 int_parameter = c("Lockdown period",
                   "% population permitted to work under lockdown",
-                  "Lockdown compliance",
+                  "Maximum lockdown compliance",
                   "Lockdown impact",
-                  "Lockdown days to full effectiveness",
+                  "Lockdown scale-up days",
                   "Rate of decline in lockdown compliance following scaling up period",
                   "Compulsory mask wearing period",
                   "Days to scale up mask wearing",
@@ -26,10 +26,13 @@ int_parameter = c("Lockdown period",
 
 int_value = c(paste(start_date + parms_baseline["ld_start"],"-<br/>", start_date + parms_baseline["ld_end"]),
               parms_baseline["fEW"]*100,
-              (1-parms_baseline["fNC"])*100,
+              round((1-parms_baseline["fNC"])*100),
               parms_baseline["ld_effect"]*100,
               parms_baseline["ld_improve"],
-              paste("rate_decline=",parms_baseline["ld_decline"],"<br/>min_compliance=",parms_baseline["ld_min_compliance"]),
+              paste(HTML("&mu;="),round(((1-parms_baseline["fNC"])-parms_baseline["ld_min_compliance"])*(1+exp((-parms_baseline["ld_sigmoid_mid"])*parms_baseline["ld_decline"])) + parms_baseline["ld_min_compliance"],2),"<br/>",
+                    HTML("&nu;="),parms_baseline["ld_min_compliance"],"<br/>",
+                    HTML("&eta;="),round(parms_baseline["ld_sigmoid_mid"]),"<br/>",
+                    HTML("&rho;="),round(parms_baseline["ld_decline"],2)),
               paste(start_date + parms_baseline["mask_start"],"-<br/>", start_date + parms_baseline["mask_end"]),
               parms_baseline["mask_improve"],
               parms_baseline["mask_compliance"]*100,
@@ -59,7 +62,11 @@ int_description = c("Start and end dates of the lockdown period, which can be ed
                     
                     "Days until full effect of lockdown is reached. The impact of the lockdown on transmission increases linearly during this period. This can be adjusted for both the initial and the optional secondary lockdown periods.",
                     
-                    "If (lockdown start day + days to full effectiveness)&ltt&ltlockdown end day,<br>current % compliance = e<sup>(-rate_decline*(t - lockdown start day - days to full effectiveness))*(lockdown compliance - min_compliance)</sup> + min_compliance",
+                    "When (lockdown start day + days to full effectiveness)&le;t&ltlockdown end day, lockdown compliance declines according to a sigmoidal function:
+                    <br>% compliance(t) = (&mu;-&nu;)/(1+e<sup>(-&rho;*(t - lockdown start day - scale-up days - &eta;))</sup>) +  &nu;
+                    <br>&mu;, &rho;, and &eta; were estimated from <a class='table_a' href=https://www.google.com/covid19/mobility/>Google community mobility data</a>.  
+                    &nu;, the minimum that the proportion of people that comply with lockdown can fall to, is assumed.  
+                    The maximum lockdown compliance (see above) is achieved when t=lockdown start day + scale-up days.",
 
                     "Start and end dates of the compulsory mask wearing period, which can be edited using the slider.",
                     
