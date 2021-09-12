@@ -19,8 +19,9 @@ shinyServer(function(input, output, session) {
       parms_edit[c("beta_p","beta_a","beta_s")]*beta_multiplier
 
     # Make additional edits from the baseline tab of sidepanel
+    parms_edit["ld"]=as.logical(input$bl_ld) # Is there a lockdown?
     parms_edit["ld2"]=as.logical(input$bl_ld2) # Is there a second stage of lockdown?
-    parms_edit["lab"]=as.logical(input$bl_lab) # Is there lab testing?
+    parms_edit["testing"]=as.logical(input$bl_testing) # Is there lab testing?
     parms_edit["syndromic"]=as.logical(input$bl_syndromic) # Is there syndromic surveillance?
     parms_edit["mask"]=as.logical(input$bl_mask) # Is there mask wearing?
     parms_edit["ld_start"]=as.numeric(input$bl_ld_dates[1] - start_date)
@@ -33,17 +34,15 @@ shinyServer(function(input, output, session) {
     parms_edit["fNC2"]=1-input$bl_ld2_compliance/100 # What proportion of people are non-compliant to lockdown?
     parms_edit["fEW2"]=input$bl_fEW2*parms_baseline["propWorkers"]/100 # What proportion of people are essential workers?
     parms_edit["ld2_improve"]=input$bl_ld2_improve # How many days does it take for the full effect of the lockdown to be reached?
-    parms_edit["capacity_lab"]=input$bl_lab_capacity # lab testing capacity
-    parms_edit["capacity_rapid"]=input$bl_rapid_capacity # rapid testing capacity
     parms_edit["community"]=input$bl_community/100 # capacity of community HWs supporting isolation
-    parms_edit["lab_start"]=as.numeric(input$bl_lab_dates[1] - start_date)
-    parms_edit["lab_end"]=as.numeric(input$bl_lab_dates[2] - start_date) # When does the lab testing start and end
     parms_edit["syn_start"]=as.numeric(input$bl_syn_dates[1] - start_date)
     parms_edit["syn_end"]=as.numeric(input$bl_syn_dates[2] - start_date) # When does the syndromic surveillance start and end
-    parms_edit["lab_improve"]=input$bl_lab_improve # How many days does it take for the full effect of the lab testing to be reached?
     parms_edit["syn_improve"]=input$bl_syn_improve # How many days does it take for the full effect of the syndromic surveillance to be reached?
-    parms_edit["lab_fneg"]=input$bl_lab_fneg # false negative probability for lab test
-    parms_edit["rapid_fneg"]=input$bl_rapid_fneg # false negative probability for rapid test
+    parms_edit["test_start"]=as.numeric(input$bl_test_dates[1] - start_date)
+    parms_edit["test_end"]=as.numeric(input$bl_test_dates[2] - start_date) # When does the lab testing start and end
+    parms_edit["test_capacity"]=input$bl_test_capacity # lab testing capacity
+    parms_edit["test_compliance"]=input$bl_test_compliance/100 # lab testing capacity
+    parms_edit["test_fneg"]=input$bl_test_fneg # false negative probability for lab test
     parms_edit["mask_start"]=as.numeric(input$bl_mask_dates[1] - start_date)
     parms_edit["mask_end"]=as.numeric(input$bl_mask_dates[2] - start_date) # When does mask wearing start and end
     parms_edit["mask_effect_outward"]=input$bl_mask_effect_out # By what proportion does mask wearing reduce transmission to others
@@ -81,6 +80,8 @@ shinyServer(function(input, output, session) {
     showNotification(HTML("<b>Comparison values will be adjusted to the new baseline values</b>"), type="message")
 
     # Lockdown inputs
+    updateRadioButtons(session, inputId = "int_ld", selected=as.logical(input$bl_ld))
+    updateRadioButtons(session, inputId = "int_ld2", selected=as.logical(input$bl_ld2))
     updateSliderInput(session, inputId = "int_ld_dates", value = c(input$bl_ld_dates[1], input$bl_ld_dates[2]), timeFormat = "%d %b %y")
     updateNumericInput(session, inputId = "int_ld_improve", value = input$bl_ld_improve)
     updateSliderInput(session, inputId = "int_fEW", value = input$bl_fEW)
@@ -89,19 +90,17 @@ shinyServer(function(input, output, session) {
     updateNumericInput(session, inputId = "int_ld2_improve", value = input$bl_ld2_improve)
     updateSliderInput(session, inputId = "int_fEW2", value = input$bl_fEW2)
     updateSliderInput(session, inputId = "int_ld2_compliance", value = input$bl_ld2_compliance)
-    # Lab testing inputs
-    updateRadioButtons(session, inputId = "int_lab", selected=as.logical(input$bl_lab))
-    updateSliderInput(session, inputId = "int_lab_dates", value = c(input$bl_lab_dates[1], input$bl_lab_dates[2]), timeFormat = "%d %b %y")
-    updateNumericInput(session, inputId = "int_lab_improve", value = input$bl_ld_improve)
-    updateSliderInput(session, inputId = "int_lab_capacity", value = input$bl_lab_capacity)
-    updateSliderInput(session, inputId = "int_lab_fneg", value = input$bl_lab_fneg)
+    # Testing inputs
+    updateRadioButtons(session, inputId = "int_testing", selected=as.logical(input$bl_testing))
+    updateSliderInput(session, inputId = "int_test_dates", value = c(input$bl_test_dates[1], input$bl_test_dates[2]), timeFormat = "%d %b %y")
+    updateSliderInput(session, inputId = "int_test_compliance", value = input$bl_test_compliance)
+    updateSliderInput(session, inputId = "int_test_capacity", value = input$bl_test_capacity)
+    updateSliderInput(session, inputId = "int_test_fneg", value = input$bl_test_fneg)
     # Community input
     updateRadioButtons(session, inputId = "int_syndromic", selected=as.logical(input$bl_syndromic))
     updateSliderInput(session, inputId = "int_syn_dates", value = c(input$bl_syn_dates[1], input$bl_syn_dates[2]))
     updateNumericInput(session, inputId = "int_syn_improve", value = input$bl_syn_improve)
     updateSliderInput(session, inputId = "int_community", value = input$bl_community)
-    updateSliderInput(session, inputId = "int_rapid_capacity", value = input$bl_rapid_capacity)
-    updateSliderInput(session, inputId = "int_rapid_fneg", value = input$bl_rapid_fneg)
     # Masks input
     updateRadioButtons(session, inputId = "int_mask", selected=as.logical(input$bl_mask))
     updateSliderInput(session, inputId = "int_mask_dates", value = c(input$bl_mask_dates[1], input$bl_mask_dates[2]), timeFormat = "%d %b %y")
@@ -128,8 +127,9 @@ shinyServer(function(input, output, session) {
     
     
     # Make intervention parameter edits
+    parms_edit["ld"]=as.logical(input$int_ld) # Is there a lockdown?
     parms_edit["ld2"]=as.logical(input$int_ld2) # Is there a second lockdown stage?
-    parms_edit["lab"]=as.logical(input$int_lab) # Is there lab testing?
+    parms_edit["testing"]=as.logical(input$int_testing) # Is there testing?
     parms_edit["syndromic"]=as.logical(input$int_syndromic) # Is there syndromic surveillance?
     parms_edit["mask"]=as.logical(input$int_mask) # Is there mask wearing?
     parms_edit["ld_start"]=as.numeric(input$int_ld_dates[1] - start_date)
@@ -142,17 +142,14 @@ shinyServer(function(input, output, session) {
     parms_edit["fNC2"]=1-input$int_ld2_compliance/100 # What proportion of people are non-compliant to lockdown?
     parms_edit["fEW2"]=input$int_fEW2*parms_baseline["propWorkers"]/100 # What proportion of people are essential workers?
     parms_edit["ld2_improve"]=input$int_ld2_improve # How many days does it take for the full effect of the lockdown to be reached?
-    parms_edit["capacity_lab"]=input$int_lab_capacity # lab testing capacity
-    parms_edit["capacity_rapid"]=input$int_rapid_capacity # rapid testing capacity
     parms_edit["community"]=input$int_community/100 # capacity of community HWs supporting isolation
-    parms_edit["lab_start"]=as.numeric(input$int_lab_dates[1] - start_date)
-    parms_edit["lab_end"]=as.numeric(input$int_lab_dates[2] - start_date) # When does the lab testing start and end
     parms_edit["syn_start"]=as.numeric(input$int_syn_dates[1] - start_date)
     parms_edit["syn_end"]=as.numeric(input$int_syn_dates[2] - start_date) # When does the syndromic surveillance start and end
-    parms_edit["lab_improve"]=input$int_lab_improve # How many days does it take for the full effect of the lab testing to be reached?
-    parms_edit["syn_improve"]=input$int_syn_improve # How many days does it take for the full effect of the syndromic surveillance to be reached?
-    parms_edit["lab_fneg"]=input$int_lab_fneg # false negative probability for lab test
-    parms_edit["rapid_fneg"]=input$int_rapid_fneg # false negative probability for rapid test
+    parms_edit["test_start"]=as.numeric(input$int_test_dates[1] - start_date)
+    parms_edit["test_end"]=as.numeric(input$int_test_dates[2] - start_date) # When does the testing start and end
+    parms_edit["test_capacity"]=input$int_test_capacity # testing capacity
+    parms_edit["test_compliance"]=input$int_test_compliance/100 # testing compliance
+    parms_edit["test_fneg"]=input$int_test_fneg # false negative probability for test
     parms_edit["mask_start"]=as.numeric(input$int_mask_dates[1] - start_date)
     parms_edit["mask_end"]=as.numeric(input$int_mask_dates[2] - start_date) # When does mask wearing start and end
     parms_edit["mask_effect_outward"]=input$int_mask_effect_out # By what proportion does mask wearing reduce transmission to others
@@ -295,14 +292,14 @@ shinyServer(function(input, output, session) {
 
   
   # Obtain vaccination vectors
-  vax_baseline <- reactive(create_vax(parms_baseline_adjust(),times_model))
-  vax_intervention <- reactive(create_vax(parms_intervention(),times_model))
+  vax_baseline <- reactive(create_vax(parms_baseline_adjust(),times))
+  vax_intervention <- reactive(create_vax(parms_intervention(),times))
 
   # Run model with input parameters
   out_baseline <- reactive(amalgamate_cats(rbind(preIntro,as.data.frame(lsoda(y, times_model, covid_model, parms=parms_baseline_adjust(),age_dep_pars=age_dep_pars, demog=dhaka_pop_by_age, vax1vec=vax_baseline()$Vax1,vax2vec=vax_baseline()$Vax2))))) # output with no extra intervention
   out_intervention <- reactive(amalgamate_cats(rbind(preIntro,as.data.frame(lsoda(y, times_model, covid_model, parms=parms_intervention(),age_dep_pars=age_dep_pars, demog=dhaka_pop_by_age, vax1vec=vax_intervention()$Vax1,vax2vec=vax_intervention()$Vax2))))) # output with selected interventions
 
-
+  # output$out <- renderPrint(nrow(vax_baseline()))
 
 
 
@@ -427,14 +424,14 @@ shinyServer(function(input, output, session) {
   #----- Create case detection plot --------------------------------------
   output$case_detection <- renderPlot({
     cd_data <- data.frame("time"=times,
-                          "value"=c(out_intervention()[,c("CumCases")]-out_intervention()$Tested,
-                                    out_intervention()$Tested),
+                          "value"=c(out_intervention()[,c("CumCases")]-out_intervention()$Detected,
+                                    out_intervention()$Detected),
                           "group"=rep(c("Undetected","Detected"),each=length(times)))
     cd_data <- mutate(cd_data,group = fct_relevel(group,"Undetected", "Detected"))
 
     cd_df <- out_intervention() %>% select(time)
-    cd_df$new <- out_intervention()[,c("CumCases")]-out_intervention()$Tested
-    cd_df$test <- out_intervention()$Tested
+    cd_df$new <- out_intervention()[,c("CumCases")]-out_intervention()$Detected
+    cd_df$test <- out_intervention()$Detected
 
 
     pl4 <- ggplot() +
@@ -472,8 +469,8 @@ shinyServer(function(input, output, session) {
 
     # Build dataframes
     test_bar_df <- data.frame(x = c("Baseline", "Comparison"),
-                               y = c(max(out_baseline()$Tested)/max(out_baseline()$CumCases),
-                                     max(out_intervention()$Tested)/max(out_intervention()$CumCases)))
+                               y = c(max(out_baseline()$Detected)/max(out_baseline()$CumCases),
+                                     max(out_intervention()$Detected)/max(out_intervention()$CumCases)))
 
     # Set as factor
     test_bar_df$x <- factor(test_bar_df$x, levels=c("Baseline", "Comparison"))

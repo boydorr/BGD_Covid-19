@@ -238,69 +238,27 @@ covid_model <- function(t, y, parms, age_dep_pars, demog, vax1vec,vax2vec) {
     
     
     # Cases detected by rapid tests (targeted at those with mild symptoms)
-    if(syndromic == T & t>=syn_start & t<syn_end){
-      targets_nonCovid_mild <- (mild_nonCovid/365)*((1-NC_syn)*(S_n+S_E+S_I + E_f+E_b+E_ss+E_sa+E_t + R_n+R_E+R_I+R_Is_f+R_Ia_f+R_I_b) + (S_q + E_q+E_qE + R_qR+R_Is_qs+R_Ia_qa+R_Is_q+R_Ia_q)) 
-      targets_covid_mild <- ((Ip_f+Ip_sa)*(1-NC_syn)+Ip_q+2*Ip_qp)/dur_p 
-      if((targets_covid_mild+targets_nonCovid_mild)>0){
-        prop_covid <- targets_covid_mild/(targets_covid_mild+targets_nonCovid_mild)
+    if(testing == T & t>=test_start & t<test_end){
+      targets_nonCovid <- (mild_nonCovid/365)*(test_compliance*(S_n+S_E+S_I + E_f+E_b+E_ss+E_sa+E_t + R_n+R_E+R_I+R_Is_f+R_Ia_f+R_I_b) + (S_q + E_q+E_qE + R_qR+R_Is_qs+R_Ia_qa+R_Is_q+R_Ia_q)) 
+      targets_covid <- ((Ip_f+Ip_sa)*(1-NC_syn)+Ip_q+2*Ip_qp)/dur_p 
+      if((targets_covid+targets_nonCovid)>0){
+        prop_covid <- targets_covid/(targets_covid+targets_nonCovid)
         }else{prop_covid <- 0}
       
       # Total positive rapid tests 
-      dRapidTotal <- (targets_covid_mild - #total targets with covid that are amenable to testing
-                         max(0,(targets_nonCovid_mild+targets_covid_mild) - capacity_rapid * syn_improve_stage) * prop_covid) * # number of those cases we don't have capacity to test (accounting for non-covid respiratory infections)
-        (1-rapid_fneg) # fraction of tests that are not false negatives
+      dDetected <- (targets_covid - #total targets with covid that are amenable to testing
+                         max(0,(targets_nonCovid+targets_covid) - test_capacity) * prop_covid) * # number of those cases we don't have capacity to test (accounting for non-covid respiratory infections)
+        (1-test_fneg) # fraction of tests that are not false negatives
 
       # Total rapid tests used
-      dRapidUsed <-  min(targets_covid_mild+targets_nonCovid_mild, capacity_rapid * syn_improve_stage) 
+      dTestsUsed <-  min(targets_covid+targets_nonCovid, test_capacity) 
       
     }else{
-      dRapidTotal <- 0
-      dRapidUsed <-  0
-    }
-    # Current individuals that have had a positive rapid test
-    dRapidCurrent <- dRapidTotal - RapidCurrent/dur_s
-    dRapidHospWait <- fHosp*(1-probICU)*dRapidTotal - RapidHospWait/delay_hosp
-    dRapidICUWait <- fHosp*probICU*dRapidTotal - RapidICUWait/delay_ICU
-
-    
-    # Cases detected by lab tests
-    if(lab==T & t>=lab_start & t<lab_end){ # Assume that lab testing is targeted towards severe/critical cases i.e. hospitalized only
-      
-      # Targets of community testing and the proportion that actually have COVID-19
-      targets_nonCovid_severe <- (severe_nonCovid/365)*((S_n+S_E+S_I + E_f+E_b+E_ss+E_sa+E_t + R_n+R_E+R_I+R_Is_f+R_Ia_f+R_I_b) + (S_q + E_q+E_qE + R_qR+R_Is_qs+R_Ia_qa+R_Is_q+R_Ia_q))
-      targets_covid_severe <- Hosp_wait/dur_hosp + ICU_wait/dur_ICU
-      prop_covid <- targets_covid_severe/(targets_covid_severe+targets_nonCovid_severe)
-      
-      # what proportion of the way through the improvement stage are we?
-      if(lab_improve>0){lab_improve_stage <- min(1,(t-lab_start)/lab_improve)
-      }else if(lab_improve==0){lab_improve_stage <- 1}
-      
-      # change in total number of positive lab tests
-      dLabTotal <-  (targets_covid_severe - #total new severe covid cases 
-                       max(0,targets_covid_severe + targets_nonCovid_severe - capacity_lab * lab_improve_stage) * prop_covid) * # number of those cases we don't have capacity to test (accounting for non-covid respiratory infections)
-        (1-lab_fneg) # fraction of tests that are not false negatives
-      
-      # change in current number of positive lab tests for individuals not previously detected by rapid tests
-      propTargetsHosp<-ifelse((Hosp_wait+ICU_wait)>0,(Hosp_wait/delay_hosp)/(Hosp_wait/delay_hosp + ICU_wait/delay_ICU),0)
-      dLabTotalNew <- ifelse(Hosp_wait>0,dLabTotal*propTargetsHosp*(1-(RapidHospWait/delay_hosp)/(Hosp_wait/delay_hosp)),0) + 
-        ifelse(ICU_wait>0,dLabTotal*(1-propTargetsHosp)*(1-(RapidICUWait/delay_ICU)/(ICU_wait/delay_ICU)),0)# no double counting if lab tested after already rapid tested - still doesn't account for potential multiple tests while in hospital however
-
-      # Total lab tests used
-      dLabUsed <-  min(targets_covid_severe+targets_nonCovid_severe, capacity_lab * lab_improve_stage) 
-      
-      
-    }else{
-      dLabTotal <- 0
-      dLabTotalNew <- 0
-      dLabUsed <- 0
+      dDetected <- 0
+      dTestsUsed <- 0
     }
     
-    
-    
-    # Total tested positive
-    dTested <- dRapidTotal + dLabTotalNew
-    
-    
+
     
 
     # Cumulative cases
@@ -328,7 +286,7 @@ covid_model <- function(t, y, parms, age_dep_pars, demog, vax1vec,vax2vec) {
            dIs_f,dIs_b,dIs_s,dIs_q,dIs_qs,
            dR_n,dR_E,dR_I,dR_Ia_f,dR_Is_f,dR_I_b,dR_qR,dR_Ia_qa,dR_Is_qs,dR_Ia_q,dR_Is_q,
            Recup,dD_wait,dD,dHosp_wait,dHosp,dICU_wait,dICU,
-           dLabTotal,dLabTotalNew,dLabUsed,dRapidTotal,dRapidCurrent,dRapidHospWait,dRapidICUWait,dRapidUsed,dTested,
+           dDetected,dTestsUsed,
            dCumCases,dCumSymp,dCumSevere,dCumICU))
     
   })

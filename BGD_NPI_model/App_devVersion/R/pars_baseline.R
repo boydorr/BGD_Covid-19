@@ -49,19 +49,18 @@ parms_baseline <- c(R0=3.515,
                     fEW2=0.2, # What proportion of people are essential workers?
                     fNC2=0.3, # What is the initial (max) proportion of people that are non-compliant to lockdown 2?
                     ld2_improve=0, # How many days does it take for the full effect of the lockdown to be reached?
-                    lab = F, syndromic = F, # Testing is introduced - laboratory (severe/critical cases) and syndromic (mild cases)
-                    capacity_lab = 500, capacity_rapid=2000, community = 0.8, # Testing capacity - for lab tests and for community HWs supporting isolation
-                    lab_start=90, lab_end=max(times_model), # When does lab testing start and end
+                    testing = T,
+                    test_capacity = 10000,  # Testing capacity - for lab tests 
+                    test_compliance = 0.8, # Proportion of symptomatic people who choose to be tested
+                    test_start=90, test_end=max(times_model), # When does lab testing start and end
+                    test_fneg=0.15, # false negative probability for lab test
+                    syndromic = F,
                     syn_start=152-7, syn_end=max(times_model), # When does syndromic testing start and end
-                    lab_improve=7, # How many days does it take for the full effect of the lab testing to be reached?
+                    community = 0.8, # compliance with CST-supported quarantine
                     syn_improve=7, # How many days does it take for the full effect of the syndromic testing to be reached?
-                    lab_fneg=0.15, # false negative probability for lab test
-                    rapid_fneg=0.3, # false negative probability for rapid tests
                     severe_nonCovid = 0.035, # proportion of people with severe respiratory symptoms not caused by covid-19 over a year
                     mild_nonCovid = 0.35, # proportion of people with mild respiratory symptoms not caused by covid-19 over a year
                     nonCovidHH = 0.23, # proportion of non-covid ILI cases that occur in same household as another ILI case
-                    lab_cost=10, # Temporary number for cost of lab test
-                    rapid_cost=3, # Temporary number of cost of rapid test
                     mask = F, # Are masks used?
                     mask_start=152-7, mask_end=max(times_model), # When does mask wearing start and end
                     mask_effect_outward=0.5, # By what proportion does mask wearing reduce viral emissions  from infectious individuals
