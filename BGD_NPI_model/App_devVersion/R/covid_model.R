@@ -19,11 +19,27 @@ covid_model <- function(t, y, parms, age_dep_pars, demog, vax1vec,vax2vec) {
     # Recalculate probs of each severity class based on level of vaccination
     #________________________
     
-    Vax1 <- vax1vec[round(t)+1]; Vax2 <- vax2vec[round(t)+1]
-    probs <- calc_fractions(age_dep_pars,demog,Vax1=Vax1,Vax2=Vax2,model_parms=parms)
-    fa <- as.numeric(probs["fa"])
-    fd <- as.numeric(probs["fd"])
-    fHosp <- as.numeric(probs["fHosp"])
+    if(t>=vax_delay){
+      Vax1 <- vax1vec[round(t)+1-vax_delay]; Vax2 <- vax2vec[round(t)+1-vax_delay]
+    }else{
+      Vax1<-Vax2<-0
+    }
+    if(vax_order==1){
+      probs <- calc_fractions(age_dep_pars,demog,Vax1=Vax1,Vax2=Vax2,model_parms=parms)
+      fa <- as.numeric(probs["fa"])
+      fd <- as.numeric(probs["fd"])
+      fHosp <- as.numeric(probs["fHosp"])
+    }else{
+      vax1_prop <- (Vax1-Vax2)/population
+      vax2_prop <- Vax2/population
+      vax_adjustment <- (1-vax2_prop-vax1_prop) + 
+        (1-vax_severity_effect_dose1)*vax1_prop + 
+        (1-vax_severity_effect_dose2)*vax2_prop
+      fa <- fa*vax_adjustment
+      fd <- fd*vax_adjustment
+      fHosp <- fHosp*vax_adjustment
+      
+    }
     
 
     
@@ -240,7 +256,7 @@ covid_model <- function(t, y, parms, age_dep_pars, demog, vax1vec,vax2vec) {
     # Cases detected by rapid tests (targeted at those with mild symptoms)
     if(testing == T & t>=test_start & t<test_end){
       targets_nonCovid <- (mild_nonCovid/365)*(test_compliance*(S_n+S_E+S_I + E_f+E_b+E_ss+E_sa+E_t + R_n+R_E+R_I+R_Is_f+R_Ia_f+R_I_b) + (S_q + E_q+E_qE + R_qR+R_Is_qs+R_Ia_qa+R_Is_q+R_Ia_q)) 
-      targets_covid <- ((Ip_f+Ip_sa)*(1-NC_syn)+Ip_q+2*Ip_qp)/dur_p 
+      targets_covid <- ((Ip_f+Ip_s+Ip_b+Ip_sa+Ip_q+2*Ip_qp)/dur_p )*test_compliance
       if((targets_covid+targets_nonCovid)>0){
         prop_covid <- targets_covid/(targets_covid+targets_nonCovid)
         }else{prop_covid <- 0}

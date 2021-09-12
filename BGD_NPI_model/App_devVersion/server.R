@@ -49,7 +49,21 @@ shinyServer(function(input, output, session) {
     parms_edit["f_mask_effect_inward"]=input$bl_mask_effect_in/input$bl_mask_effect_out # What proportion of mask_effect_outward is the impact of masks in protecting the wearer from infection
     parms_edit["mask_compliance"]=input$bl_mask_compliance/100 # What proportion of people are compliant to mask wearing?
     parms_edit["mask_improve"]=input$bl_mask_improve # How many days does it take for the full effect of mask wearing to be reached?
-
+    parms_edit["vax"]=as.logical(input$bl_vax)
+    parms_edit["vax_2_doses"]=as.logical(input$bl_vax_2_doses)
+    parms_edit["vax_order"]=as.numeric(input$bl_vax_order)
+    parms_edit["vax_compliance"]=input$bl_vax_compliance/100
+    parms_edit["vax_transmission_effect_dose1"]=input$bl_vax_transmission_effect_dose1/100
+    parms_edit["vax_transmission_effect_dose2"]=input$bl_vax_transmission_effect_dose2/100
+    parms_edit["vax_severity_effect_dose1"]=input$bl_vax_severity_effect_dose1/100
+    parms_edit["vax_severity_effect_dose2"]=input$bl_vax_severity_effect_dose2 /100
+    parms_edit["t_between_doses"]=input$bl_t_between_doses
+    parms_edit["vax_rate"]=input$bl_vax_rate
+    parms_edit["maxVax"]=input$bl_maxVax/100
+    parms_edit["vax_start"]=as.numeric(input$bl_vax_dates[1] - start_date)
+    parms_edit["vax_end"]=as.numeric(input$bl_vax_dates[2] - start_date)
+    parms_edit["vax_delay"]=input$bl_vax_delay
+    
     return(parms_edit)
 
   })
@@ -107,7 +121,22 @@ shinyServer(function(input, output, session) {
     updateNumericInput(session, inputId = "int_mask_improve", value = input$bl_mask_improve)
     updateSliderInput(session, inputId = "int_mask_effect_out", value = input$bl_mask_effect_out)
     updateSliderInput(session, inputId = "int_mask_effect_in", value = input$bl_mask_effect_in/input$bl_mask_effect_out)
-
+    # # Vaccination inputs
+    updateRadioButtons(session, inputId = "int_vax", selected=as.logical(input$bl_vax))
+    updateRadioButtons(session, inputId = "int_vax_2_doses", selected=as.logical(input$bl_vax_2_doses))
+    updateRadioButtons(session, inputId = "int_vax_order", selected=input$bl_vax_order)
+    updateSliderInput(session, inputId = "int_vax_dates", value = c(input$bl_vax_dates[1], input$bl_vax_dates[2]), timeFormat = "%d %b %y")
+    updateSliderInput(session, inputId = "int_vax_compliance", value = input$bl_vax_compliance)
+    updateSliderInput(session, inputId = "int_vax_transmission_effect_dose1", value = input$bl_vax_transmission_effect_dose1)
+    updateSliderInput(session, inputId = "int_vax_transmission_effect_dose2", value = input$bl_vax_transmission_effect_dose2)
+    updateSliderInput(session, inputId = "int_vax_severity_effect_dose1", value = input$bl_vax_severity_effect_dose1)
+    updateSliderInput(session, inputId = "int_vax_severity_effect_dose2", value = input$bl_vax_severity_effect_dose2)
+    updateSliderInput(session, inputId = "int_maxVax", value = input$bl_maxVax)
+    updateNumericInput(session, inputId = "int_t_between_doses", value = input$bl_t_between_doses)
+    updateNumericInput(session, inputId = "int_vax_rate", value = input$bl_vax_rate)
+    updateNumericInput(session, inputId = "int_vax_delay", value = input$bl_vax_delay)
+    
+    
   })
 
 
@@ -156,7 +185,20 @@ shinyServer(function(input, output, session) {
     parms_edit["f_mask_effect_inward"]=input$int_mask_effect_in/input$int_mask_effect_out # What proportion of mask_effect_outward is the impact of masks in protecting the wearer from infection
     parms_edit["mask_compliance"]=input$int_mask_compliance/100 # What proportion of people are compliant to mask wearing?
     parms_edit["mask_improve"]=input$int_mask_improve # How many days does it take for the full effect of mask wearing to be reached?
-    
+    parms_edit["vax"]=as.logical(input$int_vax)
+    parms_edit["vax_2_doses"]=as.logical(input$int_vax_2_doses)
+    parms_edit["vax_order"]=as.numeric(input$int_vax_order)
+    parms_edit["vax_compliance"]=input$int_vax_compliance/100
+    parms_edit["vax_transmission_effect_dose1"]=input$int_vax_transmission_effect_dose1/100
+    parms_edit["vax_transmission_effect_dose2"]=input$int_vax_transmission_effect_dose2/100
+    parms_edit["vax_severity_effect_dose1"]=input$int_vax_severity_effect_dose1/100
+    parms_edit["vax_severity_effect_dose2"]=input$int_vax_severity_effect_dose2/100
+    parms_edit["t_between_doses"]=input$int_t_between_doses
+    parms_edit["vax_rate"]=input$int_vax_rate
+    parms_edit["maxVax"]=input$int_maxVax/100
+    parms_edit["vax_start"]=as.numeric(input$int_vax_dates[1] - start_date)
+    parms_edit["vax_end"]=as.numeric(input$int_vax_dates[2] - start_date)
+    parms_edit["vax_delay"]=input$int_vax_delay
     
     return(parms_edit)
   })
@@ -289,7 +331,7 @@ shinyServer(function(input, output, session) {
   # upa_days <- eventReactive(input$upa_go,{
   #   upa_days<-input$upa_days
   # })
-
+    
   
   # Obtain vaccination vectors
   vax_baseline <- reactive(create_vax(parms_baseline_adjust(),times))
@@ -299,8 +341,8 @@ shinyServer(function(input, output, session) {
   out_baseline <- reactive(amalgamate_cats(rbind(preIntro,as.data.frame(lsoda(y, times_model, covid_model, parms=parms_baseline_adjust(),age_dep_pars=age_dep_pars, demog=dhaka_pop_by_age, vax1vec=vax_baseline()$Vax1,vax2vec=vax_baseline()$Vax2))))) # output with no extra intervention
   out_intervention <- reactive(amalgamate_cats(rbind(preIntro,as.data.frame(lsoda(y, times_model, covid_model, parms=parms_intervention(),age_dep_pars=age_dep_pars, demog=dhaka_pop_by_age, vax1vec=vax_intervention()$Vax1,vax2vec=vax_intervention()$Vax2))))) # output with selected interventions
 
-  # output$out <- renderPrint(nrow(vax_baseline()))
-
+  output$out <- renderPrint(out_baseline()$TestsUsed)
+  
 
 
   #----- Create plot 1 - mortality in baseline vs. intervention (RS) -----------

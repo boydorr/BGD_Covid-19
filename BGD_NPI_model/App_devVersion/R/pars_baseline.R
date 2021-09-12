@@ -81,6 +81,7 @@ parms_baseline <- c(R0=3.515,
                     beds = 10947, # hospital beds in Dhaka District
                     vax = F,
                     vax_2_doses = T,
+                    vax_order = 1, # 1=by age, 2=at random
                     vax_compliance = 0.8,
                     vax_transmission_effect_dose1 = 0.65,
                     vax_transmission_effect_dose2 = 0.8,
@@ -90,7 +91,8 @@ parms_baseline <- c(R0=3.515,
                     vax_rate = round(0.1*dhakapop2020/30), # vaccinations per day
                     maxVax = 0.3, # maximum value here is vax_compliance (unless want to exclude children - then would need to be lower)
                     vax_start = min(times_model)+20,
-                    vax_end = max(times_model)
+                    vax_end = max(times_model),
+                    vax_delay = 14 # days taken for vaccination to have a protective effect
 )
 
 
