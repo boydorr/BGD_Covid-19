@@ -2,6 +2,37 @@
 
 
 shinyServer(function(input, output, session) {
+  
+  pop_by_age <- reactive({
+    # Demography
+    pop_by_age <- data.frame(age_group = dhaka_pop_by_age$age_group)
+    pop_by_age$prop <- c(input$demog_1,input$demog_2,input$demog_3,input$demog_4,
+                         input$demog_5,input$demog_6,input$demog_7,input$demog_8,
+                         input$demog_9)/100
+    pop_by_age$pop <- pop_by_age$prop*input$pop
+    
+    
+    
+    return(pop_by_age)
+  })
+  observeEvent(input$pop_reset,{
+    
+    # Return ui inputs to defaults
+    updateNumericInput(session, inputId = "pop", value = as.numeric(parms_baseline["population"]))
+    updateNumericInput(session, inputId = "demog_1", value = round(dhaka_pop_by_age$prop[1]*100,1))
+    updateNumericInput(session, inputId = "demog_2", value = round(dhaka_pop_by_age$prop[2]*100,1))
+    updateNumericInput(session, inputId = "demog_3", value = round(dhaka_pop_by_age$prop[3]*100,1))
+    updateNumericInput(session, inputId = "demog_4", value = round(dhaka_pop_by_age$prop[4]*100,1))
+    updateNumericInput(session, inputId = "demog_5", value = round(dhaka_pop_by_age$prop[5]*100,1))
+    updateNumericInput(session, inputId = "demog_6", value = round(dhaka_pop_by_age$prop[6]*100,1))
+    updateNumericInput(session, inputId = "demog_7", value = round(dhaka_pop_by_age$prop[7]*100,1))
+    updateNumericInput(session, inputId = "demog_8", value = round(dhaka_pop_by_age$prop[8]*100,1))
+    updateNumericInput(session, inputId = "demog_9", value = round(dhaka_pop_by_age$prop[9]*100,1))
+    # updateSliderInput(session, inputId = "initial_immune", value = 25)
+    # updateNumericInput(session, inputId = "initial_infectious", value = 11451)
+    # updateNumericInput(session, inputId = "days", value = 120)
+    
+  })
 
   # Adjust baseline parameters based on selected R0
   parms_baseline_adjust <- reactive({
@@ -63,6 +94,25 @@ shinyServer(function(input, output, session) {
     parms_edit["vax_start"]=as.numeric(input$bl_vax_dates[1] - start_date)
     parms_edit["vax_end"]=as.numeric(input$bl_vax_dates[2] - start_date)
     parms_edit["vax_delay"]=input$bl_vax_delay
+    parms_edit["population"]=input$pop
+    
+    if(sum(c(input$demog_1,input$demog_2,input$demog_3,input$demog_4,
+             input$demog_5,input$demog_6,input$demog_7,input$demog_8,
+             input$demog_9))>=99.5 &
+       sum(c(input$demog_1,input$demog_2,input$demog_3,input$demog_4,
+             input$demog_5,input$demog_6,input$demog_7,input$demog_8,
+             input$demog_9))<=100.5){
+      
+      # Demography
+      pop_by_age <- data.frame(age_group = dhaka_pop_by_age$age_group)
+      pop_by_age$prop <- c(input$demog_1,input$demog_2,input$demog_3,input$demog_4,
+                           input$demog_5,input$demog_6,input$demog_7,input$demog_8,
+                           input$demog_9)/100
+      pop_by_age$pop <- pop_by_age$prop*input$pop
+      
+      # Make edits
+      parms_edit[c("fa","fd","fHosp")] <- calc_fractions(age_dep_pars,pop_by_age)
+    }
     
     return(parms_edit)
 
@@ -90,8 +140,8 @@ shinyServer(function(input, output, session) {
   observeEvent(input$up_int_adj_bl, {
 
 
-    # Show a notification
-    showNotification(HTML("<b>Comparison values will be adjusted to the new baseline values</b>"), type="message")
+    # # Show a notification
+    # showNotification(HTML("<b>Comparison values will be adjusted to the new baseline values</b>"), type="message")
 
     # Lockdown inputs
     updateRadioButtons(session, inputId = "int_ld", selected=as.logical(input$bl_ld))
@@ -199,25 +249,44 @@ shinyServer(function(input, output, session) {
     parms_edit["vax_start"]=as.numeric(input$int_vax_dates[1] - start_date)
     parms_edit["vax_end"]=as.numeric(input$int_vax_dates[2] - start_date)
     parms_edit["vax_delay"]=input$int_vax_delay
+    parms_edit["population"]=input$pop
     
+    if(sum(c(input$demog_1,input$demog_2,input$demog_3,input$demog_4,
+             input$demog_5,input$demog_6,input$demog_7,input$demog_8,
+             input$demog_9))>=99.5 &
+       sum(c(input$demog_1,input$demog_2,input$demog_3,input$demog_4,
+             input$demog_5,input$demog_6,input$demog_7,input$demog_8,
+             input$demog_9))<=100.5){
+      
+      # Demography
+      pop_by_age <- data.frame(age_group = dhaka_pop_by_age$age_group)
+      pop_by_age$prop <- c(input$demog_1,input$demog_2,input$demog_3,input$demog_4,
+                           input$demog_5,input$demog_6,input$demog_7,input$demog_8,
+                           input$demog_9)/100
+      pop_by_age$pop <- pop_by_age$prop*input$pop
+      
+      # Make edits
+      parms_edit[c("fa","fd","fHosp")] <- calc_fractions(age_dep_pars,pop_by_age)
+    }
     return(parms_edit)
   })
   
   
-  # # Give warning if pop dist proportions don't add up
-  # observeEvent(input$go, {
-  #   if(sum(c(input$demog_1,input$demog_2,input$demog_3,input$demog_4,
-  #            input$demog_5,input$demog_6,input$demog_7,input$demog_8,
-  #            input$demog_9))<99.5|
-  #      sum(c(input$demog_1,input$demog_2,input$demog_3,input$demog_4,
-  #            input$demog_5,input$demog_6,input$demog_7,input$demog_8,
-  #            input$demog_9))>100.5){
-  #     output$demog_warning <-renderText("Error: percentages describing age distribution must sum to 100")
-  #   }else{
-  #     output$demog_warning <-renderText("")
-  #   }
-  #  
-  # })
+  # Give warning if pop dist proportions don't add up
+  output$demog_warning <- renderText({
+    test <- sum(c(input$demog_1,input$demog_2,input$demog_3,input$demog_4,
+                  input$demog_5,input$demog_6,input$demog_7,input$demog_8,
+                  input$demog_9))<99.5|
+      sum(c(input$demog_1,input$demog_2,input$demog_3,input$demog_4,
+            input$demog_5,input$demog_6,input$demog_7,input$demog_8,
+            input$demog_9))>100.5
+    if(test){
+      "Warning: percentages describing age distribution do not sum to 100. Please correct before interpreting results."
+    }else{
+      ""
+    }
+  })
+ 
   
   # # Update maximum days on date sliders in response to changing upazila forecast period
   # observeEvent(input$upa_days, {
@@ -238,99 +307,35 @@ shinyServer(function(input, output, session) {
   # })
   # 
   
-  # parms_upazila <- eventReactive(input$go,{
-  #   
-  #   # Update population
-  #   parms_edit["population"]=input$pop
-  # 
-  # 
-  #   if(sum(c(input$demog_1,input$demog_2,input$demog_3,input$demog_4,
-  #            input$demog_5,input$demog_6,input$demog_7,input$demog_8,
-  #            input$demog_9))>99.5 &
-  #      sum(c(input$demog_1,input$demog_2,input$demog_3,input$demog_4,
-  #            input$demog_5,input$demog_6,input$demog_7,input$demog_8,
-  #            input$demog_9))<100.5){
-  # 
-  #     # Upazila demography
-  #     upazila_pop_by_age <- data.frame(age_group = dhaka_pop_by_age$age_group)
-  #     upazila_pop_by_age$prop <- c(input$demog_1,input$demog_2,input$demog_3,input$demog_4,
-  #                                  input$demog_5,input$demog_6,input$demog_7,input$demog_8,
-  #                                  input$demog_9)/100
-  #     upazila_pop_by_age$pop <- upazila_pop_by_age$prop*input$pop
-  # 
-  #     # Make edits
-  #     parms_edit[c("fa","fd","fHosp")] <- calc_fractions(age_dep_pars,upazila_pop_by_age)
-  # 
-  # 
-  #   }
-  #   
-  #   return(parms_edit)
-  # })
-  # pop_by_age <- eventReactive(input$go,{
-  #   
-  #   if(sum(c(input$demog_1,input$demog_2,input$demog_3,input$demog_4,
-  #            input$demog_5,input$demog_6,input$demog_7,input$demog_8,
-  #            input$demog_9))>99.5 &
-  #      sum(c(input$demog_1,input$demog_2,input$demog_3,input$demog_4,
-  #            input$demog_5,input$demog_6,input$demog_7,input$demog_8,
-  #            input$demog_9))<100.5){
-  #     
-  #     # Upazila demography
-  #     pop_by_age <- data.frame(age_group = dhaka_pop_by_age$age_group)
-  #     pop_by_age$prop <- c(input$demog_1,input$demog_2,input$demog_3,input$demog_4,
-  #                                  input$demog_5,input$demog_6,input$demog_7,input$demog_8,
-  #                                  input$demog_9)/100
-  #     pop_by_age$pop <- pop_by_age$prop*input$pop
-  #     
-  #   }
-  #   
-  #   return(pop_by_age)
-  # })
-  # observeEvent(input$pop_reset,{
-  #   
-  #   # Return ui inputs to defaults
-  #   updateNumericInput(session, inputId = "pop", value = as.numeric(parms_baseline["population"]))
-  #   updateNumericInput(session, inputId = "demog_1", value = round(dhaka_pop_by_age$prop[1]*100,1))
-  #   updateNumericInput(session, inputId = "demog_2", value = round(dhaka_pop_by_age$prop[2]*100,1))
-  #   updateNumericInput(session, inputId = "demog_3", value = round(dhaka_pop_by_age$prop[3]*100,1))
-  #   updateNumericInput(session, inputId = "demog_4", value = round(dhaka_pop_by_age$prop[4]*100,1))
-  #   updateNumericInput(session, inputId = "demog_5", value = round(dhaka_pop_by_age$prop[5]*100,1))
-  #   updateNumericInput(session, inputId = "demog_6", value = round(dhaka_pop_by_age$prop[6]*100,1))
-  #   updateNumericInput(session, inputId = "demog_7", value = round(dhaka_pop_by_age$prop[7]*100,1))
-  #   updateNumericInput(session, inputId = "demog_8", value = round(dhaka_pop_by_age$prop[8]*100,1))
-  #   updateNumericInput(session, inputId = "demog_9", value = round(dhaka_pop_by_age$prop[9]*100,1))
-  #   updateSliderInput(session, inputId = "initial_immune", value = 25)
-  #   updateNumericInput(session, inputId = "initial_infectious", value = 11451)
-  #   updateNumericInput(session, inputId = "days", value = 120)
-  # 
-  # })
-  # 
-  # # Initialise population
-  # inits <- eventReactive(input$go,{
-  #   
-  #   inits <- y
-  #   
-  #   inits["Ia_f"] <- input$initial_infectious*parms_baseline["fa"] # assume infectious individuals are the only infectious individual in their households and are at the beginning of their infectious period
-  #   inits["Ip_f"] <- input$initial_infectious*(1-parms_baseline["fa"])
-  #   inits["E_f"]<- input$initial_infectious*0.5# Assume same number incubating as infectious and evenly distribute among households with and without infecteds (assume no more than one per houshold)
-  #   inits["E_sa"]<- input$initial_infectious*0.5*parms_baseline["fa"]
-  #   inits["E_ss"]<- input$initial_infectious*0.5*(1-parms_baseline["fa"])
-  #   inits["R_n"] <- parms_baseline["population"]*(input$initial_immune/100)*(1-((input$initial_infectious+input$initial_infectious*0.5)/(parms_baseline["population"]/parms_baseline["HHsize"])))
-  #   inits["R_I"] <- parms_baseline["population"]*(input$initial_immune/100)*(input$initial_infectious/(parms_baseline["population"]/parms_baseline["HHsize"]))
-  #   inits["R_E"] <- parms_baseline["population"]*(input$initial_immune/100)*((input$initial_infectious*0.5)/(parms_baseline["population"]/parms_baseline["HHsize"]))
-  #   inits["S_I"] <- (parms_baseline["HHsize"]-1)*(input$initial_infectious*0.5) 
-  #   inits["S_E"] <- (parms_baseline["HHsize"]-1)*(input$initial_infectious*0.5) 
-  #   inits["S_n"] <- as.numeric(parms_baseline["population"] - 
-  #                            (inits["R_n"]+inits["R_I"]+inits["R_E"]+inits["Ia_f"]+inits["Ip_f"]+inits["E_f"]+
-  #                               inits["E_sa"]+inits["E_ss"]+inits["S_I"]+inits["S_E"]))
-  #   inits["CumCases"] <- input$initial_infectious
-  # 
-  #   return(inits)
-  # })
-  # 
-  # upa_days <- eventReactive(input$upa_go,{
-  #   upa_days<-input$upa_days
-  # })
+
+
+  # Initialise population
+  inits <- reactive({
+
+    inits <- initial_conds(parms_baseline_adjust())
+    # inits <- y
+    # 
+    # inits["Ia_f"] <- input$initial_infectious*parms_baseline["fa"] # assume infectious individuals are the only infectious individual in their households and are at the beginning of their infectious period
+    # inits["Ip_f"] <- input$initial_infectious*(1-parms_baseline["fa"])
+    # inits["E_f"]<- input$initial_infectious*0.5# Assume same number incubating as infectious and evenly distribute among households with and without infecteds (assume no more than one per houshold)
+    # inits["E_sa"]<- input$initial_infectious*0.5*parms_baseline["fa"]
+    # inits["E_ss"]<- input$initial_infectious*0.5*(1-parms_baseline["fa"])
+    # inits["R_n"] <- parms_baseline["population"]*(input$initial_immune/100)*(1-((input$initial_infectious+input$initial_infectious*0.5)/(parms_baseline["population"]/parms_baseline["HHsize"])))
+    # inits["R_I"] <- parms_baseline["population"]*(input$initial_immune/100)*(input$initial_infectious/(parms_baseline["population"]/parms_baseline["HHsize"]))
+    # inits["R_E"] <- parms_baseline["population"]*(input$initial_immune/100)*((input$initial_infectious*0.5)/(parms_baseline["population"]/parms_baseline["HHsize"]))
+    # inits["S_I"] <- (parms_baseline["HHsize"]-1)*(input$initial_infectious*0.5)
+    # inits["S_E"] <- (parms_baseline["HHsize"]-1)*(input$initial_infectious*0.5)
+    # inits["S_n"] <- as.numeric(parms_baseline["population"] -
+    #                          (inits["R_n"]+inits["R_I"]+inits["R_E"]+inits["Ia_f"]+inits["Ip_f"]+inits["E_f"]+
+    #                             inits["E_sa"]+inits["E_ss"]+inits["S_I"]+inits["S_E"]))
+    # inits["CumCases"] <- input$initial_infectious
+
+    return(inits)
+  })
+
+  upa_days <- eventReactive(input$upa_go,{
+    upa_days<-input$upa_days
+  })
     
   
   # Obtain vaccination vectors
@@ -338,11 +343,24 @@ shinyServer(function(input, output, session) {
   vax_intervention <- reactive(create_vax(parms_intervention(),times))
 
   # Run model with input parameters
-  out_baseline <- reactive(amalgamate_cats(rbind(preIntro,as.data.frame(lsoda(y, times_model, covid_model, parms=parms_baseline_adjust(),age_dep_pars=age_dep_pars, demog=dhaka_pop_by_age, vax1vec=vax_baseline()$Vax1,vax2vec=vax_baseline()$Vax2))))) # output with no extra intervention
-  out_intervention <- reactive(amalgamate_cats(rbind(preIntro,as.data.frame(lsoda(y, times_model, covid_model, parms=parms_intervention(),age_dep_pars=age_dep_pars, demog=dhaka_pop_by_age, vax1vec=vax_intervention()$Vax1,vax2vec=vax_intervention()$Vax2))))) # output with selected interventions
+  out_baseline <- reactive(amalgamate_cats(rbind(preIntro,as.data.frame(lsoda(y, times_model, covid_model, parms=parms_baseline_adjust(),age_dep_pars=age_dep_pars, demog=pop_by_age(), vax1vec=vax_baseline()$Vax1,vax2vec=vax_baseline()$Vax2))))) # output with no extra intervention
+  out_intervention <- reactive(amalgamate_cats(rbind(preIntro,as.data.frame(lsoda(y, times_model, covid_model, parms=parms_intervention(),age_dep_pars=age_dep_pars, demog=pop_by_age(), vax1vec=vax_intervention()$Vax1,vax2vec=vax_intervention()$Vax2))))) # output with selected interventions
 
-  output$out <- renderPrint(out_baseline()$TestsUsed)
-  
+  output$out <- renderPrint(list(pop_by_age(),
+                                 sum(c(input$demog_1,input$demog_2,input$demog_3,input$demog_4,
+                                       input$demog_5,input$demog_6,input$demog_7,input$demog_8,
+                                       input$demog_9))<99.5|
+                                   sum(c(input$demog_1,input$demog_2,input$demog_3,input$demog_4,
+                                         input$demog_5,input$demog_6,input$demog_7,input$demog_8,
+                                         input$demog_9))>100.5,
+                                 sum(c(input$demog_1,input$demog_2,input$demog_3,input$demog_4,
+                                       input$demog_5,input$demog_6,input$demog_7,input$demog_8,
+                                       input$demog_9))>=99.5&
+                                   sum(c(input$demog_1,input$demog_2,input$demog_3,input$demog_4,
+                                         input$demog_5,input$demog_6,input$demog_7,input$demog_8,
+                                         input$demog_9))<=100.5,
+                                 parms_baseline_adjust()[c("fa","fHosp","fd")]))
+
 
 
   #----- Create plot 1 - mortality in baseline vs. intervention (RS) -----------

@@ -509,7 +509,7 @@ shinyUI(
                            h5("The proportions of cases that are symptomatic, hospitalised and fatal increase as the 
                               average age of the population increases. The age distribution can be adjusted at the bottom of this tab.")
                              # verbatimTextOutput("out")
-                       ),
+                           ),
                        box(width=2,
                            HTML("<center><img src='bd_map.png' style='max-width: 100%; height: auto;'></center>")
                            )
@@ -549,7 +549,15 @@ shinyUI(
                      ),
                      br(),
                      fluidRow(
-                       box(width=12.5, solidHeader=TRUE,
+                       box(width=12.5, solidHeader=TRUE,title="Select population parameters",
+                           br(),
+                           span(textOutput("demog_warning"), style="color:red;font-size: 17px;
+                                 font-weight: bold;"),
+                           br(),
+                           actionBttn(inputId="pop_reset", label = "Reset defaults",
+                                      style="minimal"),
+                           br(),
+                           br(),
                            splitLayout(
                              numericInput(inputId = "days", label = h4(HTML("<strong>Number of days to forecast from 1st March</strong>")), min=30, max = 365,
                                           value = 120, width = "300px"),
@@ -575,20 +583,7 @@ shinyUI(
                                          min = 0, max = 100, value = 25, post="%")
                            ),
                            br(),br(),
-                           splitLayout(
-                             actionBttn(inputId="go", label = "Confirm inputs and run model",
-                                        style="minimal"),
-                             actionBttn(inputId="pop_reset", label = "Reset defaults",
-                                        style="minimal")
-                           ),
-                           span(textOutput("demog_warning"), style="color:red")
                            
-                           
-                       )
-                       
-                     ),
-                     fluidRow(
-                       box(width=12.5, solidHeader = TRUE,
                            h4(HTML("<strong>Age distribution</strong>")),
                            h5("Defaults to the overall age distribution for Dhaka District estimated by the 2011 census."),
                            br(),
@@ -616,7 +611,12 @@ shinyUI(
                              numericInput(inputId = "demog_9", label = "% Age 80+",
                                           value = round(dhaka_pop_by_age$prop[9]*100,1), width = "150px", min=0,max=100)
                            )
+                           
+                           
+                           
+                           
                        )
+                       
                      )
             ),
             #----- Add tab for technical details -------------------------------
