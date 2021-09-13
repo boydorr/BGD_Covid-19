@@ -15,32 +15,6 @@
 covid_model <- function(t, y, parms, age_dep_pars, demog, vax1vec,vax2vec) {
   with(as.list(c(y, parms)), {
     
-    
-    # Recalculate probs of each severity class based on level of vaccination
-    #________________________
-    
-    if(t>=vax_delay){
-      Vax1 <- vax1vec[round(t)+1-vax_delay]; Vax2 <- vax2vec[round(t)+1-vax_delay]
-    }else{
-      Vax1<-Vax2<-0
-    }
-    if(vax_order==1){
-      probs <- calc_fractions(age_dep_pars,demog,Vax1=Vax1,Vax2=Vax2,model_parms=parms)
-      fa <- as.numeric(probs["fa"])
-      fd <- as.numeric(probs["fd"])
-      fHosp <- as.numeric(probs["fHosp"])
-    }else{
-      vax1_prop <- (Vax1-Vax2)/population
-      vax2_prop <- Vax2/population
-      vax_adjustment <- (1-vax2_prop-vax1_prop) + 
-        (1-vax_severity_effect_dose1)*vax1_prop + 
-        (1-vax_severity_effect_dose2)*vax2_prop
-      fa <- fa*vax_adjustment
-      fd <- fd*vax_adjustment
-      fHosp <- fHosp*vax_adjustment
-      
-    }
-    
 
     
     ##Calculate time-dependent rate parameters for disease transmission
@@ -49,14 +23,19 @@ covid_model <- function(t, y, parms, age_dep_pars, demog, vax1vec,vax2vec) {
     # Adjust betas based on vaccination
     #---------------
     
+    if(t>=vax_delay){
+      Vax1 <- vax1vec[round(t)+1-vax_delay]; Vax2 <- vax2vec[round(t)+1-vax_delay]
+    }else{
+      Vax1<-Vax2<-0
+    }
     vax1_prop <- (Vax1-Vax2)/population
     vax2_prop <- Vax2/population
-    vax_adjustment <- (1-vax2_prop-vax1_prop) + 
+    vax_trans_adjustment <- (1-vax2_prop-vax1_prop) + 
       (1-vax_transmission_effect_dose1)*vax1_prop + 
       (1-vax_transmission_effect_dose2)*vax2_prop
-    beta_a <- beta_a*vax_adjustment
-    beta_p <- beta_p*vax_adjustment
-    beta_s <- beta_s*vax_adjustment
+    beta_a <- beta_a*vax_trans_adjustment
+    beta_p <- beta_p*vax_trans_adjustment
+    beta_s <- beta_s*vax_trans_adjustment
     
     
     # Household betas (not affected by any of the interventions)
@@ -154,6 +133,29 @@ covid_model <- function(t, y, parms, age_dep_pars, demog, vax1vec,vax2vec) {
       beta_a_t_bHH <- beta_a_t_bHH*overall_mask_effect
       beta_p_t_bHH <- beta_p_t_bHH*overall_mask_effect
       beta_s_t_bHH <- beta_s_t_bHH*overall_mask_effect
+      
+    }
+    
+    
+    
+    # Recalculate probs of each severity class based on level of vaccination
+    #________________________
+    
+    
+    if(vax_order==1){
+      probs <- calc_fractions(age_dep_pars,demog,Vax1=Vax1,Vax2=Vax2,model_parms=parms)
+      fa <- as.numeric(probs["fa"])
+      fd <- as.numeric(probs["fd"])
+      fHosp <- as.numeric(probs["fHosp"])
+    }else{
+      vax1_prop_infected <- vax1_prop*(1-vax_transmission_effect_dose1)/((1-vax1_prop-vax2_prop) + vax1_prop*(1-vax_transmission_effect_dose1)+vax2_prop*(1-vax_transmission_effect_dose2))
+      vax2_prop_infected <- vax2_prop*(1-vax_transmission_effect_dose2)/((1-vax1_prop-vax2_prop) + vax1_prop*(1-vax_transmission_effect_dose1)+vax2_prop*(1-vax_transmission_effect_dose2))
+      vax_adjustment <- (1-vax2_prop_infected-vax1_prop_infected) + 
+        (1-vax_severity_effect_dose1)*vax1_prop_infected + 
+        (1-vax_severity_effect_dose2)*vax2_prop_infected
+      fa <- fa*vax_adjustment
+      fd <- fd*vax_adjustment
+      fHosp <- fHosp*vax_adjustment
       
     }
     

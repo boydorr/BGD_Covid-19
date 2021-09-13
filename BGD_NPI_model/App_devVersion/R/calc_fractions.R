@@ -20,12 +20,16 @@ calc_fractions <- function(age_dep_pars,demog,Vax1=NULL,Vax2=NULL,model_parms){
   
   }else{
     
-    # Proportion of people with one or two vaccination doses in each age category
+    # Proportion of infected people with one or two vaccination doses in each age category
     pops_to_vax <- demog$prop*model_parms["population"]*model_parms["vax_compliance"]
-    vax2_pops <- pmin(pops_to_vax,pmax(0,Vax2-cumsum(c(0,pops_to_vax[1:(length(pops_to_vax)-1)]))))
+    vax2_pops <- pmin(pops_to_vax,pmax(0,Vax2-rev(cumsum(c(0,rev(pops_to_vax)[1:(length(pops_to_vax)-1)])))))
+    vax1_pops <- pmin(pops_to_vax,pmax(0,Vax1-rev(cumsum(c(0,rev(pops_to_vax)[1:(length(pops_to_vax)-1)]))))) - vax2_pops
     vax2_props <- vax2_pops/(demog$prop*model_parms["population"])
-    vax1_pops <- pmin(pops_to_vax,pmax(0,Vax1-cumsum(c(0,pops_to_vax[1:(length(pops_to_vax)-1)])))) - vax2_pops
     vax1_props <- vax1_pops/(demog$prop*model_parms["population"])
+    
+    vax1_props_infected <- vax1_props*(1-model_parms["vax_transmission_effect_dose1"])/((1-vax1_props-vax2_props) + vax1_props*(1-model_parms["vax_transmission_effect_dose1"])+vax2_props*(1-model_parms["vax_transmission_effect_dose2"]))
+    vax2_props_infected <- vax2_props*(1-model_parms["vax_transmission_effect_dose2"])/((1-vax1_props-vax2_props) + vax1_props*(1-model_parms["vax_transmission_effect_dose1"])+vax2_props*(1-model_parms["vax_transmission_effect_dose2"]))
+    
     
     fa <- sum((1-age_dep_pars$prop_symptomatic)*demog$prop*(1-vax2_props-vax1_props) + 
                 (1-age_dep_pars$prop_symptomatic*(1-model_parms["vax_severity_effect_dose1"]))*demog$prop*vax1_props +

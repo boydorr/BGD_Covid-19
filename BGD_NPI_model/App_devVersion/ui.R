@@ -247,7 +247,7 @@ shinyUI(
                                   conditionalPanel(
                                     condition="input.int_vax_2_doses == 'TRUE'",
                                     sliderInput(inputId = "int_vax_transmission_effect_dose2", label = "% reduction in transmission to people with two vaccination doses:",
-                                                min = 0,  max = 100, value = parms_baseline["vax_transmission_effect_dose1"]*100, post="%"),
+                                                min = 0,  max = 100, value = parms_baseline["vax_transmission_effect_dose2"]*100, post="%"),
                                     sliderInput(inputId = "int_vax_severity_effect_dose2", label = "% reduction in an individual's risks of symptoms, hospitalisation, and death following second vaccination dose:",
                                                 min = 0,  max = 100, value = parms_baseline["vax_severity_effect_dose2"]*100, post="%"),
                                     numericInput(inputId = "int_t_between_doses", label = "Days between giving first and second doses:",
@@ -386,7 +386,7 @@ shinyUI(
                                     conditionalPanel(
                                       condition="input.bl_vax_2_doses == 'TRUE'",
                                       sliderInput(inputId = "bl_vax_transmission_effect_dose2", label = "% reduction in transmission to people with two vaccination doses:",
-                                                  min = 0,  max = 100, value = parms_baseline["vax_transmission_effect_dose1"]*100, post="%"),
+                                                  min = 0,  max = 100, value = parms_baseline["vax_transmission_effect_dose2"]*100, post="%"),
                                       sliderInput(inputId = "bl_vax_severity_effect_dose2", label = "% reduction in an individual's risks of symptoms, hospitalisation, and death following second vaccination dose:",
                                                   min = 0,  max = 100, value = parms_baseline["vax_severity_effect_dose2"]*100, post="%"),
                                       numericInput(inputId = "bl_t_between_doses", label = "Days between giving first and second doses:",
