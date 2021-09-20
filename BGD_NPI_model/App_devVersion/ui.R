@@ -200,8 +200,8 @@ shinyUI(
       title = " Explore", icon = icon("home"),
 
       # Set slider colour for all sliders
-      setSliderColor(color = rep("SlateGray",50),
-                     sliderId = 1:50),
+      setSliderColor(color = rep("SlateGray",100),
+                     sliderId = 1:100),
 
       # Set slider skin (style of marker)
       chooseSliderSkin(skin = "Flat"),
@@ -212,26 +212,28 @@ shinyUI(
         sidebarPanel(width=3,
                      tabsetPanel(
                        #----- Add tab for Interventions ------------------------
-                       tabPanel("Comparison",
+                       #Interventions 1
+                       tabPanel("Scenario 1",
                                 br(),
                                 h6(HTML("Adjust R<sub>0</sub>, intervention, and testing settings for the comparison scenario on the 'Interventions Dhaka' tab (coloured red on output plots).")),
                                 #----- R0 -------------------------
-                                sliderInput(inputId = "int_R0", label = HTML(paste("R", tags$sub(0), sep = "")),
+                                sliderInput(inputId = "int_R0", label = h4(HTML(paste("<strong>R", tags$sub(0),"</strong>", sep = ""))),
                                             min = minR0,  max = 6, value = parms_baseline["R0"], step = 0.01),
                                 hr(class = "dot"),
                                 #----- Vaccination inputs -------------------------
+                                h4(HTML("<strong>Vaccination</strong>")),
                                 radioButtons(inputId = "int_vax", "Vaccinate?",
-                                             choices = list("Yes" = TRUE,"No" = FALSE), inline=TRUE, selected=as.logical(parms_baseline["ld"])),
+                                             choices = list("Yes" = TRUE,"No" = FALSE), inline=TRUE, selected=TRUE),
                                 conditionalPanel(
                                   condition="input.int_vax == 'TRUE'",
                                   sliderInput(inputId = "int_vax_dates", label = "Vaccination period:",
-                                              min = start_date,  max=end_date,
-                                              value = c(start_date+parms_baseline[c("vax_start","vax_end")]),
+                                              min = start_date_forecast,  max=start_date_forecast+90,
+                                              value = c(start_date_forecast,  start_date_forecast+90),
                                               timeFormat = "%d %b %y",step=1,ticks=F),
                                   sliderInput(inputId = "int_maxVax", label = "Target vaccination coverage",
-                                              min = 0,  max = 100, value = (parms_baseline["maxVax"])*100, post="%"),
+                                              min = 0,  max = 100, value = 50, post="%"),
                                   numericInput(inputId = "int_vax_rate", label = "Vaccination capacity (doses/day):",
-                                               value = parms_baseline["vax_rate"], width = "100%", min=0),
+                                               value = round(0.1*dhakapop2020/30), width = "100%", min=0),
                                   sliderInput(inputId = "int_vax_compliance", label = "% of people in each age class that comply with vaccination:",
                                               min = 0,  max = 100, value = (parms_baseline["vax_compliance"])*100, post="%"),
                                   sliderInput(inputId = "int_vax_transmission_effect_dose1", label = "% reduction in transmission to people with one vaccination dose:",
@@ -257,13 +259,14 @@ shinyUI(
                                 ),
                                 hr(class = "dot"),
                                 #----- Lockdown inputs -------------------------
+                                h4(HTML("<strong>Lockdown</strong>")),
                                 radioButtons(inputId = "int_ld", "Add a lockdown?",
-                                             choices = list("Yes" = TRUE,"No" = FALSE), inline=TRUE, selected=as.logical(parms_baseline["ld"])),
+                                             choices = list("Yes" = TRUE,"No" = FALSE), inline=TRUE, selected=FALSE),
                                 conditionalPanel(
-                                  condition="input.bl_ld == 'TRUE'",
+                                  condition="input.int_ld == 'TRUE'",
                                   sliderInput(inputId = "int_ld_dates", label = "Lockdown period:",
-                                            min = start_date,  max=end_date,
-                                            value = c(start_date+parms_baseline[c("ld_start","ld_end")]),
+                                              min = start_date_forecast,  max=start_date_forecast+90,
+                                              value = c(start_date_forecast,  start_date_forecast+90-30),
                                             timeFormat = "%d %b %y",step=1,ticks=F),
                                   numericInput(inputId = "int_ld_improve", label = "Days to full effectiveness:",
                                                value = parms_baseline["ld_improve"], width = "100%", min=0),
@@ -273,34 +276,18 @@ shinyUI(
                                               min = 0,  max = 100, value = (1-parms_baseline["fNC"])*100, post="%"),
                                 ),
                                 hr(class = "dot"),
-                                radioButtons(inputId = "int_ld2", "Add a second lockdown phase?",
-                                             choices = list("Yes" = TRUE,"No" = FALSE), inline=TRUE, selected=as.logical(parms_baseline["ld2"])),
-                                conditionalPanel(
-                                  condition="input.int_ld2 == 'TRUE'",
-                                  sliderInput(inputId = "int_ld2_dates", label = "Implementation period:",
-                                              min = start_date + parms_baseline["ld_end"],  max=end_date,
-                                              value = c(start_date+parms_baseline[c("ld2_start","ld2_end")]),
-                                              timeFormat = "%d %b %y",step=1,ticks=F),
-                                  numericInput(inputId = "int_ld2_improve", label = "Days to full effectiveness:",
-                                               value = parms_baseline["ld2_improve"], width = "100%", min=0),
-                                  sliderInput(inputId = "int_fEW2", label = "% workforce not under lockdown:",
-                                              min = 0,  max = 100, value = (parms_baseline["fEW2"]/parms_baseline["propWorkers"])*100, post="%"),
-                                  sliderInput(inputId = "int_ld2_compliance", label = "Compliance:",
-                                              min = 0,  max = 100, value = (1-parms_baseline["fNC2"])*100, post="%"),
-
-                                ),
-                                hr(class = "dot"),
                                 #----- Mask wearing inputs ----------------------
-                                radioButtons(inputId = "int_mask", "Compulsory public mask wearing?",
-                                             choices = list("Yes" = TRUE,"No" = FALSE), inline=TRUE, selected=as.logical(parms_baseline["mask"])),
+                                h4(HTML("<strong>Public mask wearing</strong>")),
+                                radioButtons(inputId = "int_mask", "Introduce public mask wearing?",
+                                             choices = list("Yes" = TRUE,"No" = FALSE), inline=TRUE, selected=FALSE),
                                 conditionalPanel(
                                   condition="input.int_mask == 'TRUE'",
                                   sliderInput(inputId = "int_mask_dates", label = "Implementation period:",
-                                              min = start_date,  max=end_date,
-                                              value = c(start_date+parms_baseline[c("mask_start","mask_end")]),
+                                              min = start_date_forecast,  max=start_date_forecast+90,
+                                              value = c(start_date_forecast,  start_date_forecast+90),
                                               timeFormat = "%d %b %y",step=1,ticks=F),
                                   numericInput(inputId = "int_mask_improve", label = "Days to scale up:",
-                                               value = parms_baseline["mask_improve"], width = "100%", min=0),
+                                               value = 0, width = "100%", min=0),
                                   sliderInput(inputId = "int_mask_compliance", label = "Compliance:",
                                               min = 0,  max = 100, value = parms_baseline["mask_compliance"]*100, post="%"),
                                   sliderInput(inputId = "int_mask_effect_out", label = "Proportion reduction in transmission from mask-wearers:",
@@ -309,179 +296,270 @@ shinyUI(
                                               min = 0,  max = parms_baseline["mask_effect_outward"], value = parms_baseline["f_mask_effect_inward"]*parms_baseline["mask_effect_outward"])
                                 ),
                                 hr(class = "dot"),
-                                #----- Testing inputs ----------------------
-                                radioButtons(inputId = "int_testing", "Include testing?",
-                                             choices = list("Yes" = TRUE,"No" = FALSE), inline=TRUE, selected=as.logical(parms_baseline["testing"])),
-                                conditionalPanel(
-                                  condition="input.int_testing == 'TRUE'",
-                                  sliderInput(inputId = "int_test_dates", label = "Implementation period:",
-                                              min = start_date,  max=end_date,
-                                              value = c(start_date+parms_baseline[c("test_start","test_end")]),
-                                              timeFormat = "%d %b %y",step=1,ticks=F),
-                                  sliderInput(inputId = "int_test_compliance", label = "% symptomatic people that comply with testing:",
-                                               value = parms_baseline["test_compliance"]*100, width = "100%", min=0,max=100,step=1),
-                                  sliderInput(inputId = "int_test_capacity", label = "Test capacity (max tests/day):",
-                                              min = 0, max = 100000, value = parms_baseline["test_capacity"],
-                                              step = 100),
-                                  sliderInput(inputId = "int_test_fneg", label = "False negative probability:",
-                                              min = 0, max = 1, value = parms_baseline["test_fneg"])
-                                ),
-                                hr(class = "dot"),
                                 #----- Community inputs ------------------------
-                                radioButtons(inputId = "int_syndromic", "Community Support Team response (household quarantine)?",
-                                             choices = list("Yes" = TRUE,"No" = FALSE),inline=TRUE, selected=as.logical(parms_baseline["syndromic"])),
+                                h4(HTML("<strong>Household quaranting (with support by community support teams (CST))</strong>")),
+                                radioButtons(inputId = "int_syndromic", "Introduce household quarantine?",
+                                             choices = list("Yes" = TRUE,"No" = FALSE),inline=TRUE, selected=FALSE),
                                 conditionalPanel(
                                   condition="input.int_syndromic == 'TRUE'",
                                   sliderInput(inputId = "int_syn_dates", label = "Implementation period:",
-                                              min = start_date,  max=end_date,
-                                              value = c(start_date+parms_baseline[c("syn_start","syn_end")]),
+                                              min = start_date_forecast,  max=start_date_forecast+90,
+                                              value = c(start_date_forecast,start_date_forecast+90),
                                               timeFormat = "%d %b %y",step=1,ticks=F),
                                   numericInput(inputId = "int_syn_improve", label = "Days to scale up:",
                                                value = parms_baseline["syn_improve"], width = "100%", min=0),
                                   sliderInput(inputId = "int_community", label = "Quarantine adherence:",
                                               min = 0,  max = 100, value = parms_baseline["community"]*100, post="%")
+                                ),
+                                hr(class = "dot"),
+                                #----- Testing inputs ----------------------
+                                h4(HTML("<strong>Testing</strong>")),
+                                radioButtons(inputId = "int_testing", "Add testing?",
+                                             choices = list("Yes" = TRUE,"No" = FALSE), inline=TRUE, selected=as.logical(parms_baseline["testing"])),
+                                conditionalPanel(
+                                  condition="input.int_testing == 'TRUE'",
+                                  sliderInput(inputId = "int_test_dates", label = "Implementation period:",
+                                              min = start_date_forecast,  max=start_date_forecast+90,
+                                              value = c(start_date_forecast,start_date_forecast+90),
+                                              timeFormat = "%d %b %y",step=1,ticks=F),
+                                  sliderInput(inputId = "int_test_compliance", label = "% symptomatic people that comply with testing:",
+                                              value = parms_baseline["test_compliance"]*100, width = "100%", min=0,max=100,step=1),
+                                  sliderInput(inputId = "int_test_capacity", label = "Test capacity (max tests/day):",
+                                              min = 0, max = 100000, value = parms_baseline["test_capacity"],
+                                              step = 100),
+                                  sliderInput(inputId = "int_test_fneg", label = "False negative probability:",
+                                              min = 0, max = 1, value = parms_baseline["test_fneg"])
                                 )
+                                
                        ),
-                       #----- Add tab for baseline -----------------------------
-                       tabPanel("Baseline",
+                       #Interventions2
+                       tabPanel("Scenario 2",
                                 br(),
-                                h6(HTML("Adjust R<sub>0</sub>, intervention, and testing settings for the baseline scenario on the 'Interventions Dhaka' tab (coloured black on output plots). The baseline parameter settings are also used to produce the plots on the 'Technical Details' tab")),
-                                br(),
-                                radioButtons(inputId = "edit_baseline", "Adjust Baseline Parameters?",
+                                h6(HTML("Adjust R<sub>0</sub>, intervention, and testing settings for the comparison scenario on the 'Interventions Dhaka' tab (coloured red on output plots).")),
+                                #----- R0 -------------------------
+                                sliderInput(inputId = "int2_R0", label = h4(HTML(paste("<strong>R", tags$sub(0),"</strong>", sep = ""))),
+                                            min = minR0,  max = 6, value = parms_baseline["R0"], step = 0.01),
+                                hr(class = "dot"),
+                                #----- Vaccination inputs -------------------------
+                                h4(HTML("<strong>Vaccination</strong>")),
+                                radioButtons(inputId = "int2_vax", "Vaccinate?",
                                              choices = list("Yes" = TRUE,"No" = FALSE), inline=TRUE, selected=FALSE),
                                 conditionalPanel(
-                                  condition="input.edit_baseline == 'TRUE'",
-                                  actionBttn(inputId="up_int_adj_bl", label = "Match comparison values with baseline",
-                                             style="minimal"),
-                                  hr(class = "dot"),
-                                  #----- R0 -------------------------
-                                  sliderInput(inputId = "bl_R0", label = HTML(paste("R", tags$sub(0), sep = "")),
-                                              min = minR0,  max = 6, value = parms_baseline["R0"], step = 0.01),
-                                  hr(class = "dot"),
-                                  #----- Vaccination inputs -------------------------
-                                  radioButtons(inputId = "bl_vax", "Vaccinate?",
-                                               choices = list("Yes" = TRUE,"No" = FALSE), inline=TRUE, selected=as.logical(parms_baseline["ld"])),
+                                  condition="input.int2_vax == 'TRUE'",
+                                  sliderInput(inputId = "int2_vax_dates", label = "Vaccination period:",
+                                              min = start_date_forecast,  max=start_date_forecast+90,
+                                              value = c(start_date_forecast,  start_date_forecast+90),
+                                              timeFormat = "%d %b %y",step=1,ticks=F),
+                                  sliderInput(inputId = "int2_maxVax", label = "Target vaccination coverage",
+                                              min = 0,  max = 100, value = 70, post="%"),
+                                  numericInput(inputId = "int2_vax_rate", label = "Vaccination capacity (doses/day):",
+                                               value = round(0.15*dhakapop2020/30), width = "100%", min=0),
+                                  sliderInput(inputId = "int2_vax_compliance", label = "% of people in each age class that comply with vaccination:",
+                                              min = 0,  max = 100, value = (parms_baseline["vax_compliance"])*100, post="%"),
+                                  sliderInput(inputId = "int2_vax_transmission_effect_dose1", label = "% reduction in transmission to people with one vaccination dose:",
+                                              min = 0,  max = 100, value = parms_baseline["vax_transmission_effect_dose1"]*100, post="%"),
+                                  sliderInput(inputId = "int2_vax_severity_effect_dose1", label = "% reduction in an individual's risks of symptoms, hospitalisation, and death following one vaccination dose:",
+                                              min = 0,  max = 100, value = parms_baseline["vax_severity_effect_dose1"]*100, post="%"),
+                                  numericInput(inputId = "int2_vax_delay", label = "days taken for vaccination to have a protective effect:",
+                                               min = 0, value = parms_baseline["vax_delay"]),
+                                  radioButtons(inputId = "int2_vax_order", "Vaccinate oldest first, or vaccinate at random?",
+                                               choices = list("Oldest" = 1,"Random" = 2), inline=TRUE, selected=parms_baseline["vax_order"]),
+                                  radioButtons(inputId = "int2_vax_2_doses", "Give a second vaccination dose?",
+                                               choices = list("Yes" = TRUE,"No" = FALSE), inline=TRUE, selected=as.logical(parms_baseline["vax_2_doses"])),
                                   conditionalPanel(
-                                    condition="input.bl_vax == 'TRUE'",
-                                    sliderInput(inputId = "bl_vax_dates", label = "Vaccination period:",
-                                                min = start_date,  max=end_date,
-                                                value = c(start_date+parms_baseline[c("vax_start","vax_end")]),
-                                                timeFormat = "%d %b %y",step=1,ticks=F),
-                                    sliderInput(inputId = "bl_maxVax", label = "Target vaccination coverage",
-                                                min = 0,  max = 100, value = (parms_baseline["maxVax"])*100, post="%"),
-                                    numericInput(inputId = "bl_vax_rate", label = "Vaccination capacity (doses/day):",
-                                                 value = parms_baseline["vax_rate"], width = "100%", min=0),
-                                    sliderInput(inputId = "bl_vax_compliance", label = "% of people in each age class that comply with vaccination:",
-                                                min = 0,  max = 100, value = (parms_baseline["vax_compliance"])*100, post="%"),
-                                    sliderInput(inputId = "bl_vax_transmission_effect_dose1", label = "% reduction in transmission to people with one vaccination dose:",
-                                                min = 0,  max = 100, value = parms_baseline["vax_transmission_effect_dose1"]*100, post="%"),
-                                    sliderInput(inputId = "bl_vax_severity_effect_dose1", label = "% reduction in an individual's risks of symptoms, hospitalisation, and death following one vaccination dose:",
-                                                min = 0,  max = 100, value = parms_baseline["vax_severity_effect_dose1"]*100, post="%"),
-                                    numericInput(inputId = "bl_vax_delay", label = "days taken for vaccination to have a protective effect:",
-                                                 min = 0, value = parms_baseline["vax_delay"]),
-                                    radioButtons(inputId = "bl_vax_order", "Vaccinate oldest first, or vaccinate at random?",
-                                                 choices = list("Oldest" = 1,"Random" = 2), inline=TRUE, selected=parms_baseline["vax_order"]),
-                                    radioButtons(inputId = "bl_vax_2_doses", "Give a second vaccination dose?",
-                                                 choices = list("Yes" = TRUE,"No" = FALSE), inline=TRUE, selected=as.logical(parms_baseline["vax_2_doses"])),
-                                    conditionalPanel(
-                                      condition="input.bl_vax_2_doses == 'TRUE'",
-                                      sliderInput(inputId = "bl_vax_transmission_effect_dose2", label = "% reduction in transmission to people with two vaccination doses:",
-                                                  min = 0,  max = 100, value = parms_baseline["vax_transmission_effect_dose2"]*100, post="%"),
-                                      sliderInput(inputId = "bl_vax_severity_effect_dose2", label = "% reduction in an individual's risks of symptoms, hospitalisation, and death following second vaccination dose:",
-                                                  min = 0,  max = 100, value = parms_baseline["vax_severity_effect_dose2"]*100, post="%"),
-                                      numericInput(inputId = "bl_t_between_doses", label = "Days between giving first and second doses:",
-                                                   min = 0, value = parms_baseline["t_between_doses"]),
-                                      
-                                    )
-                                  ),
-                                  hr(class = "dot"),
-                                  #----- Lockdown inputs -------------------------
-                                  radioButtons(inputId = "bl_ld", "Add a lockdown?",
-                                               choices = list("Yes" = TRUE,"No" = FALSE), inline=TRUE, selected=as.logical(parms_baseline["ld"])),
-                                  conditionalPanel(
-                                    condition="input.bl_ld == 'TRUE'",
-                                    sliderInput(inputId = "bl_ld_dates", label = "Lockdown period:",
-                                                min = start_date,  max=end_date,
-                                                value = c(start_date+parms_baseline[c("ld_start","ld_end")]),
-                                                timeFormat = "%d %b %y",step=1,ticks=F),
-                                    numericInput(inputId = "bl_ld_improve", label = "Days to full effectiveness:",
-                                                 value = parms_baseline["ld_improve"], width = "100%", min=0),
-                                    sliderInput(inputId = "bl_fEW", label = "% workforce not under lockdown:",
-                                                min = 0,  max = 100, value = (parms_baseline["fEW"]/parms_baseline["propWorkers"])*100, post="%"),
-                                    sliderInput(inputId = "bl_ld_compliance", label = "Compliance:",
-                                                min = 0,  max = 100, value = (1-parms_baseline["fNC"])*100, post="%"),
-                                  ),
-                                  hr(class = "dot"),
-                                  radioButtons(inputId = "bl_ld2", "Add a second lockdown phase?",
-                                               choices = list("Yes" = TRUE,"No" = FALSE), inline=TRUE, selected=as.logical(parms_baseline["ld2"])),
-                                  conditionalPanel(
-                                    condition="input.bl_ld2 == 'TRUE'",
-                                    sliderInput(inputId = "bl_ld2_dates", label = "Implementation period:",
-                                                min = start_date + parms_baseline["ld_end"],  max=end_date,
-                                                value = c(start_date+parms_baseline[c("ld2_start","ld2_end")]),
-                                                timeFormat = "%d %b %y",step=1,ticks=F),
-                                    numericInput(inputId = "bl_ld2_improve", label = "Days to full effectiveness:",
-                                                 value = parms_baseline["ld2_improve"], width = "100%", min=0),
-                                    sliderInput(inputId = "bl_fEW2", label = "% workforce not under lockdown:",
-                                                min = 0,  max = 100, value = (parms_baseline["fEW2"]/parms_baseline["propWorkers"])*100, post="%"),
-                                    sliderInput(inputId = "bl_ld2_compliance", label = "Compliance:",
-                                                min = 0,  max = 100, value = (1-parms_baseline["fNC2"])*100, post="%"),
-
-                                  ),
-                                  hr(class = "dot"),
-                                  #----- Mask wearing inputs ----------------------
-                                  radioButtons(inputId = "bl_mask", "Compulsory public mask wearing?",
-                                               choices = list("Yes" = TRUE,"No" = FALSE), inline=TRUE, selected=as.logical(parms_baseline["mask"])),
-                                  conditionalPanel(
-                                    condition="input.bl_mask == 'TRUE'",
-                                    sliderInput(inputId = "bl_mask_dates", label = "Implementation period:",
-                                                min = start_date,  max=end_date,
-                                                value = c(start_date+parms_baseline[c("mask_start","mask_end")]),
-                                                timeFormat = "%d %b %y",step=1,ticks=F),
-                                    numericInput(inputId = "bl_mask_improve", label = "Days to scale up:",
-                                                 value = parms_baseline["mask_improve"], width = "100%", min=0),
-                                    sliderInput(inputId = "bl_mask_compliance", label = "Compliance:",
-                                                min = 0,  max = 100, value = parms_baseline["mask_compliance"]*100, post="%"),
-                                    sliderInput(inputId = "bl_mask_effect_out", label = "Proportion reduction in transmission from mask-wearers:",
-                                                min = 0,  max = 1, value = parms_baseline["mask_effect_outward"]),
-                                    sliderInput(inputId = "bl_mask_effect_in", label = "Proportion reduction in transmission to mask-wearers:",
-                                                min = 0,  max = parms_baseline["mask_effect_outward"], value = parms_baseline["f_mask_effect_inward"]*parms_baseline["mask_effect_outward"])
+                                    condition="input.int2_vax_2_doses == 'TRUE'",
+                                    sliderInput(inputId = "int2_vax_transmission_effect_dose2", label = "% reduction in transmission to people with two vaccination doses:",
+                                                min = 0,  max = 100, value = parms_baseline["vax_transmission_effect_dose2"]*100, post="%"),
+                                    sliderInput(inputId = "int2_vax_severity_effect_dose2", label = "% reduction in an individual's risks of symptoms, hospitalisation, and death following second vaccination dose:",
+                                                min = 0,  max = 100, value = parms_baseline["vax_severity_effect_dose2"]*100, post="%"),
+                                    numericInput(inputId = "int2_t_between_doses", label = "Days between giving first and second doses:",
+                                                 min = 0, value = parms_baseline["t_between_doses"]),
                                     
-                                  ),
-                                  #----- Lab testing inputs ----------------------
-                                  radioButtons(inputId = "bl_testing", "Testing?",
-                                               choices = list("Yes" = TRUE,"No" = FALSE), inline=TRUE, selected=as.logical(parms_baseline["testing"])),
-                                  conditionalPanel(
-                                    condition="input.bl_testing == 'TRUE'",
-                                    sliderInput(inputId = "bl_test_dates", label = "Implementation period:",
-                                                min = start_date,  max=end_date,
-                                                value = c(start_date+parms_baseline[c("test_start","test_end")]),
-                                                timeFormat = "%d %b %y",step=1,ticks=F),
-                                    sliderInput(inputId = "bl_test_compliance", label = "% symptomatic people that comply with testing:",
-                                                value = parms_baseline["test_compliance"]*100, width = "100%", min=0,max=100,step=1),
-                                    sliderInput(inputId = "bl_test_capacity", label = "Test capacity (max tests/day):",
-                                                min = 0, max = 100000, value = parms_baseline["test_capacity"],
-                                                step = 100),
-                                    sliderInput(inputId = "bl_test_fneg", label = "False negatives:",
-                                                min = 0, max = 1, value = parms_baseline["test_fneg"])
-                                  ),
-                                  hr(class = "dot"),
-                                  #----- Community inputs ------------------------
-                                  radioButtons(inputId = "bl_syndromic", "Community Support Team response (household quarantine)?",
-                                               choices = list("Yes" = TRUE,"No" = FALSE),inline=TRUE, selected=as.logical(parms_baseline["syndromic"])),
-                                  conditionalPanel(
-                                    condition="input.bl_syndromic == 'TRUE'",
-                                    sliderInput(inputId = "bl_syn_dates", label = "Implementation period:",
-                                                min = start_date,  max=end_date,
-                                                value = c(start_date+parms_baseline[c("syn_start","syn_end")]),
-                                                timeFormat = "%d %b %y",step=1,ticks=F),
-                                    numericInput(inputId = "bl_syn_improve", label = "Days to scale up:",
-                                                 value = parms_baseline["syn_improve"], width = "100%", min=0),
-                                    sliderInput(inputId = "bl_community", label = "Quarantine adherence:",
-                                                min = 0,  max = 100, value = parms_baseline["community"]*100, post="%"),
-
                                   )
+                                ),
+                                hr(class = "dot"),
+                                #----- Lockdown inputs -------------------------
+                                h4(HTML("<strong>Lockdown</strong>")),
+                                radioButtons(inputId = "int2_ld", "Add a lockdown?",
+                                             choices = list("Yes" = TRUE,"No" = FALSE), inline=TRUE, selected=FALSE),
+                                conditionalPanel(
+                                  condition="input.int2_ld == 'TRUE'",
+                                  sliderInput(inputId = "int2_ld_dates", label = "Lockdown period:",
+                                              min = start_date_forecast,  max=start_date_forecast+90,
+                                              value = c(start_date_forecast,  start_date_forecast+90-30),
+                                              timeFormat = "%d %b %y",step=1,ticks=F),
+                                  numericInput(inputId = "int2_ld_improve", label = "Days to full effectiveness:",
+                                               value = parms_baseline["ld_improve"], width = "100%", min=0),
+                                  sliderInput(inputId = "int2_fEW", label = "% workforce not under lockdown:",
+                                              min = 0,  max = 100, value = (parms_baseline["fEW"]/parms_baseline["propWorkers"])*100, post="%"),
+                                  sliderInput(inputId = "int2_ld_compliance", label = "Compliance:",
+                                              min = 0,  max = 100, value = (1-parms_baseline["fNC"])*100, post="%"),
+                                ),
+                                hr(class = "dot"),
+                                #----- Mask wearing inputs ----------------------
+                                h4(HTML("<strong>Public mask wearing</strong>")),
+                                radioButtons(inputId = "int2_mask", "Introduce public mask wearing?",
+                                             choices = list("Yes" = TRUE,"No" = FALSE), inline=TRUE, selected=FALSE),
+                                conditionalPanel(
+                                  condition="input.int2_mask == 'TRUE'",
+                                  sliderInput(inputId = "int2_mask_dates", label = "Implementation period:",
+                                              min = start_date_forecast,  max=start_date_forecast+90,
+                                              value = c(start_date_forecast,  start_date_forecast+90),
+                                              timeFormat = "%d %b %y",step=1,ticks=F),
+                                  numericInput(inputId = "int2_mask_improve", label = "Days to scale up:",
+                                               value = 0, width = "100%", min=0),
+                                  sliderInput(inputId = "int2_mask_compliance", label = "Compliance:",
+                                              min = 0,  max = 100, value = parms_baseline["mask_compliance"]*100, post="%"),
+                                  sliderInput(inputId = "int2_mask_effect_out", label = "Proportion reduction in transmission from mask-wearers:",
+                                              min = 0,  max = 1, value = parms_baseline["mask_effect_outward"]),
+                                  sliderInput(inputId = "int2_mask_effect_in", label = "Proportion reduction in transmission to mask-wearers:",
+                                              min = 0,  max = parms_baseline["mask_effect_outward"], value = parms_baseline["f_mask_effect_inward"]*parms_baseline["mask_effect_outward"])
+                                ),
+                                hr(class = "dot"),
+                                #----- Community inputs ------------------------
+                                h4(HTML("<strong>Household quaranting (with support by community support teams (CST))</strong>")),
+                                radioButtons(inputId = "int2_syndromic", "Introduce household quarantine?",
+                                             choices = list("Yes" = TRUE,"No" = FALSE),inline=TRUE, selected=FALSE),
+                                conditionalPanel(
+                                  condition="input.int2_syndromic == 'TRUE'",
+                                  sliderInput(inputId = "int2_syn_dates", label = "Implementation period:",
+                                              min = start_date,  max=start_date_forecast+90,
+                                              value = c(start_date_forecast,start_date_forecast+90),
+                                              timeFormat = "%d %b %y",step=1,ticks=F),
+                                  numericInput(inputId = "int2_syn_improve", label = "Days to scale up:",
+                                               value = parms_baseline["syn_improve"], width = "100%", min=0),
+                                  sliderInput(inputId = "int2_community", label = "Quarantine adherence:",
+                                              min = 0,  max = 100, value = parms_baseline["community"]*100, post="%")
+                                ),
+                                hr(class = "dot"),
+                                #----- Testing inputs ----------------------
+                                h4(HTML("<strong>Testing</strong>")),
+                                radioButtons(inputId = "int2_testing", "Add testing?",
+                                             choices = list("Yes" = TRUE,"No" = FALSE), inline=TRUE, selected=as.logical(parms_baseline["testing"])),
+                                conditionalPanel(
+                                  condition="input.int2_testing == 'TRUE'",
+                                  sliderInput(inputId = "int2_test_dates", label = "Implementation period:",
+                                              min = start_date_forecast,  max=start_date_forecast+90,
+                                              value = c(start_date_forecast,start_date_forecast+90),
+                                              timeFormat = "%d %b %y",step=1,ticks=F),
+                                  sliderInput(inputId = "int2_test_compliance", label = "% symptomatic people that comply with testing:",
+                                              value = parms_baseline["test_compliance"]*100, width = "100%", min=0,max=100,step=1),
+                                  sliderInput(inputId = "int2_test_capacity", label = "Test capacity (max tests/day):",
+                                              min = 0, max = 100000, value = parms_baseline["test_capacity"],
+                                              step = 100),
+                                  sliderInput(inputId = "int2_test_fneg", label = "False negative probability:",
+                                              min = 0, max = 1, value = parms_baseline["test_fneg"])
                                 )
+                                
+                       ),
+                       #----- Add tab for baseline -----------------------------
+                       tabPanel("Initialisation",
+                                br(),
+                                h6(HTML("Adjust R<sub>0</sub>, intervention, and testing settings for the initial period from 1st March to 15th September prior to the forecast period. The model outputs during this period can be viewed in the 'Model and data comparison' tab")),
+                                br(),
+                                
+                                #----- R0 -------------------------
+                                sliderInput(inputId = "bl_R0", label = h4(HTML(paste("<strong>R", tags$sub(0),"</strong>", sep = ""))),
+                                            min = minR0,  max = 6, value = parms_baseline["R0"], step = 0.01),
+                                hr(class = "dot"),
+                                #----- Vaccination inputs -------------------------
+                                h4(HTML("<strong>Vaccination</strong>")),
+                                h6(HTML("Data on numbers of single and double-vaccinated individuals in the pre-forecast period are taken from <a class='table_a' href=https://github.com/RamiKrispin/coronavirus/>https://github.com/RamiKrispin/coronavirus/</a>")),
+                                br(),
+                                numericInput(inputId = "bl_vax_delay", label = "Days taken for vaccination to have a protective effect:",
+                                             min = 0, value = parms_baseline["vax_delay"]),
+                                radioButtons(inputId = "bl_vax_order", "Vaccinate oldest first, or vaccinate at random?",
+                                             choices = list("Oldest" = 1,"Random" = 2), inline=TRUE, selected=parms_baseline["vax_order"]),
+                                sliderInput(inputId = "bl_vax_compliance", label = "% of people in each age class that comply with vaccination:",
+                                            min = 0,  max = 100, value = (parms_baseline["vax_compliance"])*100, post="%"),
+                                sliderInput(inputId = "bl_vax_transmission_effect_dose1", label = "% reduction in transmission to people with one vaccination dose:",
+                                            min = 0,  max = 100, value = parms_baseline["vax_transmission_effect_dose1"]*100, post="%"),
+                                sliderInput(inputId = "bl_vax_severity_effect_dose1", label = "% reduction in an individual's risks of symptoms, hospitalisation, and death following one vaccination dose:",
+                                            min = 0,  max = 100, value = parms_baseline["vax_severity_effect_dose1"]*100, post="%"),
+                                sliderInput(inputId = "bl_vax_transmission_effect_dose2", label = "% reduction in transmission to people with two vaccination doses:",
+                                            min = 0,  max = 100, value = parms_baseline["vax_transmission_effect_dose2"]*100, post="%"),
+                                sliderInput(inputId = "bl_vax_severity_effect_dose2", label = "% reduction in an individual's risks of symptoms, hospitalisation, and death following second vaccination dose:",
+                                            min = 0,  max = 100, value = parms_baseline["vax_severity_effect_dose2"]*100, post="%"),
+                                
+                                hr(class = "dot"),
+                                #----- Lockdown inputs -------------------------
+                                h4(HTML("<strong>Lockdown</strong>")),
+                                radioButtons(inputId = "bl_ld", "Add a lockdown?",
+                                             choices = list("Yes" = TRUE,"No" = FALSE), inline=TRUE, selected=as.logical(parms_baseline["ld"])),
+                                conditionalPanel(
+                                  condition="input.bl_ld == 'TRUE'",
+                                  sliderInput(inputId = "bl_ld_dates", label = "Lockdown period:",
+                                              min = start_date,  max=start_date_forecast,
+                                              value = c(start_date+parms_baseline[c("ld_start","ld_end")]),
+                                              timeFormat = "%d %b %y",step=1,ticks=F),
+                                  numericInput(inputId = "bl_ld_improve", label = "Days to full effectiveness:",
+                                               value = parms_baseline["ld_improve"], width = "100%", min=0),
+                                  sliderInput(inputId = "bl_fEW", label = "% workforce not under lockdown:",
+                                              min = 0,  max = 100, value = (parms_baseline["fEW"]/parms_baseline["propWorkers"])*100, post="%"),
+                                  sliderInput(inputId = "bl_ld_compliance", label = "Compliance:",
+                                              min = 0,  max = 100, value = (1-parms_baseline["fNC"])*100, post="%"),
+                                ),
+                                
+                                hr(class = "dot"),
+                                #----- Mask wearing inputs ----------------------
+                                h4(HTML("<strong>Public mask wearing</strong>")),
+                                radioButtons(inputId = "bl_mask", "Introduce public mask wearing?",
+                                             choices = list("Yes" = TRUE,"No" = FALSE), inline=TRUE, selected=as.logical(parms_baseline["mask"])),
+                                conditionalPanel(
+                                  condition="input.bl_mask == 'TRUE'",
+                                  sliderInput(inputId = "bl_mask_dates", label = "Implementation period:",
+                                              min = start_date,  max=start_date_forecast,
+                                              value = c(start_date+parms_baseline[c("mask_start","mask_end")]),
+                                              timeFormat = "%d %b %y",step=1,ticks=F),
+                                  numericInput(inputId = "bl_mask_improve", label = "Days to scale up:",
+                                               value = parms_baseline["mask_improve"], width = "100%", min=0),
+                                  sliderInput(inputId = "bl_mask_compliance", label = "Compliance:",
+                                              min = 0,  max = 100, value = parms_baseline["mask_compliance"]*100, post="%"),
+                                  sliderInput(inputId = "bl_mask_effect_out", label = "Proportion reduction in transmission from mask-wearers:",
+                                              min = 0,  max = 1, value = parms_baseline["mask_effect_outward"]),
+                                  sliderInput(inputId = "bl_mask_effect_in", label = "Proportion reduction in transmission to mask-wearers:",
+                                              min = 0,  max = parms_baseline["mask_effect_outward"], value = parms_baseline["f_mask_effect_inward"]*parms_baseline["mask_effect_outward"])
+                                  
+                                ),
+                                hr(class = "dot"),
+                                
+                                #----- Community inputs ------------------------
+                                h4(HTML("<strong>Household quaranting (with support by community support teams (CST))</strong>")),
+                                radioButtons(inputId = "bl_syndromic", "Introduce household quarantine?",
+                                             choices = list("Yes" = TRUE,"No" = FALSE),inline=TRUE, selected=as.logical(parms_baseline["syndromic"])),
+                                conditionalPanel(
+                                  condition="input.bl_syndromic == 'TRUE'",
+                                  sliderInput(inputId = "bl_syn_dates", label = "Implementation period:",
+                                              min = start_date,  max=start_date_forecast,
+                                              value = c(start_date+parms_baseline[c("syn_start","syn_end")]),
+                                              timeFormat = "%d %b %y",step=1,ticks=F),
+                                  numericInput(inputId = "bl_syn_improve", label = "Days to scale up:",
+                                               value = parms_baseline["syn_improve"], width = "100%", min=0),
+                                  sliderInput(inputId = "bl_community", label = "Quarantine adherence:",
+                                              min = 0,  max = 100, value = parms_baseline["community"]*100, post="%"),
+                                  
+                                ),
+                                hr(class = "dot"),
+                                #----- Testing inputs ----------------------
+                                h4(HTML("<strong>Testing</strong>")),
+                                radioButtons(inputId = "bl_testing", "Add testing?",
+                                             choices = list("Yes" = TRUE,"No" = FALSE), inline=TRUE, selected=as.logical(parms_baseline["testing"])),
+                                conditionalPanel(
+                                  condition="input.bl_testing == 'TRUE'",
+                                  sliderInput(inputId = "bl_test_dates", label = "Implementation period:",
+                                              min = start_date,  max=start_date_forecast,
+                                              value = c(start_date+parms_baseline[c("test_start","test_end")]),
+                                              timeFormat = "%d %b %y",step=1,ticks=F),
+                                  sliderInput(inputId = "bl_test_compliance", label = "% symptomatic people that comply with testing:",
+                                              value = parms_baseline["test_compliance"]*100, width = "100%", min=0,max=100,step=1),
+                                  sliderInput(inputId = "bl_test_capacity", label = "Test capacity (max tests/day):",
+                                              min = 0, max = 100000, value = parms_baseline["test_capacity"],
+                                              step = 100),
+                                  sliderInput(inputId = "bl_test_fneg", label = "False negatives:",
+                                              min = 0, max = 1, value = parms_baseline["test_fneg"])
+                                )
+,
+                                
                        )
                      )
         ),
@@ -490,7 +568,7 @@ shinyUI(
         mainPanel(
           tabsetPanel(
             #----- Add tab for Interventions Dhaka -----------------------------------------
-            tabPanel("Interventions 2020",
+            tabPanel("Compare interventions",
                      br(),
                      #----- Add row for description of content -----------------
                      fluidRow(
@@ -508,7 +586,7 @@ shinyUI(
                                can be returned to their default settings by pressing the 'Reset defaults' button"),
                            h5("The proportions of cases that are symptomatic, hospitalised and fatal increase as the 
                               average age of the population increases. The age distribution can be adjusted at the bottom of this tab.")
-                             # verbatimTextOutput("out")
+                           # verbatimTextOutput("out")
                            ),
                        box(width=2,
                            HTML("<center><img src='bd_map.png' style='max-width: 100%; height: auto;'></center>")
@@ -516,23 +594,34 @@ shinyUI(
                      ),
                      br(),
 
+                     #----- Add row for vaccination plots ------------------------
+                     fluidRow(
+                       box(width=8, title="Vaccination coverage", solidHeader = TRUE,
+                           plotOutput("plot_vax", height="200px")
+                       ),
+                       
+                       # box(width=4, title="Total Vaccinated", solidHeader = TRUE,
+                       #     plotOutput("barplot_vax", height="200px")
+                       # )
+                     ),
+                     br(),
                      #----- Add row for mortality plots ------------------------
                      fluidRow(
-                       box(width=9, title="Excess daily mortality", solidHeader = TRUE,
-                           plotOutput("plot1", height="200px")
+                       box(width=8, title="Daily deaths", solidHeader = TRUE,
+                           plotOutput("plot_mortality", height="200px")
                        ),
 
-                       box(width=3, title="2020", solidHeader = TRUE,
+                       box(width=4, title="Total deaths", solidHeader = TRUE,
                            plotOutput("barplot_mortality", height="200px")
                        )
                      ),
                      br(),
                      #----- Add row for hospitalisation plots ----------------
                      fluidRow(
-                       box(width=9, title="Hospital Demand", solidHeader = TRUE,
-                           plotOutput("plot2", height="200px")
+                       box(width=8, title="Hospital Demand", solidHeader = TRUE,
+                           plotOutput("plot_hosp", height="200px")
                        ),
-                       box(width=3, title="2020", solidHeader = TRUE,
+                       box(width=4, title="Total hospitalised", solidHeader = TRUE,
                            plotOutput("barplot_hosp", height="200px")
                        )
                      ),
@@ -540,10 +629,10 @@ shinyUI(
                      
                      #----- Add row for case detection plot --------------------
                      fluidRow(
-                       box(width=9, title = "Cases & detection", solidHeader = TRUE,
+                       box(width=8, title = "Cases & detection", solidHeader = TRUE,
                            plotOutput("case_detection", height="200px")
                        ),
-                       box(width=3, title="2020", solidHeader = TRUE,
+                       box(width=4, title="Proportion cases detected", solidHeader = TRUE,
                            plotOutput("barplot_testing", height="200px")
                        )
                      ),
@@ -559,10 +648,10 @@ shinyUI(
                            br(),
                            br(),
                            splitLayout(
-                             numericInput(inputId = "days", label = h4(HTML("<strong>Number of days to forecast from 1st March</strong>")), min=30, max = 365,
-                                          value = 120, width = "300px"),
+                             numericInput(inputId = "days", label = h4(HTML("<strong>Number of days to forecast from 15th September</strong>")), min=30, max = 6*30,
+                                          value = 90, width = "300px"),
                              
-                             # h5("Defaults to the estimated population of Dhaka District in 2020."),
+                             # h5("Defaults to the estimated population of Dhaka District in 0."),
                              numericInput(inputId = "pop", label = h4(HTML("<strong>Population size</strong>")),
                                           value = parms_baseline["population"], width = "300px", min=0)
                              
@@ -620,7 +709,7 @@ shinyUI(
                      )
             ),
             #----- Add tab for technical details -------------------------------
-            tabPanel("Technical Details",
+            tabPanel("Model and data comparison",
                      br(),
                      #----- Add row for explanation of panels ------------------
                      fluidRow(
@@ -639,55 +728,14 @@ shinyUI(
                      
                      #----- Add rows for case timeseries plots--------------------
                      fluidRow(
-                       box(width=6, title="Forecast vs reports (early epidemic)", solidHeader = TRUE,
-                           plotOutput("epi_ts_early", height = "350px")
-                       ),
-                       box(width=6, title="Forecast vs reports (2020)", solidHeader = TRUE,
+                       box(width=6, title="Forecast vs reported cases & deaths", solidHeader = TRUE,
                            plotOutput("epi_ts", height = "350px")
-                       )
-                     ),
-                     br(),
-                     fluidRow(
-                       box(width=6, title="Forecast vs reported deaths (early epidemic)", solidHeader = TRUE,
-                           plotOutput("death_ts_early", height = "350px")
                        ),
-                       box(width=6, title="Forecast vs reported deaths (2020)", solidHeader = TRUE,
-                           plotOutput("death_ts", height = "350px")
+                       box(width=6, title="Forecast vaccination vs reported vaccination", solidHeader = TRUE,
+                           plotOutput("vax_ts", height = "350px")
                        )
                      ),
                      br(),
-                     #----- Add row for model schematic table --------------------
-                     fluidRow(
-                       box(width=12, title="Model Schematic", solidHeader = TRUE,
-                           HTML('<center><img src="model_schematic.png"></center>')
-                       )
-                     ),
-                     br(),
-                     #----- Add row for model details table --------------------
-                     fluidRow(
-                       box(width=12, title="Epidemiological Parameters", solidHeader = TRUE,
-                           dataTableOutput("param_table")  , style = "height:500px; overflow-y: scroll;" # add scroll bar
-                       )
-                     ),
-                     br(),
-                     fluidRow(
-                       box(width=12, title="Intervention/Testing Parameters", solidHeader = TRUE,
-                           dataTableOutput("int_param_table")  , style = "height:500px; overflow-y: scroll;" # add scroll bar
-                       )
-                     ),
-                     br(),
-                     fluidRow(
-                       box(width=12, title="Age-dependent severity of infection", solidHeader = TRUE,
-                           dataTableOutput("age_dep_param_table")  #, style = "height:500px; overflow-y: scroll;" # add scroll bar
-                       )
-                     ),
-                     br(),
-                     fluidRow(
-                       box(width=12, title="Population parameters", solidHeader = TRUE,
-                           dataTableOutput("pop_param_table")  #, style = "height:500px; overflow-y: scroll;" # add scroll bar
-                       )
-                     ),
-                     br(),br(),
                      #----- Add row for 'secret' y-axis checkbox ---------------
                      fluidRow(
                        div(style="display: inline-block;vertical-align:top; width: 10px;",HTML("<br>")),

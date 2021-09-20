@@ -1,16 +1,16 @@
 
 
 # Start date for all outputs
-start_date <- as.Date("2020-01-01")
-start_date_upa <- as.Date("2021-03-01")
+start_date <- as.Date("2021-03-01")
+start_date_forecast <- as.Date("2021-09-15")
 
 # End date for model
-if(!is.element("end_date",ls())){end_date <- as.Date("2021-01-01")}
+end_date <- as.Date("2022-06-30")
 
 # time periods of interest
 times <- seq(0, as.numeric(end_date-start_date), 1)
-intro_date <- as.Date("2020-02-15")
-times_model <- c(as.numeric(intro_date-start_date):as.numeric(end_date-start_date))
+times_initial <- c(0:as.numeric(start_date_forecast-start_date))
+times_forecast <- c(as.numeric(start_date_forecast-start_date):as.numeric(start_date_forecast-start_date+120))
 
 
 ## Load age dependent disease stage probabilities
@@ -24,6 +24,7 @@ dhaka_pop_by_age <- read.csv("data/dhaka_dist_pop_by_age_census2011_10yearBands.
 
 # Estimate 2020 Dhaka population
 dhakapop2011 <- 12043977
+dhakadivpop2011 <- 36433505
 bdeshpop2011 <- 144043697
 bdeshpop2020 <- 164689000 # UN estimate https://population.un.org/wpp/Download/Standard/Population/
 propDhakaPop <- dhakapop2011/bdeshpop2011
@@ -31,42 +32,42 @@ dhakapop2020 <- round(bdeshpop2020*propDhakaPop)
 
 
 # Parameters for baseline scenario (with just standard lockdown)
-parms_baseline <- c(R0=3.515,
+parms_baseline <- c(R0=2.8,
                     dur_inc=5.8, dur_p=2, dur_s=7, dur_a=7.7, # duration of incubation & residence in each infectious class (days)
                     dur_ICU=7, dur_hosp=5,delay_ICU=7,delay_hosp=7,delay_death=20.2, 
                     dur_hh=10.56,dur_hha=9.87,dur_hhs=12.16,
                     ld=T, # Is there a lockdown period?
                     ld_effect=0.756, # By what proportion do non-household transmissions drop during lockdown for pre/asymptomatic compliant non-workers
-                    ld_start=85, ld_end=85+35+32, # When does the lockdown start (26 Mar) and end (1 Jun)
+                    ld_start=as.Date("2021-04-05")-start_date,ld_end=as.Date("2021-05-23")-start_date, # When does the lockdown start (26 Mar) and end (1 Jun)
                     fEW=0.52*0.326, # What proportion of people are essential workers?
                     fNC=0.06673928, # What is the initial (max) proportion of people that are non-compliant to lockdown?
-                    ld_improve=0, # How many days does it take for the full effect of the lockdown to be reached?
+                    ld_improve=9, # How many days does it take for the full effect of the lockdown to be reached?
                     ld_decline=0.08072955, # At what rate does compliance drop after reaching the peak?
                     ld_min_compliance=0.3, # what is the minimum compliance to which the lockdown can drop during the declining phase?
                     ld_sigmoid_mid = 47.87292115, # location (in days after ld_start) of the lockdown compliance function's inflection point
                     ld2=F, # Is there a second lockdown period?
-                    ld2_start=85+35+32, ld2_end=85+35+32+60, # When does the lockdown start and end
+                    ld2_start=max(times_initial)-30, ld2_end=max(times_initial), # When does the lockdown start and end
                     fEW2=0.2, # What proportion of people are essential workers?
                     fNC2=0.3, # What is the initial (max) proportion of people that are non-compliant to lockdown 2?
                     ld2_improve=0, # How many days does it take for the full effect of the lockdown to be reached?
                     testing = T,
                     test_capacity = 10000,  # Testing capacity - for lab tests 
                     test_compliance = 0.8, # Proportion of symptomatic people who choose to be tested
-                    test_start=90, test_end=max(times_model), # When does lab testing start and end
+                    test_start=0, test_end=max(times_initial), # When does lab testing start and end
                     test_fneg=0.15, # false negative probability for lab test
-                    syndromic = F,
-                    syn_start=152-7, syn_end=max(times_model), # When does syndromic testing start and end
-                    community = 0.8, # compliance with CST-supported quarantine
-                    syn_improve=7, # How many days does it take for the full effect of the syndromic testing to be reached?
+                    syndromic = T,
+                    syn_start=as.Date("2021-04-05")-start_date, syn_end=as.Date("2021-05-23")-start_date, # When does syndromic testing start and end
+                    community = 0.3, # compliance with CST-supported quarantine
+                    syn_improve=9, # How many days does it take for the full effect of the syndromic testing to be reached?
                     severe_nonCovid = 0.035, # proportion of people with severe respiratory symptoms not caused by covid-19 over a year
                     mild_nonCovid = 0.35, # proportion of people with mild respiratory symptoms not caused by covid-19 over a year
                     nonCovidHH = 0.23, # proportion of non-covid ILI cases that occur in same household as another ILI case
-                    mask = F, # Are masks used?
-                    mask_start=152-7, mask_end=max(times_model), # When does mask wearing start and end
+                    mask = T, # Are masks used?
+                    mask_start=as.Date("2021-04-05")-start_date, mask_end=as.Date("2021-05-23")-start_date, # When does mask wearing start and end
                     mask_effect_outward=0.5, # By what proportion does mask wearing reduce viral emissions  from infectious individuals
                     f_mask_effect_inward=0.5, # What proportion of mask_effect_outward is the impact of masks in protecting the wearer from infection
-                    mask_compliance=0.8, # What proportion of people comply with mask wearing
-                    mask_improve=7, # How many days does it take for the full effect of mask wearing to be reached?
+                    mask_compliance=0.3, # What proportion of people comply with mask wearing
+                    mask_improve=9, # How many days does it take for the full effect of mask wearing to be reached?
                     probHHtrans=0.166, # probability of infecting each other household member
                     propPresympTrans=0.23, # proportion of symptomatic transmission that occurs in the presymptomatic period
                     asympTrans=0.65, # Multiplier of symptomatic transmission achieved by asymptomatic cases in the absence of intervention
@@ -79,7 +80,7 @@ parms_baseline <- c(R0=3.515,
                     population = dhakapop2020, # Dhaka metropolitan in 2020 
                     probICU = 0.31, # probability that a hospitalised case requires ICU
                     beds = 10947, # hospital beds in Dhaka District
-                    vax = F,
+                    vax = T,
                     vax_2_doses = T,
                     vax_order = 1, # 1=by age, 2=at random
                     vax_compliance = 0.8,
@@ -88,10 +89,10 @@ parms_baseline <- c(R0=3.515,
                     vax_severity_effect_dose1 = 0.65,
                     vax_severity_effect_dose2 = 0.8,
                     t_between_doses = 7*8,
-                    vax_rate = round(0.1*dhakapop2020/30), # vaccinations per day
-                    maxVax = 0.3, # maximum value here is vax_compliance (unless want to exclude children - then would need to be lower)
-                    vax_start = min(times_model)+20,
-                    vax_end = max(times_model),
+                    vax_rate = 0.2*dhakapop2020/max(times_initial-7*8-14), # vaccinations per day
+                    maxVax = 0.2, # maximum value here is vax_compliance (unless want to exclude children - then would need to be lower)
+                    vax_start = 0,
+                    vax_end = max(times_initial),
                     vax_delay = 14 # days taken for vaccination to have a protective effect
 )
 

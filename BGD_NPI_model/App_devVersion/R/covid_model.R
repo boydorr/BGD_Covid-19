@@ -285,6 +285,9 @@ covid_model <- function(t, y, parms, age_dep_pars, demog, vax1vec,vax2vec) {
     # Cumulative symptomatic cases
     dCumSymp <- (Ip_f+Ip_b+Ip_s+Ip_sa+Ip_q+2*Ip_qp)/dur_p
     
+    # Cumulative asymptomatic cases
+    dCumAsymp <- dCumCases*fa
+    
     # Cumulative hospital cases (general + ICU)
     dCumSevere <- Hosp_wait/delay_hosp + ICU_wait/delay_ICU
     
@@ -305,7 +308,7 @@ covid_model <- function(t, y, parms, age_dep_pars, demog, vax1vec,vax2vec) {
            dR_n,dR_E,dR_I,dR_Ia_f,dR_Is_f,dR_I_b,dR_qR,dR_Ia_qa,dR_Is_qs,dR_Ia_q,dR_Is_q,
            Recup,dD_wait,dD,dHosp_wait,dHosp,dICU_wait,dICU,
            dDetected,dTestsUsed,
-           dCumCases,dCumSymp,dCumSevere,dCumICU))
+           dCumCases,dCumSymp,dCumAsymp,dCumSevere,dCumICU))
     
   })
 }
