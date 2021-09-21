@@ -330,9 +330,7 @@ shinyServer(function(input, output, session) {
   times_forecast <- reactive({
     c(as.numeric(start_date_forecast-start_date):as.numeric(start_date_forecast-start_date+input$days))
   })
-  output$out <- renderPrint({
-    list()
-  })
+  
 
   # Initialise population
   inits <- reactive(initial_conds(parms_baseline_adjust(), initial_immune = input$initial_immune, initial_infectious = input$initial_infectious))
@@ -348,13 +346,17 @@ shinyServer(function(input, output, session) {
   
 
   # Run model with input parameters
+  prevVax <- reactive(c(Vax1=as.numeric(vax_intervention()$Vax1[max(times_initial)+1]),vax_order=as.numeric(input$bl_vax_order),vax_compliance=as.numeric(input$bl_vax_compliance/100)))
   out_baseline <- reactive(amalgamate_cats(as.data.frame(lsoda(y=inits(), times_initial, covid_model, parms=parms_baseline_adjust(),age_dep_pars=age_dep_pars, demog=pop_by_age(), vax1vec=dhaka_vax[which(dhaka_vax$date<=start_date_forecast),"Vax1"],vax2vec=dhaka_vax[which(dhaka_vax$date<=start_date_forecast),"Vax2"])))) # output with no extra intervention
   inits_forecast <- reactive(setNames(as.numeric(out_baseline()[length(times_initial),which(names(out_baseline())%in%names(inits()))]), names(inits())))
-  out_intervention <- reactive(amalgamate_cats(as.data.frame(lsoda(y=inits_forecast(), times_forecast(), covid_model, parms=parms_intervention(),age_dep_pars=age_dep_pars, demog=pop_by_age(), vax1vec=vax_intervention()$Vax1,vax2vec=vax_intervention()$Vax2)))) # output with selected interventions)
-  out_intervention2 <- reactive(amalgamate_cats(as.data.frame(lsoda(y=inits_forecast(), times_forecast(), covid_model, parms=parms_intervention2(),age_dep_pars=age_dep_pars, demog=pop_by_age(), vax1vec=vax_intervention2()$Vax1,vax2vec=vax_intervention2()$Vax2)))) # output with selected interventions)
+  out_intervention <- reactive(amalgamate_cats(as.data.frame(lsoda(y=inits_forecast(), times_forecast(), covid_model, parms=parms_intervention(),age_dep_pars=age_dep_pars, demog=pop_by_age(), vax1vec=vax_intervention()$Vax1,vax2vec=vax_intervention()$Vax2,prevVax=prevVax())))) # output with selected interventions)
+  out_intervention2 <- reactive(amalgamate_cats(as.data.frame(lsoda(y=inits_forecast(), times_forecast(), covid_model, parms=parms_intervention2(),age_dep_pars=age_dep_pars, demog=pop_by_age(), vax1vec=vax_intervention2()$Vax1,vax2vec=vax_intervention2()$Vax2,prevVax=prevVax())))) # output with selected interventions)
   out_full <- reactive(rbind(out_baseline(),out_intervention()[2:length(times_forecast()),])) 
   out_full2 <- reactive(rbind(out_baseline(),out_intervention2()[2:length(times_forecast()),])) 
   
+  output$out <- renderPrint({
+    list(prevVax())
+  })
   
   #----- Create plot - vaccinations ----
   output$plot_vax <- renderPlot({
@@ -664,7 +666,7 @@ shinyServer(function(input, output, session) {
     legend("topleft",
            c("Daily new cases (scenario 1)","Daily new symptomatic (scenario 1)","Total deaths (scenario 1)","Daily new cases (scenario 2)","Daily new symptomatic (scenario 2)","Total deaths (scenario 2)", "Reported daily cases", "Reported total deaths"),
            col=c("red","orange","black","red","orange","black","red","black"),
-           lty=c(1,1,1,3,3,3,2,2,2), lwd=c(2,2,2,2,1,1), bty="n")
+           lty=c(1,1,1,3,3,3,2,2,2), lwd=c(2,2,2,2,2,2,1,1), bty="n")
 
   })
 
@@ -681,16 +683,16 @@ shinyServer(function(input, output, session) {
     axis(2,at=pretty(yRange),labels=format(pretty(yRange),scientific=FALSE,big.mark = ','))
     graphics::box(bty="l")
 
-    lines(out_full()$time, vax_intervention()$Vax2, col="red", type = "l", lwd=1, lty=1)
-    lines(out_full()$time, vax_intervention()$VaxDosesUsed, col="orange", type = "l", lwd=1, lty=1)
-    lines(out_full2()$time, vax_intervention2()$Vax1-vax_intervention2()$Vax2, col=1, type = "l", lwd=2, lty=3)
+    lines(out_full()$time, vax_intervention()$Vax2, col="red", type = "l", lwd=2, lty=1)
+    lines(out_full()$time, vax_intervention()$VaxDosesUsed, col="orange", type = "l", lwd=2, lty=1)
+    lines(out_full2()$time, vax_intervention2()$Vax1, col=1, type = "l", lwd=2, lty=3)
     lines(out_full2()$time, vax_intervention2()$Vax2, col="red", type = "l", lwd=2, lty=3)
     lines(out_full2()$time, vax_intervention2()$VaxDosesUsed, col="orange", type = "l", lwd=2, lty=3)
         
     # Bangladesh data
-    lines(dhaka_vax$date-start_date, dhaka_vax$Vax1-dhaka_vax$Vax2, col="black", type = "l", lwd=1, lty=2)
-    lines(dhaka_vax$date-start_date, dhaka_vax$Vax2, col="red", type = "l", lwd=1, lty=2)
-    lines(dhaka_vax$date-start_date, dhaka_vax$VaxDosesUsed, col="orange", type = "l", lwd=1, lty=2)
+    lines(dhaka_vax$date-start_date, dhaka_vax$Vax1-dhaka_vax$Vax2, col="black", type = "l", lwd=2, lty=2)
+    lines(dhaka_vax$date-start_date, dhaka_vax$Vax2, col="red", type = "l", lwd=2, lty=2)
+    lines(dhaka_vax$date-start_date, dhaka_vax$VaxDosesUsed, col="orange", type = "l", lwd=2, lty=2)
     
     # Demarcate initial and forecast periods
     lines(rep(start_date_forecast-start_date, 2), c(0,yRange[2]*1.2), col="grey45", type = "l", lwd=1,lty=2)

@@ -83,7 +83,7 @@ parms_baseline <- c(R0=2.8,
                     vax = T,
                     vax_2_doses = T,
                     vax_order = 1, # 1=by age, 2=at random
-                    vax_compliance = 0.8,
+                    vax_compliance = 0.5,
                     vax_transmission_effect_dose1 = 0.65,
                     vax_transmission_effect_dose2 = 0.8,
                     vax_severity_effect_dose1 = 0.65,

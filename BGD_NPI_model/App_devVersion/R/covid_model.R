@@ -12,7 +12,7 @@
 
 
 
-covid_model <- function(t, y, parms, age_dep_pars, demog, vax1vec,vax2vec) {
+covid_model <- function(t, y, parms, age_dep_pars, demog, vax1vec,vax2vec,prevVax=NULL) {
   with(as.list(c(y, parms)), {
     
 
@@ -142,22 +142,15 @@ covid_model <- function(t, y, parms, age_dep_pars, demog, vax1vec,vax2vec) {
     #________________________
     
     
-    if(vax_order==1){
+    if(is.null(prevVax)){
       probs <- calc_fractions(age_dep_pars,demog,Vax1=Vax1,Vax2=Vax2,model_parms=parms)
-      fa <- as.numeric(probs["fa"])
-      fd <- as.numeric(probs["fd"])
-      fHosp <- as.numeric(probs["fHosp"])
     }else{
-      vax1_prop_infected <- vax1_prop*(1-vax_transmission_effect_dose1)/((1-vax1_prop-vax2_prop) + vax1_prop*(1-vax_transmission_effect_dose1)+vax2_prop*(1-vax_transmission_effect_dose2))
-      vax2_prop_infected <- vax2_prop*(1-vax_transmission_effect_dose2)/((1-vax1_prop-vax2_prop) + vax1_prop*(1-vax_transmission_effect_dose1)+vax2_prop*(1-vax_transmission_effect_dose2))
-      vax_adjustment <- (1-vax2_prop_infected-vax1_prop_infected) + 
-        (1-vax_severity_effect_dose1)*vax1_prop_infected + 
-        (1-vax_severity_effect_dose2)*vax2_prop_infected
-      fa <- fa*vax_adjustment
-      fd <- fd*vax_adjustment
-      fHosp <- fHosp*vax_adjustment
-      
+      probs <- calc_fractions(age_dep_pars,demog,Vax1=Vax1,Vax2=Vax2,model_parms=parms,prevVax=prevVax)
     }
+    fa <- as.numeric(probs["fa"])
+    fd <- as.numeric(probs["fd"])
+    fHosp <- as.numeric(probs["fHosp"])
+    
     
 
 

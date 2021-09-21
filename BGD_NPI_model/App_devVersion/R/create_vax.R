@@ -7,16 +7,21 @@ create_vax <- function(model_parms,times,vax_init=NA){
     for(t in times){
       if(vax==1 & t>vax_start){
         if(vax_2_doses==T){
-          if(t>(vax_start+t_between_doses)){
-            Vax2RateToday <- dailyVax1[t-t_between_doses]
+          if(t>(vax_start)){
+            Vax2RateToday <- dailyVax1[t+1-t_between_doses]
+            if(Vax1[t]>=min(maxVax*population,population*vax_compliance) & 
+               Vax2[t]<Vax1[t] &
+               Vax1[t]==Vax1[t-t_between_doses]){
+              Vax2RateToday <- Vax1[t]-Vax2[t]
+            }
           }else{
             Vax2RateToday <- 0
           }
         }else{Vax2RateToday <- 0}
         
-        dailyVax2[t+1] <- ifelse(t<=vax_end,min(Vax2RateToday,vax_rate,max(0,maxVax*population-Vax2[t])),0)
+        dailyVax2[t+1] <- ifelse(t<=vax_end,min(Vax2RateToday,vax_rate,max(0,min(maxVax*population,population*vax_compliance)-Vax2[t])),0)
         Vax2[t+1] <- Vax2[t] + dailyVax2[t+1]
-        dailyVax1[t+1] <- ifelse(t<=vax_end,min(vax_rate - dailyVax2[t+1],max(0,maxVax*population - Vax1[t])),0)
+        dailyVax1[t+1] <- ifelse(t<=vax_end,min(vax_rate - dailyVax2[t+1],max(0,min(maxVax*population,population*vax_compliance) - Vax1[t])),0)
         Vax1[t+1] <- Vax1[t] + dailyVax1[t+1]
       }else{
         Vax2[t+1] <- Vax2[t] 
