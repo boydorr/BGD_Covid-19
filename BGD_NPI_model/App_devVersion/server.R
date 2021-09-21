@@ -572,7 +572,7 @@ shinyServer(function(input, output, session) {
   #----- Create case detection plot --------------------------------------
   output$case_detection <- renderPlot({
     
-    par(mgp=c(2,1,0), mar=c(2,3.5,1.5,4.5),mfrow=c(1,2))
+    par(mgp=c(2,1,0), mar=c(2,3.5,1.5,0),mfrow=c(1,2))
     
 
     cases_int<-data.frame("detected"=diff(out_full()$Detected[which(out_full()$time>=(min(times_forecast())-1))]),
@@ -638,7 +638,7 @@ shinyServer(function(input, output, session) {
     par(mgp=c(2,1,0), mar=c(2,3.5,2,0))
     yRange = c(0, max(diff(out_full()$CumCases),diff(out_full2()$CumCases),out_full()$D,out_full2()$D)*1)
     plot(out_full()$time, c(0,diff(out_full()$CumCases)), col="red", type = "l", xlab = "", ylab = "", lwd=2,
-         ylim=yRange, axes=F)
+         ylim=yRange, axes=F,xlim=c(15,max(times_forecast())))
     mtext("Count",side=2,line=2.5,cex=1.3) 
     axis(1, at=date_ticks,
          labels = date_labels)
@@ -676,12 +676,12 @@ shinyServer(function(input, output, session) {
     par(mgp=c(2,1,0), mar=c(2,3.5,2,3.5))
     yRange = c(0, max(vax_intervention2()$VaxDosesUsed,vax_intervention()$VaxDosesUsed))
     plot(out_full()$time, vax_intervention()$Vax1-vax_intervention()$Vax2, col="black", type = "l", xlab = "", ylab = "", lwd=2,
-         ylim=yRange, axes=F,cex.lab=1.2)
+         ylim=yRange, axes=F,cex.lab=1.2,xlim=c(15,max(times_forecast())))
     mtext("Count",side=2,line=2.5,cex=1.3) 
     axis(1, at=date_ticks,
          labels = date_labels)
     axis(2,at=pretty(yRange),labels=format(pretty(yRange),scientific=FALSE,big.mark = ','))
-    graphics::box(bty="l")
+    graphics::box(bty="u")
 
     lines(out_full()$time, vax_intervention()$Vax2, col="red", type = "l", lwd=2, lty=1)
     lines(out_full()$time, vax_intervention()$VaxDosesUsed, col="orange", type = "l", lwd=2, lty=1)

@@ -215,7 +215,7 @@ shinyUI(
                        #Interventions 1
                        tabPanel("Scenario 1",
                                 br(),
-                                h6(HTML("Adjust R<sub>0</sub>, intervention, and testing settings for the comparison scenario on the 'Interventions Dhaka' tab (coloured red on output plots).")),
+                                h6(HTML("Adjust R<sub>0</sub>, intervention, and testing settings for the first of two scenarios for the forecast period (coloured black on the output plots on the 'Compare interventions' tab).")),
                                 #----- R0 -------------------------
                                 sliderInput(inputId = "int_R0", label = h4(HTML(paste("<strong>R", tags$sub(0),"</strong>", sep = ""))),
                                             min = minR0,  max = 6, value = parms_baseline["R0"], step = 0.01),
@@ -335,7 +335,7 @@ shinyUI(
                        #Interventions2
                        tabPanel("Scenario 2",
                                 br(),
-                                h6(HTML("Adjust R<sub>0</sub>, intervention, and testing settings for the comparison scenario on the 'Interventions Dhaka' tab (coloured red on output plots).")),
+                                h6(HTML("Adjust R<sub>0</sub>, intervention, and testing settings for the second of two scenarios for the forecast period (coloured red on the output plots on the 'Compare interventions' tab).")),
                                 #----- R0 -------------------------
                                 sliderInput(inputId = "int2_R0", label = h4(HTML(paste("<strong>R", tags$sub(0),"</strong>", sep = ""))),
                                             min = minR0,  max = 6, value = parms_baseline["R0"], step = 0.01),
@@ -455,13 +455,21 @@ shinyUI(
                        #----- Add tab for baseline -----------------------------
                        tabPanel("Initialisation",
                                 br(),
-                                h6(HTML("Adjust R<sub>0</sub>, intervention, and testing settings for the initial period from 1st March to 15th September prior to the forecast period. The model outputs during this period can be viewed in the 'Model and data comparison' tab")),
+                                h6(HTML("Adjust R<sub>0</sub>, intervention, and testing settings for the initial period from 1st March to 15th September, prior to the forecast period. The model outputs during this period are not shown in the 'Compare interventions' tab, but can be viewed in the 'Model and data comparison' tab")),
                                 br(),
                                 
                                 #----- R0 -------------------------
                                 sliderInput(inputId = "bl_R0", label = h4(HTML(paste("<strong>R", tags$sub(0),"</strong>", sep = ""))),
                                             min = minR0,  max = 6, value = parms_baseline["R0"], step = 0.01),
                                 hr(class = "dot"),
+                                
+                                #----- Pop initialisation -------------------------
+                                numericInput(inputId = "initial_infectious", label = h4(HTML("<strong>Number infectious at initialisation</strong>")), min=0, max = 2000000,
+                                             value = 19086, width = "300px"),
+                                sliderInput(inputId = "initial_immune", label = h4(HTML("<strong>% population immune at initialisation</strong>")),
+                                            min = 0, max = 100, value = 25, post="%"),
+                                hr(class = "dot"),
+                                
                                 #----- Vaccination inputs -------------------------
                                 h4(HTML("<strong>Vaccination</strong>")),
                                 h6(HTML("Data on numbers of single and double-vaccinated individuals in the pre-forecast period are taken from <a class='table_a' href=https://github.com/RamiKrispin/coronavirus/>https://github.com/RamiKrispin/coronavirus/</a>")),
@@ -573,19 +581,21 @@ shinyUI(
                      #----- Add row for description of content -----------------
                      fluidRow(
                        box(width=10,
-                           h5(HTML("Forecasts are shown for <strong>mortality</strong>, severe cases requiring <strong>hospital care</strong>,
-                              and <strong>case detection</strong> by testing in Dhaka District. These metrics are shown both as time series and
-                              summarized over 12 months (barplots to the right).")),
-                           h5("All plots show outputs for both a baseline scenario and a comparison scenario so the impact of interventions can be compared. 
-                              The interventions applied can be adjusted via the 'Comparison' and 'Baseline' tabs in the sidebar."),
-                           h5("This tab can be used to generate forecasts for 2021 in populations of different sizes and age distributions (defaults represent Dhaka District)."),
-                           h5("The number of days to forecast following 1st March 2021 (beginning of the third COVID-19 wave) can be selected (minimum 30), 
-                              along with starting infections and the percentage of the population immune (from prior infection or vaccination) at the forecast start.
-                              Interventions applied during the forecast period can be selected in the 2021 tab of the sidebar. 
-                              Once selected, inputs need to be confirmed and the model run using the grey button below. The parameters that can be adjusted in this tab
-                               can be returned to their default settings by pressing the 'Reset defaults' button"),
+                           h5(HTML("Forecasts are shown for mortality, severe cases requiring hospital care,
+                              and case detection by testing in Dhaka District. These metrics are shown both as time series and
+                              summarized over the entire forecast period (barplots to the right).")),
+                           h5("All plots show outputs for two different scenarios to allow the impact of different interventions to be compared. 
+                              The interventions applied in each scenario can be adjusted via the 'Scenario 1' and 'Scenario 2' tabs in the sidebar."),
+                           h5("The forecast period starts on 15th September 2021, and ends after a number of days that can be selected at the bottom of this page (defaults to 90 days)."),
                            h5("The proportions of cases that are symptomatic, hospitalised and fatal increase as the 
-                              average age of the population increases. The age distribution can be adjusted at the bottom of this tab.")
+                              average age of the population increases. The age distribution can be adjusted at the 
+                              bottom of this tab, and defaults to the age distribution in Dhaka District at the time
+                              of the last census.  The size of the population can also be adjusted."),
+                           h5("If selected, vaccination occurs over a chosen time period within the forecast period. 
+                              The target vaccination coverage is the maximum value that coverage can reach during the forecast period. 
+                              However, this target may not be achieved if the daily vaccination capacity within the vaccination period is too low, or if too small a
+                              percentage of the population complies with vaccination. Vaccines can either be distributed to the oldest first, or randomly among age classes. If 
+                              a second dose is to be given then the time between first and second doses can also be selected.")
                            # verbatimTextOutput("out")
                            ),
                        box(width=2,
@@ -596,8 +606,8 @@ shinyUI(
 
                      #----- Add row for vaccination plots ------------------------
                      fluidRow(
-                       box(width=8, title="Vaccination coverage", solidHeader = TRUE,
-                           plotOutput("plot_vax", height="200px")
+                       box(width=12, title="Vaccination coverage", solidHeader = TRUE,
+                           plotOutput("plot_vax", height="250px")
                        ),
                        
                        # box(width=4, title="Total Vaccinated", solidHeader = TRUE,
@@ -629,16 +639,16 @@ shinyUI(
                      
                      #----- Add row for case detection plot --------------------
                      fluidRow(
-                       box(width=8, title = "Cases & detection", solidHeader = TRUE,
+                       box(width=9, title = "Cases & detection", solidHeader = TRUE,
                            plotOutput("case_detection", height="200px")
                        ),
-                       box(width=4, title="Proportion cases detected", solidHeader = TRUE,
+                       box(width=3, title="% cases detected", solidHeader = TRUE,
                            plotOutput("barplot_testing", height="200px")
                        )
                      ),
                      br(),
                      fluidRow(
-                       box(width=12.5, solidHeader=TRUE,title="Select population parameters",
+                       box(width=12.5, solidHeader=TRUE,title="Select forecast length & population parameters",
                            br(),
                            span(textOutput("demog_warning"), style="color:red;font-size: 17px;
                                  font-weight: bold;"),
@@ -664,14 +674,6 @@ shinyUI(
                            
                            br(),br(),
                            
-                           splitLayout(
-                             
-                             numericInput(inputId = "initial_infectious", label = h4(HTML("<strong>Number infectious at start of forecast</strong>")), min=0, max = 2000000,
-                                          value = 19086, width = "300px"),
-                             sliderInput(inputId = "initial_immune", label = h4(HTML("<strong>% population immune at start of forecast</strong>")),
-                                         min = 0, max = 100, value = 25, post="%")
-                           ),
-                           br(),br(),
                            
                            h4(HTML("<strong>Age distribution</strong>")),
                            h5("Defaults to the overall age distribution for Dhaka District estimated by the 2011 census."),
@@ -715,23 +717,29 @@ shinyUI(
                      fluidRow(
                        box(width=12, #title="", solidHeader = TRUE,
                            h5(HTML("We use an SEIR model to explore impacts of control measures on COVID-19 transmission in Dhaka District.",
-                                   "R<sub>0</sub> and the impact of lockdown were tuned to match the trend in deaths prior to June 2020 (see early epidemic forecasts below).",
-                                   "Other epidemiological and population parameters were obtained from the literature. Parameters and their sources are detailed in the tables below. 
-                                   Most parameters describing the interventions, including timing, compliance, and impacts on transmission, can be adjusted in the sidebar tabs."
+                                   "R<sub>0</sub> was tuned to match the trend in deaths prior in March 2021.",
+                                   "Other epidemiological and population parameters were obtained from the literature. 
+                                   Most parameters describing the interventions, including timing, compliance, and impacts on transmission, can be adjusted in the sidebar tabs. 
+                                   The model is first run through an initialisation period from 1st March to 15th September 2021 (the interventions and some of the parameters assumed during this period can be
+                                   viewed and adjusted in the 'Initialisation' tab of the sidebar. The forecast period then runs from 15th September  for a selected number of days."
                                    
                            )),
                            h5(HTML("A detailed description of the model and of how this app has been used in Bangladesh, along with further analyses, can be found in our <a class='table_a' href=https://www.medrxiv.org/content/10.1101/2021.04.19.21255673v1.full.pdf>preprint</a>. 
-                                   R code for the model and app can be found in our <a class='table_a' href=https://github.com/boydorr/BGD_Covid-19/tree/main/BGD_NPI_model/App>Github repository</a>."))
+                                   R code for the model and app can be found in our <a class='table_a' href=https://github.com/boydorr/BGD_Covid-19/tree/main/BGD_NPI_model/App_devVersion>Github repository</a>."))
                        )
                      ),
                      br(),
                      
                      #----- Add rows for case timeseries plots--------------------
                      fluidRow(
-                       box(width=6, title="Forecast vs reported cases & deaths", solidHeader = TRUE,
+                       box(width=12, title="Forecast vs reported cases & deaths", solidHeader = TRUE,
                            plotOutput("epi_ts", height = "350px")
                        ),
-                       box(width=6, title="Forecast vaccination vs reported vaccination", solidHeader = TRUE,
+                       
+                     ),
+                     br(),
+                     fluidRow(
+                       box(width=12, title="Forecast vaccination vs reported vaccination", solidHeader = TRUE,
                            plotOutput("vax_ts", height = "350px")
                        )
                      ),
@@ -770,18 +778,14 @@ shinyUI(
                                 developed a relatively simple deterministic SEIR framework. We assume persons infected with the virus 
                                 are either asymptomatic for the duration of their infectious period or enter a pre-symptomatic infectious state before progressing
                                 to symptomatic infection. A proportion of symptomatic people are hospitalised and/or die. The rates and probabilities 
-                                of movement between states are detailed in the technical details tab, informed by published studies."),
+                                of movement between states are informed by published studies."),
                              h5("We assume that transmission can be reduced through response measures, but the size of the reduction depends 
                                 on how well interventions are implemented, adhered to and enforced. i.e. as a result of investment, technological and sociological capacity, communications, trust etc."),
                              h5("The timing and duration of the epidemic and associated responses will have major impacts on morbidity,
                                 mortality and the economy, with potential to overwhelm health systems and cause catastrophic
                                 consequences for families, communities and society as a whole. These knock on effects are beyond the scope of
-                                our model. However, we attempt to lay out short-term impacts on morbidity and hospital demand relative to capacity.
-                                We summarize these impacts over 12 months to better understand longer-term consequences of decisions that
-                                need to be taken quickly. We further calibrate the model to the resurgence in 2021 to better understand 
-                                factors (R0 of new variants, prior immunity, NPIs) that led to the resurgence and the potential for control measures 
-                                to mitigate impacts."),
-                             h5("There is considerable uncertainty in quantitative predictions therefore we focus on order of magnitude
+                                our model. However, we attempt to lay out short-term impacts on morbidity and hospital demand relative to capacity."),
+                             h5("There is considerable uncertainty in quantitative predictions, so we focus on order of magnitude
                                 impacts. We caveat that while this framework helps us to understand the consequences of different
                                 decisions, outcomes depend on how interventions are delivered and complied with. We use publicly available data 
                                 on the course of the pandemic to calibrate the model, and caution that recorded cases and deaths are underestimated 
