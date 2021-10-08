@@ -160,9 +160,9 @@ lines(rep(as.Date("2020-06-01"),2),c(-200,100),col="grey45",lty=2)
 lines(c(start_date-60,end_date),c(0,0),col="grey45",lty=2)
 # text(as.Date("2020-04-25"), 4, col="grey45", "baseline",cex=0.8)
 
-legend("bottomright",c("home","workplace","retail/recreation","grocery/pharmacy","parks","transit"),
+legend("bottomright",c("residential","workplace","retail/recreation","grocery/pharmacy","parks","transit"),
        col=cols,lty=1,lwd=2,bty="n",ncol=2)
-
+legend("topleft","A",bty="n",ncol=2,cex=1.2,text.font = 2)
 
 start_date_ld <- as.Date("2020-03-21")
 end_date_ld <- as.Date("2020-06-05")
@@ -205,6 +205,8 @@ axis(2,cex.axis=0.9)
 axis(1,at=date_ticks,labels = date_labels,cex.axis=0.9)
 legend(as.Date("2020-04-25"),-60,c("Workplace data","Exponential model","Sigmoidal model"),
        col=cols[c(1,4,6)],lty=1,lwd=2,bty="n")
+legend("topleft","B",bty="n",ncol=2,cex=1.2,text.font = 2)
+
 lines(rep(as.Date("2020-03-26"),2),c(-200,100),col="grey45",lty=2)
 # text(as.Date("2020-03-27"), -22, col="grey45", "Lockdown start",srt=90,cex=0.8)
 lines(rep(as.Date("2020-06-01"),2),c(-200,100),col="grey45",lty=2)

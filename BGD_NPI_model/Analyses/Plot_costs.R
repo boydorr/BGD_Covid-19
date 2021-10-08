@@ -44,7 +44,8 @@ stats <- data.frame(scenarios=scenarios,
                     wdl=NA,
                     excess_beds=NA,
                     total_cost=NA,
-                    int_cost=NA)
+                    int_cost=NA,
+                    hosp_cost=NA)
 
 
 # Function to calculate statistics for given intervention scenario
@@ -70,7 +71,8 @@ get_stats <- function(parms){
     wdl=wdl,
     excess_beds=sum(pmax(0,(out$Hosp+out$ICU)-beds))/sum(out$Hosp+out$ICU),
     total_cost=costs$total,
-    int_cost=sum(costs[c("lockdown_advertising","CST","mask")]))
+    int_cost=sum(costs[c("lockdown_advertising","CST","mask")]),
+    hosp_cost=costs["healthcare"])
   
 }
 
@@ -200,12 +202,12 @@ parms["f_mask_effect_inward"] <- 1
 stats[24,2:ncol(stats)] <- get_stats(parms)
 
 # Cost/death averted
-deaths_averted <- stats$deaths[1] - stats$deaths
-cost_diff <- stats$total_cost - stats$total_cost[1]
-stats$cost_death_averted <- cost_diff/deaths_averted
+stats$deaths_averted <- stats$deaths[1] - stats$deaths
+stats$cost_diff <- stats$total_cost - stats$total_cost[1]
+stats$cost_death_averted <- stats$cost_diff/stats$deaths_averted
 
 # % ROI
-stats$ROI <- -100*cost_diff/stats$int_cost
+stats$ROI <- -100*stats$cost_diff/stats$int_cost
 
 
 
@@ -214,15 +216,41 @@ stats$ROI <- -100*cost_diff/stats$int_cost
 # _______________________
 
 # Open figure
-tiff(filename="Figs/Costs.tiff",width=160,height=70,units="mm",pointsize=12,res=350)
+tiff(filename="Figs/Costs.tiff",width=160,height=140,units="mm",pointsize=12,res=350)
 par(mar=c(1.8,1.7,0.5,1))
 
 
 
-#Plot 1: Total costs (high cost scenario)
+#Plot 1: Intervention costs
 #-----------
 
-par(fig=c(0,0.33,0,1))
+par(fig=c(0,0.5,0.5,1))
+yRange = c(0, max(stats$int_cost)/1000000)
+xRange = c(0.9, 5.1)
+plot(NA,xlim=xRange,ylim=yRange,xlab="",ylab="",bty="l",axes=F)
+title(ylab="Implementation cost ($1,000,000)", line=0.9,cex.lab=1)
+graphics::box(bty="l")
+axis(2,cex.axis=0.7,padj=1.9,tcl=-0.25)
+axis(1,at=c(1:5),labels=c("NI","L","L+Q","L+M","L+Q+M"),cex.axis=0.64,padj=-2,tcl=-0.25)
+
+points(x=c(1,3,4,5),y=stats$int_cost[c(1,6,7,16)]/1000000,lwd=1.5,cex=0.8,
+       pch=c(16,16),col=1)
+arrows(c(2), stats$int_cost[c(2)]/1000000, 
+       c(2), stats$int_cost[c(5)]/1000000, 
+       length=0.03, angle=90, code=3,col=c(1))
+
+
+# points(x=c(1,rep(2,4),3,rep(4,9),rep(5,9)),y=c(stats$total_cost)/1000000,
+#        pch=c(16,1:4,1,rep(1:3,3),rep(1:3,3)),col=c(1,colorRampPalette(c(1,4,"white"))(6)[2:5],"red3",rep(c(rep("dodgerblue",3),rep("darkorange",3),rep(2,3)),2)))
+
+legend(xRange[2]-1.1,yRange[2]*1.09,"A",text.font=2,bty="n",cex=1)
+
+
+
+#Plot 2: Total costs 
+#-----------
+
+par(fig=c(0.5,1,0.5,1),new=T)
 yRange = c(0, max(stats$total_cost)/1000000)
 xRange = c(0.9, 5.1)
 plot(NA,xlim=xRange,ylim=yRange,xlab="",ylab="",bty="l",axes=F)
@@ -241,14 +269,14 @@ arrows(c(2,rep(4,3)+c(-0.15,0,0.15),rep(5,3)+c(-0.15,0,0.15)), stats$total_cost[
 # points(x=c(1,rep(2,4),3,rep(4,9),rep(5,9)),y=c(stats$total_cost)/1000000,
 #        pch=c(16,1:4,1,rep(1:3,3),rep(1:3,3)),col=c(1,colorRampPalette(c(1,4,"white"))(6)[2:5],"red3",rep(c(rep("dodgerblue",3),rep("darkorange",3),rep(2,3)),2)))
 
-legend(xRange[2]-1.1,yRange[2]*1.09,"A",text.font=2,bty="n",cex=1)
+legend(xRange[2]-1.1,yRange[2]*1.09,"B",text.font=2,bty="n",cex=1)
 
 
 
-#Plot 2: Cost/death averted (high cost scenario)
+#Plot 2: Cost/death averted 
 #-----------
 
-par(fig=c(0.33,0.66,0,1),new=T)
+par(fig=c(0,0.5,0,0.5),new=T)
 yRange = c(min(stats$cost_death_averted[2:nrow(stats)]), max(stats$cost_death_averted[2:nrow(stats)]))/1000
 xRange = c(0.9, 4.1)
 plot(NA,xlim=xRange,ylim=yRange,xlab="",ylab="",bty="l",axes=F)
@@ -267,14 +295,14 @@ arrows(c(1,rep(3,3)+c(-0.15,0,0.15),rep(4,3)+c(-0.15,0,0.15)), stats$cost_death_
 # points(x=c(rep(1,4),2,rep(3,9),rep(4,9)),y=c(stats$cost_death_averted[2:nrow(stats)])/1000,
 #        pch=c(1:4,1,rep(1:3,3),rep(1:3,3)),col=c(colorRampPalette(c(1,4,"white"))(6)[2:5],"red3",rep(c(rep("dodgerblue",3),rep("darkorange",3),rep(2,3)),2)))
 
-legend(xRange[2]-0.8,yRange[2]*1.11,"B",text.font=2,bty="n",cex=1)
+legend(xRange[2]-0.8,yRange[2]*1.11,"C",text.font=2,bty="n",cex=1)
 
 
 
 #Plot 3: % Return on investment
 #-----------
 
-par(fig=c(0.66,1,0,1),new=T)
+par(fig=c(0.5,1,0,0.5),new=T)
 yRange = c(min(stats$ROI[2:nrow(stats)]), max(stats$ROI[2:nrow(stats)]))
 xRange = c(0.9, 4.1)
 plot(NA,xlim=xRange,ylim=yRange,xlab="",ylab="",bty="l",axes=F)
@@ -293,7 +321,7 @@ arrows(c(1,rep(3,3)+c(-0.15,0,0.15),rep(4,3)+c(-0.15,0,0.15)), stats$ROI[c(2,7,1
 # points(x=c(rep(1,4),2,rep(3,9),rep(4,9)),y=stats$ROI[2:nrow(stats)],
 #        pch=c(1:4,1,rep(1:3,3),rep(1:3,3)),col=c(colorRampPalette(c(1,4,"white"))(6)[2:5],"red3",rep(c(rep("dodgerblue",3),rep("darkorange",3),rep(2,3)),2)))
 
-legend(xRange[2]-0.8,yRange[2]*1.1,"C",text.font=2,bty="n",cex=1)
+legend(xRange[2]-0.8,yRange[2]*1.1,"D",text.font=2,bty="n",cex=1)
 legend(1.03,2000,
        legend=as.expression(mapply(function(c,d) {bquote(.(c)~ (italic(epsilon^m)==.(d)))},c("low","medium","high"),c(0.2,0.5,0.8) )),
        col=c("dodgerblue","darkorange",2),lty=1,bty="n",title="Mask (M) filtration efficiency:",

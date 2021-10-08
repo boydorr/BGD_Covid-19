@@ -76,7 +76,7 @@ opt$value
 opt$convergence
 
 # Select R0
-parms_baseline["R0"] <- round(opt$par,2)
+parms_baseline["R0"] <- round(opt$par,3)
 parms_baseline["beta_s"] <- parms_baseline["R0"]/(parms_baseline["fa"]*(parms_baseline["asympTrans"]*(parms_baseline["propPresympTrans"]/(1-parms_baseline["propPresympTrans"]) + 1))*parms_baseline["dur_s"] + 
                                                           (1-parms_baseline["fa"])*((parms_baseline["propPresympTrans"]/(1-parms_baseline["propPresympTrans"]))*parms_baseline["dur_s"] + 
                                                                                             parms_baseline["dur_s"]))
@@ -123,7 +123,7 @@ opt$convergence
 
 
 # Select ld_effect
-parms_baseline["ld_effect"] <- round(opt$par,2)
+parms_baseline["ld_effect"] <- round(opt$par,3)
 
 
 

@@ -101,7 +101,7 @@ text(as.Date("2020-06-01")-start_date+5, ifelse(y_axis=="Patients",ylim*0.65,yli
 
 
 # Colours
-cols <- colorRampPalette(c(1,4,"white"))(6)
+cols <- colorRampPalette(c(1,"blue","white"))(6)
 
 
 # Run model with no interventions
@@ -205,7 +205,7 @@ text(as.Date("2020-06-01")-start_date+5, ifelse(y_axis=="Patients",ylim*0.65,yli
 
 
 # Colours
-cols <- colorRampPalette(c(1,4,"white"))(6)
+cols <- colorRampPalette(c(1,"blue","white"))(6)
 
 
 # Run model with no interventions
@@ -344,7 +344,7 @@ text(as.Date("2020-06-01")-start_date+5, ifelse(y_axis=="Patients",ylim*0.65,yli
 
 
 # Colours
-cols <- colorRampPalette(c(1,4,"white"))(6)
+cols <- colorRampPalette(c(1,"blue","white"))(6)
 
 
 # Run model with no interventions

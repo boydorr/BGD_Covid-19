@@ -199,7 +199,7 @@ stats[24,2:ncol(stats)] <- get_stats(parms)
 # _______________________
 
 # Open figure
-tiff(filename="Figs/Intervention_outcomes.tiff",width=160,height=160,units="mm",pointsize=12,res=350)
+tiff(filename="Figs/Intervention_outcomes.tiff",width=160,height=140,units="mm",pointsize=12,res=350)
 par(mar=c(3,2.7,0.8,1.7))
 
 
