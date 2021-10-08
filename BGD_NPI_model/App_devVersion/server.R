@@ -51,7 +51,6 @@ shinyServer(function(input, output, session) {
 
     # Make additional edits from the baseline tab of sidepanel
     parms_edit["ld"]=as.logical(input$bl_ld) # Is there a lockdown?
-    parms_edit["testing"]=as.logical(input$bl_testing) # Is there lab testing?
     parms_edit["syndromic"]=as.logical(input$bl_syndromic) # Is there syndromic surveillance?
     parms_edit["mask"]=as.logical(input$bl_mask) # Is there mask wearing?
     parms_edit["ld_start"]=as.numeric(input$bl_ld_dates[1] - start_date)
@@ -63,11 +62,6 @@ shinyServer(function(input, output, session) {
     parms_edit["syn_start"]=as.numeric(input$bl_syn_dates[1] - start_date)
     parms_edit["syn_end"]=as.numeric(input$bl_syn_dates[2] - start_date) # When does the syndromic surveillance start and end
     parms_edit["syn_improve"]=input$bl_syn_improve # How many days does it take for the full effect of the syndromic surveillance to be reached?
-    parms_edit["test_start"]=as.numeric(input$bl_test_dates[1] - start_date)
-    parms_edit["test_end"]=as.numeric(input$bl_test_dates[2] - start_date) # When does the lab testing start and end
-    parms_edit["test_capacity"]=input$bl_test_capacity # lab testing capacity
-    parms_edit["test_compliance"]=input$bl_test_compliance/100 # lab testing capacity
-    parms_edit["test_fneg"]=input$bl_test_fneg # false negative probability for lab test
     parms_edit["mask_start"]=as.numeric(input$bl_mask_dates[1] - start_date)
     parms_edit["mask_end"]=as.numeric(input$bl_mask_dates[2] - start_date) # When does mask wearing start and end
     parms_edit["mask_effect_outward"]=input$bl_mask_effect_out # By what proportion does mask wearing reduce transmission to others
@@ -79,7 +73,7 @@ shinyServer(function(input, output, session) {
     parms_edit["vax_transmission_effect_dose1"]=input$bl_vax_transmission_effect_dose1/100
     parms_edit["vax_transmission_effect_dose2"]=input$bl_vax_transmission_effect_dose2/100
     parms_edit["vax_severity_effect_dose1"]=input$bl_vax_severity_effect_dose1/100
-    parms_edit["vax_severity_effect_dose2"]=input$bl_vax_severity_effect_dose2 /100
+    parms_edit["vax_severity_effect_dose2"]=input$bl_vax_severity_effect_dose2/100
     parms_edit["vax_delay"]=input$bl_vax_delay
     parms_edit["population"]=input$pop
     
@@ -355,7 +349,7 @@ shinyServer(function(input, output, session) {
   out_full2 <- reactive(rbind(out_baseline(),out_intervention2()[2:length(times_forecast()),])) 
   
   output$out <- renderPrint({
-    list(prevVax())
+    parms_intervention()
   })
   
   #----- Create plot - vaccinations ----
@@ -373,26 +367,26 @@ shinyServer(function(input, output, session) {
             border=c("black","grey45"),col=c("black","grey45"),axes=F,ylim=yRange,ylab="")
     mtext("Count",side=2,line=2.5,cex=1.3) 
     axis(1, at=date_ticks_forecast-min(date_ticks_forecast)+1,labels = date_labels_forecast)
-    if(input$show_y_axis==TRUE){axis(2,at=pretty(yRange),labels=format(pretty(yRange),scientific=FALSE,big.mark = ','))}
+    axis(2,at=pretty(yRange),labels=format(pretty(yRange),scientific=FALSE,big.mark = ','))
     graphics::box(bty="u")
     legend("topleft",border=c("black","grey45"),cex=1.2,
            c("Single vaccinated","Double vaccinated"),
            fill=c("black","grey45"), bty="n")
     par(new=T)
-    if(input$show_y_axis==TRUE){axis(4,at=pretty(yRange/input$pop)*input$pop,labels=format(pretty(yRange/input$pop)*100,scientific=FALSE,big.mark = ','))}
+    axis(4,at=pretty(yRange/input$pop)*input$pop,labels=format(pretty(yRange/input$pop)*100,scientific=FALSE,big.mark = ','))
     mtext("% of the population",side=4,line=2.1,cex=1.3) 
     
     barplot(t(as.matrix(vax_int2)),beside = F,names.arg = rep("",length(times_forecast())),main="Scenario 2",
             border=c("red","#FF9999"),col=c("red","#FF9999"),axes=F,ylim=yRange,ylab="")
     mtext("Count",side=2,line=2.5,cex=1.3) 
     axis(1, at=date_ticks_forecast-min(date_ticks_forecast)+1,labels = date_labels_forecast)
-    if(input$show_y_axis==TRUE){axis(2,at=pretty(yRange),labels=format(pretty(yRange),scientific=FALSE,big.mark = ','))}
+    axis(2,at=pretty(yRange),labels=format(pretty(yRange),scientific=FALSE,big.mark = ','))
     graphics::box(bty="u")
     legend("topleft",cex=1.2,
            c("Single vaccinated","Double vaccinated"),
            fill=c("red","#FF9999"),border=c("red","#FF9999"), bty="n")
     par(new=T)
-    if(input$show_y_axis==TRUE){axis(4,at=pretty(yRange/input$pop)*input$pop,labels=format(pretty(yRange/input$pop)*100,scientific=FALSE,big.mark = ','))}
+    axis(4,at=pretty(yRange/input$pop)*input$pop,labels=format(pretty(yRange/input$pop)*100,scientific=FALSE,big.mark = ','))
     mtext("% of the population",side=4,line=2.1,cex=1.3) 
     
   })
@@ -481,7 +475,7 @@ shinyServer(function(input, output, session) {
     par(mgp=c(2,1,0), mar=c(2,3.5,0,3.5))
     
     hosp_intervention<-out_intervention()$Hosp+out_intervention()$ICU
-    hosp_intervention2<-out_intervention()$Hosp+out_intervention()$ICU
+    hosp_intervention2<-out_intervention2()$Hosp+out_intervention()$ICU
     ICU_intervention<-out_intervention()$ICU
     ICU_intervention2<-out_intervention2()$ICU
     yRange = c(0, max(hosp_intervention,hosp_intervention2))

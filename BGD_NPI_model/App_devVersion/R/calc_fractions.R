@@ -52,21 +52,19 @@ calc_fractions <- function(age_dep_pars,demog,Vax1=NULL,Vax2=NULL,model_parms,pr
     }
     
     # Proportion of infected people with one or two vaccination doses in each age category
-    vax2_props <- vax2_pops/(demog$prop*model_parms["population"])
-    vax1_props <- vax1_pops/(demog$prop*model_parms["population"])
-    vax1_props_infected <- vax1_props*(1-model_parms["vax_transmission_effect_dose1"])/((1-vax1_props-vax2_props) + vax1_props*(1-model_parms["vax_transmission_effect_dose1"])+vax2_props*(1-model_parms["vax_transmission_effect_dose2"]))
-    vax2_props_infected <- vax2_props*(1-model_parms["vax_transmission_effect_dose2"])/((1-vax1_props-vax2_props) + vax1_props*(1-model_parms["vax_transmission_effect_dose1"])+vax2_props*(1-model_parms["vax_transmission_effect_dose2"]))
+    vax1_props <- (vax1_pops*(1-model_parms["vax_transmission_effect_dose1"])/((1-vax1_pops-vax2_pops) + vax1_pops*(1-model_parms["vax_transmission_effect_dose1"])+vax2_pops*(1-model_parms["vax_transmission_effect_dose2"])))/(demog$prop*model_parms["population"])
+    vax2_props <- (vax2_pops*(1-model_parms["vax_transmission_effect_dose2"])/((1-vax1_pops-vax2_pops) + vax1_pops*(1-model_parms["vax_transmission_effect_dose1"])+vax2_pops*(1-model_parms["vax_transmission_effect_dose2"])))/(demog$prop*model_parms["population"])
     
     
-    fa <- sum((1-age_dep_pars$prop_symptomatic)*demog$prop*(1-vax2_props_infected-vax1_props_infected) + 
-                (1-age_dep_pars$prop_symptomatic*(1-model_parms["vax_severity_effect_dose1"]))*demog$prop*vax1_props_infected +
-                (1-age_dep_pars$prop_symptomatic*(1-model_parms["vax_severity_effect_dose2"]))*demog$prop*vax2_props_infected) # fraction of infections that are asymptomatic
-    fd <- sum((age_dep_pars$CFR/100)*demog$prop*(1-vax2_props_infected-vax1_props_infected) + 
-                (age_dep_pars$CFR*(1-model_parms["vax_severity_effect_dose1"])/100)*demog$prop*vax1_props_infected +
-                (age_dep_pars$CFR*(1-model_parms["vax_severity_effect_dose2"])/100)*demog$prop*vax2_props_infected)/(1-fa) # fraction of symptomatics that die
-    fHosp <- sum((age_dep_pars$hospitalised/100)*demog$prop*(1-vax2_props_infected-vax1_props_infected) + 
-                   (age_dep_pars$hospitalised*(1-model_parms["vax_severity_effect_dose1"])/100)*demog$prop*vax1_props_infected +
-                   (age_dep_pars$hospitalised*(1-model_parms["vax_severity_effect_dose2"])/100)*demog$prop*vax2_props_infected)/(1-fa) # fraction of symptomatics hospitalised
+    fa <- sum((1-age_dep_pars$prop_symptomatic)*demog$prop*(1-vax2_props-vax1_props) + 
+                (1-age_dep_pars$prop_symptomatic*(1-model_parms["vax_severity_effect_dose1"]))*demog$prop*vax1_props +
+                (1-age_dep_pars$prop_symptomatic*(1-model_parms["vax_severity_effect_dose2"]))*demog$prop*vax2_props) # fraction of infections that are asymptomatic
+    fd <- sum((age_dep_pars$CFR/100)*demog$prop*(1-vax2_props-vax1_props) + 
+                (age_dep_pars$CFR*(1-model_parms["vax_severity_effect_dose1"])/100)*demog$prop*vax1_props +
+                (age_dep_pars$CFR*(1-model_parms["vax_severity_effect_dose2"])/100)*demog$prop*vax2_props)/(1-fa) # fraction of symptomatics that die
+    fHosp <- sum((age_dep_pars$hospitalised/100)*demog$prop*(1-vax2_props-vax1_props) + 
+                   (age_dep_pars$hospitalised*(1-model_parms["vax_severity_effect_dose1"])/100)*demog$prop*vax1_props +
+                   (age_dep_pars$hospitalised*(1-model_parms["vax_severity_effect_dose2"])/100)*demog$prop*vax2_props)/(1-fa) # fraction of symptomatics hospitalised
     
   }
   

@@ -32,12 +32,12 @@ dhakapop2020 <- round(bdeshpop2020*propDhakaPop)
 
 
 # Parameters for baseline scenario (with just standard lockdown)
-parms_baseline <- c(R0=2.8,
+parms_baseline <- c(R0=3.46,
                     dur_inc=5.8, dur_p=2, dur_s=7, dur_a=7.7, # duration of incubation & residence in each infectious class (days)
                     dur_ICU=7, dur_hosp=5,delay_ICU=7,delay_hosp=7,delay_death=20.2, 
                     dur_hh=10.56,dur_hha=9.87,dur_hhs=12.16,
                     ld=T, # Is there a lockdown period?
-                    ld_effect=0.756, # By what proportion do non-household transmissions drop during lockdown for pre/asymptomatic compliant non-workers
+                    ld_effect=0.759, # By what proportion do non-household transmissions drop during lockdown for pre/asymptomatic compliant non-workers
                     ld_start=as.Date("2021-04-05")-start_date,ld_end=as.Date("2021-05-23")-start_date, # When does the lockdown start (26 Mar) and end (1 Jun)
                     fEW=0.52*0.326, # What proportion of people are essential workers?
                     fNC=0.06673928, # What is the initial (max) proportion of people that are non-compliant to lockdown?
@@ -84,10 +84,10 @@ parms_baseline <- c(R0=2.8,
                     vax_2_doses = T,
                     vax_order = 1, # 1=by age, 2=at random
                     vax_compliance = 0.5,
-                    vax_transmission_effect_dose1 = 0.65,
-                    vax_transmission_effect_dose2 = 0.8,
-                    vax_severity_effect_dose1 = 0.65,
-                    vax_severity_effect_dose2 = 0.8,
+                    vax_transmission_effect_dose1 = 0.4,
+                    vax_transmission_effect_dose2 = 0.6,
+                    vax_severity_effect_dose1 = 0.4,
+                    vax_severity_effect_dose2 = 0.6,
                     t_between_doses = 7*8,
                     vax_rate = 0.2*dhakapop2020/max(times_initial-7*8-14), # vaccinations per day
                     maxVax = 0.2, # maximum value here is vax_compliance (unless want to exclude children - then would need to be lower)
