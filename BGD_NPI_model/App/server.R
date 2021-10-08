@@ -367,7 +367,7 @@ shinyServer(function(input, output, session) {
       labs(x = "", y = "% increase in daily deaths") +
       scale_y_continuous(limits = c(0, max(rc_mortality$bl_rel_change,rc_mortality$int_rel_change))) +
       scale_x_continuous(limits = c(min(date_ticks), max(date_ticks)), breaks=date_ticks, labels=date_labels, guide = guide_axis(check.overlap = TRUE)) +
-      scale_fill_gradient(low = "#e4e2e2", high = "red", limits = c(0, max(rc_mortality$int_rel_change))) +
+      scale_fill_gradient(low = "#e4e2e2", high = "red", limits = c(0, max(rc_mortality$int_rel_change,rc_mortality$bl_rel_change))) +
       theme_classic() +
       theme(axis.text.y = element_text(size=12),
             axis.title.y = element_text(size=14),

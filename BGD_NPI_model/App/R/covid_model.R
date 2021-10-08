@@ -69,7 +69,7 @@ covid_model <- function(t, y, parms) {
       ld2_sigmoid_max <- ((1-fNC2)-ld_min_compliance)*(1+exp((-ld_sigmoid_mid)*ld_decline)) + ld_min_compliance
       if(ld2_improve>0){ld2_improve_stage <- min(1,(t-ld2_start)/ld2_improve)
       }else if(ld2_improve==0){ld2_improve_stage <- 1} # implement max effect straight away
-      if(ld2_improve_stage==1){NC_ld2 <- 1-((ld2_sigmoid_max-ld_min_compliance)/(1+exp((t-ld_start2-ld2_improve-ld_sigmoid_mid)*ld_decline)) + ld_min_compliance)}
+      if(ld2_improve_stage==1){NC_ld2 <- 1-((ld2_sigmoid_max-ld_min_compliance)/(1+exp((t-ld2_start-ld2_improve-ld_sigmoid_mid)*ld_decline)) + ld_min_compliance)}
       if(ld2_improve_stage<1){NC_ld2 <- 1-ld2_improve_stage*((ld2_sigmoid_max-ld_min_compliance)/(1+exp((-ld_sigmoid_mid)*ld_decline)) + ld_min_compliance)}
       
       # edit betas  

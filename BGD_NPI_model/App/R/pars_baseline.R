@@ -36,7 +36,7 @@ parms_baseline <- c(R0=3.515,
                     dur_ICU=7, dur_hosp=5,delay_ICU=7,delay_hosp=7,delay_death=20.2, 
                     dur_hh=10.56,dur_hha=9.87,dur_hhs=12.16,
                     ld=T, # Is there a lockdown period?
-                    ld_effect=0.756, # By what proportion do non-household transmissions drop during lockdown for pre/asymptomatic compliant non-workers
+                    ld_effect=0.759, # By what proportion do non-household transmissions drop during lockdown for pre/asymptomatic compliant non-workers
                     ld_start=85, ld_end=85+35+32, # When does the lockdown start (26 Mar) and end (1 Jun)
                     fEW=0.52*0.326, # What proportion of people are essential workers?
                     fNC=0.06673928, # What is the initial (max) proportion of people that are non-compliant to lockdown?
