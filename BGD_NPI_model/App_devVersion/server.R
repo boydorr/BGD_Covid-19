@@ -679,7 +679,7 @@ shinyServer(function(input, output, session) {
 
     lines(out_full()$time, vax_intervention()$Vax2, col="red", type = "l", lwd=2, lty=1)
     lines(out_full()$time, vax_intervention()$VaxDosesUsed, col="orange", type = "l", lwd=2, lty=1)
-    lines(out_full2()$time, vax_intervention2()$Vax1, col=1, type = "l", lwd=2, lty=3)
+    lines(out_full2()$time, vax_intervention2()$Vax1-vax_intervention2()$Vax2, col=1, type = "l", lwd=2, lty=3)
     lines(out_full2()$time, vax_intervention2()$Vax2, col="red", type = "l", lwd=2, lty=3)
     lines(out_full2()$time, vax_intervention2()$VaxDosesUsed, col="orange", type = "l", lwd=2, lty=3)
         
