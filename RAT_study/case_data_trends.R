@@ -15,6 +15,8 @@ library(ggthemes)
 library(zoo)
 library(forcats)
 
+# Make sure within correct folder of BGD_Covid-19 repo
+# setwd("RAT_study/")
 # use a theme for pretty plotting
 theme <- theme_clean() + theme(axis.title=element_text(size=15), axis.text=element_text(size=12), 
                                legend.text=element_text(size=14), legend.title=element_text(size=15), 
@@ -53,7 +55,7 @@ ggsave(p, file = "figs/RDT_testing.pdf", units = "cm", dpi = "retina", width = 1
 # Read in the extended data
 cst_all <- read.csv("data/cst_data.csv"); dim(cst_all)
 cst_all$date <- as.Date(cst_all$Date,"%d/%m/%Y"); head(cst_all); names(cst_all)
-cst_all_long$
+# cst_all_long$
 
 cst_all_long <- gather(cst_all, key = "type", value = "samples", 
                     RDT,CST,IEDCR, -date, -Comments) %>%
@@ -139,4 +141,65 @@ p <- ggplot(data.daily, aes(x=date)) +
         labs(x="", y="Positivity (cases/tests)", color="Legend")
 p
 ggsave(p, file = "figs/daily_positivity_BGD_trend.svg", units = "cm", dpi = "retina", width = 15, height = 12)
+
+# Probability of a false negative RAT result broken down by day from self-reported symptom onset for primary contacts
+# Data read in
+metadat <- read.csv("data/metadata-phaseII.csv") 
+RAT <- read.csv("data/RAT_phase2_w_PCR.csv")
+
+# Match up IDs
+RAT$id <- RAT$sample_id
+dat <- inner_join(metadat, RAT) %>% 
+  select(vvf_nasal, PCR_result, 
+         Symptom_Onset, Specimen_Collected_Date)
+# Select rows with full data
+dat <- dat[complete.cases(dat),]
+
+dat$vvf_nasal <- dat$vvf_nasal %>% recode(negative = 0,
+                                          positive = 1,
+                                          "NaN" = NaN)
+
+# Calculate days between offset and testing
+dat$Symptom_Onset <- mdy(dat$Symptom_Onset) %>% yday()
+dat$Specimen_Collected_Date <- mdy(dat$Specimen_Collected_Date) %>% yday()
+dat$days_since_offset <- dat$Specimen_Collected_Date - dat$Symptom_Onset 
+dat <- dat[complete.cases(dat),] %>% 
+  filter(days_since_offset > 0) %>% # Remove impossible negative values
+  filter(days_since_offset <7) %>% # Remove improbably large values
+  mutate(classification = vvf_nasal - PCR_result)
+
+dat$classification[dat$classification == 0 & dat$PCR_result == 1] <- "TruePos"
+dat$classification[dat$classification == 0 & dat$PCR_result == 0] <- "TrueNeg"
+dat$classification[dat$classification == -1] <- "FalseNeg"
+dat$classification[dat$classification == 1] <-  "FalsePos" 
+
+# Calculate FNR counts by days since offset
+dat_summ <- dat %>% 
+  group_by(days_since_offset) %>%
+  summarise(FalseNegSum = sum(classification == "FalseNeg"),
+            FalsePosSum = sum(classification == "FalsePos"),
+            TrueNegSum = sum(classification == "TrueNeg"),
+            TruePosSum = sum(classification == "TruePos"),
+            N = n())
+# Convert to percentages
+class_perc <- data.frame("days_since" = dat_summ$days_since_offset,
+                         "FNPerc" = dat_summ$FalseNegSum/dat_summ$N,
+                         "FPPerc" = dat_summ$FalsePosSum/dat_summ$N,
+                         "TNPerc" = dat_summ$TrueNegSum/dat_summ$N,
+                         "TPPerc" = dat_summ$TruePosSum/dat_summ$N,
+                         "N" = dat_summ$N)
+
+# Plot
+p <- ggplot(class_perc, aes(x = factor(days_since), y = FNPerc)) +
+  geom_col() +
+  xlab("Days Since Symptom Onset") +
+  ylab("False Negatives (%)") +
+  theme_clean() + theme(axis.title=element_text(size=15), axis.text=element_text(size=12), 
+                        legend.text=element_text(size=14), legend.title=element_text(size=15), 
+                        plot.background = element_rect(color = "white"), 
+                        strip.text=element_text(size=15))
+
+p
+ggsave(p, file = "figs/false_negs_days_since_offset.svg", units = "cm", dpi = "retina", width = 15, height = 12)
+
 
