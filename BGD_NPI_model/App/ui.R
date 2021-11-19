@@ -426,8 +426,8 @@ shinyUI(
                                 
                                 #----- R0 -------------------------
                                 sliderInput(inputId = "upa_R0", label = HTML(paste("R", tags$sub(0), sep = "")),
-                                            min = minR0,  max = 6.5, value = 2.8, step = 0.01),
-                                h6("Defaults to 2.80. This value was tuned to data for Dhaka District in March 2021, assuming 25% of the population was already immune and 19086 initial infectious."),
+                                            min = minR0,  max = 6.5, value = 3.46, step = 0.01),
+                                h6("Defaults to 3.46. This value was tuned to data for Dhaka District in March 2021, assuming 40% of the population was already immune and 19086 initial infectious."),
                                 hr(class = "dot"),
                                 #----- Lockdown inputs -------------------------
                                 radioButtons(inputId = "upa_ld", "Include a lockdown phase?",
@@ -436,13 +436,13 @@ shinyUI(
                                   condition="input.upa_ld == 'TRUE'",
                                   sliderInput(inputId = "upa_ld_dates", label = "Lockdown period:",
                                               min = start_date_upa,  max = start_date_upa + 120,timeFormat = "%d %b %y",step=1,ticks=F,
-                                              value = c(as.Date("2021-04-05"),as.Date("2021-06-01"))),
+                                              value = c(as.Date("2021-04-05"),as.Date("2021-05-23"))),
                                   numericInput(inputId = "upa_ld_improve", label = "Days to full effectiveness:",
                                                value = 9, width = "100%", min=0),
                                   sliderInput(inputId = "upa_fEW", label = "% workforce not under lockdown:",
                                               min = 0,  max = 100, value = (parms_baseline["fEW"]/parms_baseline["propWorkers"])*100, post="%"),
                                   sliderInput(inputId = "upa_ld_compliance", label = "Peak compliance:",
-                                              min = 30,  max = 100, value = (1-0.2)*100, post="%")
+                                              min = 30,  max = 100, value = (1-parms_baseline["fNC"])*100, post="%")
                                 ),
                                 hr(class = "dot"),
                                 radioButtons(inputId = "upa_ld2", "Add a second lockdown phase?",
@@ -468,11 +468,11 @@ shinyUI(
                                   condition="input.upa_mask == 'TRUE'",
                                   sliderInput(inputId = "upa_mask_dates", label = "Implementation period:",
                                               min = start_date_upa,  max = start_date_upa + 120,timeFormat = "%d %b %y",step=1,ticks=F,
-                                              value = c(as.Date("2021-04-05"),as.Date("2021-06-01"))),
+                                              value = c(as.Date("2021-04-05"),as.Date("2021-05-23"))),
                                   numericInput(inputId = "upa_mask_improve", label = "Days to scale up:",
-                                               value = parms_baseline["mask_improve"], width = "100%", min=0),
+                                               value = 9, width = "100%", min=0),
                                   sliderInput(inputId = "upa_mask_compliance", label = "Compliance:",
-                                              min = 0,  max = 100, value = 0.3*100, post="%"),
+                                              min = 0,  max = 100, value = 0.2*100, post="%"),
                                   sliderInput(inputId = "upa_mask_effect_out", label = "Proportion reduction in transmission from mask-wearers:",
                                               min = 0,  max = 1, value = parms_baseline["mask_effect_outward"]),
                                   sliderInput(inputId = "upa_mask_effect_in", label = "Proportion reduction in transmission to mask-wearers:",
@@ -487,11 +487,11 @@ shinyUI(
                                   condition="input.upa_syndromic == 'TRUE'",
                                   sliderInput(inputId = "upa_syn_dates", label = "Implementation period:",
                                               min = start_date_upa,  max = start_date_upa + 120,timeFormat = "%d %b %y",step=1,ticks=F,
-                                              value = c(as.Date("2021-04-05"),as.Date("2021-06-01"))),
+                                              value = c(as.Date("2021-04-05"),as.Date("2021-05-23"))),
                                   numericInput(inputId = "upa_syn_improve", label = "Days to scale up:",
-                                               value = parms_baseline["syn_improve"], width = "100%", min=0),
+                                               value = 9, width = "100%", min=0),
                                   sliderInput(inputId = "upa_community", label = "Quarantine adherence:",
-                                              min = 0,  max = 100, value = 0.3*100, post="%")
+                                              min = 0,  max = 100, value = 0.2*100, post="%")
                                     
                                   )
                                 )
@@ -625,7 +625,7 @@ shinyUI(
                              numericInput(inputId = "upa_infectious", label = h4(HTML("<strong>Number infectious at start of forecast</strong>")), min=0, max = 2000000,
                                           value = 19086, width = "300px"),
                              sliderInput(inputId = "upa_immune", label = h4(HTML("<strong>% population immune at start of forecast</strong>")),
-                                         min = 0, max = 100, value = 25, post="%")
+                                         min = 0, max = 100, value = 40, post="%")
                            ),
                            br(),br(),
                            splitLayout(

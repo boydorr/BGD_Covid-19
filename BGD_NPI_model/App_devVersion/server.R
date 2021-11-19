@@ -695,7 +695,7 @@ shinyServer(function(input, output, session) {
     legend("topleft",
            c("Single vaccinated (scenario 1)","Double Vaccinated (scenario 1)","Vaccine doses used (scenario 1)","Single vaccinated (scenario 2)","Double Vaccinated (scenario 2)","Vaccine doses used (scenario 2)","Reported single vaccinated", "Reported double vaccinated","Reported vaccine doses used"),
            col=rep(c("black","red","orange"),3),
-           lty=c(1,1,1,3,3,3,2,2,2), lwd=c(2,2,2,2,2,2,1,1,1), bty="n")
+           lty=c(1,1,1,3,3,3,2,2,2), lwd=c(2,2,2,2,2,2,2,2,2), bty="n")
     
     par(new=T)
     axis(4,at=pretty(yRange/input$pop)*input$pop,labels=format(pretty(yRange/input$pop)*100,scientific=FALSE,big.mark = ','))

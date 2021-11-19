@@ -1,33 +1,51 @@
 
-# devtools::install_github("RamiKrispin/coronavirus") # Install coronavirus package - to show JH data
 # ALTERNATIVE DATA THAT CAN BE UPDATED IN REAL-TIME:
-coronavirus::update_dataset(silence=T)
+devtools::install_github("RamiKrispin/coronavirus",dependencies = F,upgrade = F)
 library(coronavirus); #system.time(coronavirus::update_dataset(silence=T))
 library(dplyr)
 library(tidyr)
 
-# 1. Johns Hopkins direct
 # cases & deaths
-covid19_df <- refresh_coronavirus_jhu()
-BGD <- covid19_df %>%
-  filter(location == "Bangladesh") %>% 
-  spread(data_type, value) %>% 
+BGD <- coronavirus %>%
+  filter(country == "Bangladesh") %>% 
+  spread(type, cases) %>% 
   arrange(date) %>%
-  mutate(deaths = deaths_new, cases = cases_new) %>% 
+  mutate(deaths = death, cases = confirmed,date=as.Date(date,format("%Y-%m-%d"))) %>% 
   mutate(cumulative_death = cumsum(deaths), cumulative_cases = cumsum(cases)) %>% 
   ungroup()
 
 # Vaccination
+# covid19_vaccine <- read.csv("data/Vaccination.csv")
 BGD_vax <- covid19_vaccine %>%
-  filter(country_region == "Bangladesh" & is.na(province_state)) 
-if(length(which(BGD_vax$date=="2021-05-10"))==0){ #fill in missing day of data
-  BGD_vax <- rbind(BGD_vax[which(BGD_vax$date<"2021-05-10"),],
-                   BGD_vax[which(BGD_vax$date=="2021-05-09"),],
-                   BGD_vax[which(BGD_vax$date>"2021-05-10"),])
-  BGD_vax$date[which(duplicated(BGD_vax$date))] <- as.Date("2021-05-10")
+  filter(country_region == "Bangladesh" & is.na(province_state)) %>% 
+  mutate(date=as.Date(date)) %>%
+  arrange(date)
+missing_dates <- seq(min(BGD_vax$date),max(BGD_vax$date),"day")[which(!seq(min(BGD_vax$date),max(BGD_vax$date),"day")%in%BGD_vax$date)]
+if(length(missing_dates)>0){ #fill in missing days of data
+  for(date in missing_dates){
+    BGD_vax <- rbind(BGD_vax[which(BGD_vax$date<date),],
+                     BGD_vax[which(BGD_vax$date==(date-1)),],
+                     BGD_vax[which(BGD_vax$date>date),])
+    BGD_vax$date[which(duplicated(BGD_vax$date))] <- as.Date(date,origin="1970-01-01")
+  }
 }
+for(i in which(is.na(BGD_vax$people_fully_vaccinated))){
+  BGD_vax$people_fully_vaccinated[i] <- BGD_vax$people_fully_vaccinated[i-1]}
+for(i in which(is.na(BGD_vax$people_partially_vaccinated))){
+  BGD_vax$people_partially_vaccinated[i] <- BGD_vax$people_partially_vaccinated[i-1]}
 dhakaDiv_vax <- covid19_vaccine %>%
-  filter(country_region == "Bangladesh" & province_state == "Dhaka") 
+  filter(country_region == "Bangladesh" & province_state == "Dhaka") %>%
+  mutate(date=as.Date(date)) %>%
+  arrange(date)
+missing_dates <- seq(min(dhakaDiv_vax$date),max(dhakaDiv_vax$date),"day")[which(!seq(min(dhakaDiv_vax$date),max(dhakaDiv_vax$date),"day")%in%dhakaDiv_vax$date)]
+if(length(missing_dates)>0){ #fill in missing days of data
+  for(date in missing_dates){
+    dhakaDiv_vax <- rbind(dhakaDiv_vax[which(dhakaDiv_vax$date<date),],
+                     dhakaDiv_vax[which(dhakaDiv_vax$date==(date-1)),],
+                     dhakaDiv_vax[which(dhakaDiv_vax$date>date),])
+    dhakaDiv_vax$date[which(duplicated(dhakaDiv_vax$date))] <- as.Date(date,origin="1970-01-01")
+  }
+}
 # plot(BGD_vax$doses_admin~BGD_vax$date,type="l")
 # lines(BGD_vax$people_partially_vaccinated~BGD_vax$date,col=2)
 # lines(BGD_vax$people_fully_vaccinated~BGD_vax$date,col=3)
@@ -67,15 +85,7 @@ dhaka_vax <- dhaka_vax %>%
 # barplot(t(as.matrix(dhaka_vax[,7:9])),beside = F,names.arg = dhaka_vax$date,
 #         border=c("navy","dodgerblue","orange"),col=c("navy","dodgerblue","orange"))
 
-# # 2. Coronavirus package (also from JHU)
-# data("coronavirus")
-# BGD_df <- coronavirus %>% 
-#   filter(country == "Bangladesh") %>% 
-#   spread(type, cases) %>% 
-#   arrange(date) %>%
-#   mutate(deaths = death, cases = confirmed) %>% 
-#   mutate(cumulative_death = cumsum(death), cumulative_cases = cumsum(confirmed)) %>% 
-#   ungroup()
+
 
 # ECDC - now archived though
 # read the Dataset sheet into R. The dataset will be called "data".
@@ -93,14 +103,6 @@ cases <- data %>%
   ungroup()
 bangladesh = subset(cases, country == "Bangladesh")
 
-# # COMPARE DATASETS - everythign seems to align
-# plot(BGD_df$date, BGD_df$cases, type = "l")
-# lines(BGD$date, BGD$cases, type = "l", col="red")
-# lines(bangladesh$date, bangladesh$cases, col="green")
-
-# plot(BGD_df$date, BGD_df$deaths, type="l")
-# lines(BGD$date, BGD$deaths, col="red", type="l")
-# lines(bangladesh$date, bangladesh$deaths, col="green")
 
 ## Proportion cases in Dhaka (from the dashboard)
 district_cases <- read.csv("data/district_cases_dashboard_19.11.csv")

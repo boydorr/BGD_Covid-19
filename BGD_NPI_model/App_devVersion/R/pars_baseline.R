@@ -57,7 +57,7 @@ parms_baseline <- c(R0=3.46,
                     test_fneg=0.15, # false negative probability for lab test
                     syndromic = T,
                     syn_start=as.Date("2021-04-05")-start_date, syn_end=as.Date("2021-05-23")-start_date, # When does syndromic testing start and end
-                    community = 0.3, # compliance with CST-supported quarantine
+                    community = 0.2, # compliance with CST-supported quarantine
                     syn_improve=9, # How many days does it take for the full effect of the syndromic testing to be reached?
                     severe_nonCovid = 0.035, # proportion of people with severe respiratory symptoms not caused by covid-19 over a year
                     mild_nonCovid = 0.35, # proportion of people with mild respiratory symptoms not caused by covid-19 over a year
@@ -66,7 +66,7 @@ parms_baseline <- c(R0=3.46,
                     mask_start=as.Date("2021-04-05")-start_date, mask_end=as.Date("2021-05-23")-start_date, # When does mask wearing start and end
                     mask_effect_outward=0.5, # By what proportion does mask wearing reduce viral emissions  from infectious individuals
                     f_mask_effect_inward=0.5, # What proportion of mask_effect_outward is the impact of masks in protecting the wearer from infection
-                    mask_compliance=0.3, # What proportion of people comply with mask wearing
+                    mask_compliance=0.2, # What proportion of people comply with mask wearing
                     mask_improve=9, # How many days does it take for the full effect of mask wearing to be reached?
                     probHHtrans=0.166, # probability of infecting each other household member
                     propPresympTrans=0.23, # proportion of symptomatic transmission that occurs in the presymptomatic period
@@ -84,9 +84,9 @@ parms_baseline <- c(R0=3.46,
                     vax_2_doses = T,
                     vax_order = 1, # 1=by age, 2=at random
                     vax_compliance = 0.5,
-                    vax_transmission_effect_dose1 = 0.4,
-                    vax_transmission_effect_dose2 = 0.6,
-                    vax_severity_effect_dose1 = 0.4,
+                    vax_transmission_effect_dose1 = 0.45,
+                    vax_transmission_effect_dose2 = 0.45,
+                    vax_severity_effect_dose1 = 0.6,
                     vax_severity_effect_dose2 = 0.6,
                     t_between_doses = 7*8,
                     vax_rate = 0.2*dhakapop2020/max(times_initial-7*8-14), # vaccinations per day

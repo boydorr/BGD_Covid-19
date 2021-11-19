@@ -2,28 +2,19 @@
 # devtools::install_github("RamiKrispin/coronavirus") # Install coronavirus package - to show JH data
 # ALTERNATIVE DATA THAT CAN BE UPDATED IN REAL-TIME:
 library(coronavirus); #system.time(update_dataset(silence=T))
+update_dataset()
 library(dplyr)
 library(tidyr)
 
-# 1. Johns Hopkins direct
-covid19_df <- refresh_coronavirus_jhu()
-BGD <- covid19_df %>%
-  filter(location == "Bangladesh") %>% 
-  spread(data_type, value) %>% 
+# Coronavirus package
+BGD <- coronavirus %>%
+  filter(country == "Bangladesh") %>% 
+  spread(type, cases) %>% 
   arrange(date) %>%
-  mutate(deaths = deaths_new, cases = cases_new) %>% 
+  mutate(deaths = death, cases = confirmed,date=as.Date(date,format("%Y-%m-%d"))) %>% 
   mutate(cumulative_death = cumsum(deaths), cumulative_cases = cumsum(cases)) %>% 
   ungroup()
 
-# # 2. Coronavirus package (also from JHU)
-# data("coronavirus")
-# BGD_df <- coronavirus %>% 
-#   filter(country == "Bangladesh") %>% 
-#   spread(type, cases) %>% 
-#   arrange(date) %>%
-#   mutate(deaths = death, cases = confirmed) %>% 
-#   mutate(cumulative_death = cumsum(death), cumulative_cases = cumsum(confirmed)) %>% 
-#   ungroup()
 
 # ECDC - now archived though
 # read the Dataset sheet into R. The dataset will be called "data".
@@ -41,14 +32,6 @@ cases <- data %>%
   ungroup()
 bangladesh = subset(cases, country == "Bangladesh")
 
-# # COMPARE DATASETS - everythign seems to align
-# plot(BGD_df$date, BGD_df$cases, type = "l")
-# lines(BGD$date, BGD$cases, type = "l", col="red")
-# lines(bangladesh$date, bangladesh$cases, col="green")
-
-# plot(BGD_df$date, BGD_df$deaths, type="l")
-# lines(BGD$date, BGD$deaths, col="red", type="l")
-# lines(bangladesh$date, bangladesh$deaths, col="green")
 
 ## Proportion cases in Dhaka (from the dashboard)
 district_cases <- read.csv("data/district_cases_dashboard_19.11.csv")

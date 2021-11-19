@@ -744,7 +744,7 @@ shinyServer(function(input, output, session) {
   output$death_ts_early <- renderPlot({
     
     par(mgp=c(2,1,0), mar=c(2,3,2,0))
-    yRange = c(0, max(out_baseline()$D[1:152]))
+    yRange = c(0, max(out_baseline()$D[1:153]))
     xRange = c(60, 152)
     plot(BGD$date-start_date, BGD$dhaka_cum_deaths, col="black", type = "l", lwd=1, lty=2,
          ylim=yRange, xlim=xRange, axes=F, ylab="Count")
