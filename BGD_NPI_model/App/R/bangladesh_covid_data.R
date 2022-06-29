@@ -1,10 +1,8 @@
 
 # devtools::install_github("RamiKrispin/coronavirus") # Install coronavirus package - to show JH data
 # ALTERNATIVE DATA THAT CAN BE UPDATED IN REAL-TIME:
-library(coronavirus); #system.time(update_dataset(silence=T))
+#system.time(update_dataset(silence=T))
 update_dataset()
-library(dplyr)
-library(tidyr)
 
 # Coronavirus package
 BGD <- coronavirus %>%
