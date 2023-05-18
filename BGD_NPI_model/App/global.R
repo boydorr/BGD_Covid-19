@@ -1,7 +1,8 @@
 if (!require("pacman")) install.packages("pacman")
+library("pacman")
 pacman::p_load(shiny, shinyjs, shinythemes, shinyWidgets, shinydashboard, DT,
                lubridate, dplyr, ggplot2, deSolve, data.table, forcats,
-               tidyr, coronavirus,readr)
+               tidyr, readr)
 
 # library(shiny)
 # library(shinyjs)
